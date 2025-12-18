@@ -1,2 +1,3 @@
-# food_Ordering_app
-Flutter App
+# food_order_app
+
+A new Flutter project.
