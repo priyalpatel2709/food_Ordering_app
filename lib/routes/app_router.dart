@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../core/constants/route_constants.dart';
+import '../features/authentication/presentation/pages/sign_up_page.dart';
 import '../features/splash/presentation/pages/splash_page.dart';
 import '../features/authentication/presentation/pages/login_page.dart';
 import '../features/home/presentation/pages/home_page.dart';
 
 class AppRouter {
-  static const String splash = '/';
-  static const String login = '/login';
-  static const String home = '/home';
+  // Route paths and names are now centralized in RouteConstants
+  // This class only handles the router configuration
 
   static final GoRouter router = GoRouter(
-    initialLocation: splash,
+    initialLocation: RouteConstants.splash,
     routes: [
       GoRoute(
-        path: splash,
-        name: 'splash',
+        path: RouteConstants.splash,
+        name: RouteConstants.splashName,
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: const SplashPage(),
@@ -24,8 +25,8 @@ class AppRouter {
         ),
       ),
       GoRoute(
-        path: login,
-        name: 'login',
+        path: RouteConstants.login,
+        name: RouteConstants.loginName,
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: const LoginPage(),
@@ -45,8 +46,29 @@ class AppRouter {
         ),
       ),
       GoRoute(
-        path: home,
-        name: 'home',
+        path: RouteConstants.signin,
+        name: RouteConstants.signInName,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const SignInPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            const begin = Offset(1.0, 0.0);
+            const end = Offset.zero;
+            const curve = Curves.easeInOut;
+            var tween = Tween(
+              begin: begin,
+              end: end,
+            ).chain(CurveTween(curve: curve));
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: child,
+            );
+          },
+        ),
+      ),
+      GoRoute(
+        path: RouteConstants.home,
+        name: RouteConstants.homeName,
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
           child: const HomePage(),

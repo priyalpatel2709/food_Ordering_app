@@ -1,8 +1,22 @@
-class User {
+import 'package:hive/hive.dart';
+
+part 'user.g.dart';
+
+@HiveType(typeId: 0)
+class User extends HiveObject {
+  @HiveField(0)
   final String id;
+
+  @HiveField(1)
   final String name;
+
+  @HiveField(2)
   final String email;
+
+  @HiveField(3)
   final String token;
+
+  @HiveField(4)
   final String? restaurantsId;
 
   User({
@@ -31,5 +45,22 @@ class User {
       'token': token,
       'restaurantsId': restaurantsId,
     };
+  }
+
+  /// Create a copy with updated fields
+  User copyWith({
+    String? id,
+    String? name,
+    String? email,
+    String? token,
+    String? restaurantsId,
+  }) {
+    return User(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      email: email ?? this.email,
+      token: token ?? this.token,
+      restaurantsId: restaurantsId ?? this.restaurantsId,
+    );
   }
 }

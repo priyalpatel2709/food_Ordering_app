@@ -2,8 +2,9 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/constants/route_constants.dart';
 import '../../../../core/services/storage_service.dart';
-import '../../../../routes/app_router.dart';
+import '../../../../shared/theme/app_colors.dart';
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});
@@ -57,9 +58,9 @@ class _SplashPageState extends State<SplashPage>
     if (!mounted) return;
 
     if (false) {
-      context.go(AppRouter.home);
+      context.go(RouteConstants.home);
     } else {
-      context.go(AppRouter.login);
+      context.go(RouteConstants.login);
     }
   }
 
@@ -73,14 +74,14 @@ class _SplashPageState extends State<SplashPage>
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.orange.shade400,
-              Colors.deepOrange.shade600,
-              Colors.red.shade700,
+              AppColors.primaryLight,
+              AppColors.primary,
+              AppColors.primaryDark,
             ],
           ),
         ),
@@ -100,11 +101,11 @@ class _SplashPageState extends State<SplashPage>
                   width: 150,
                   height: 150,
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.white,
                     borderRadius: BorderRadius.circular(30),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.3),
+                        color: AppColors.shadowDark,
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -113,7 +114,7 @@ class _SplashPageState extends State<SplashPage>
                   child: const Icon(
                     Icons.restaurant_menu,
                     size: 80,
-                    color: Colors.deepOrange,
+                    color: AppColors.primary,
                   ),
                 ),
               ),
@@ -125,7 +126,7 @@ class _SplashPageState extends State<SplashPage>
                   style: TextStyle(
                     fontSize: 36,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: AppColors.white,
                     letterSpacing: 2,
                   ),
                 ),
@@ -137,7 +138,7 @@ class _SplashPageState extends State<SplashPage>
                   'Delicious meals at your doorstep',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.white.withValues(alpha: 0.9),
+                    color: AppColors.white.withValues(alpha: 0.9),
                     letterSpacing: 1,
                   ),
                 ),

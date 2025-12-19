@@ -5,17 +5,18 @@ import '../../../../core/services/auth_service.dart';
 import '../../../../core/services/storage_service.dart';
 import '../../../../shared/theme/app_colors.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key});
+class SignInPage extends StatefulWidget {
+  const SignInPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  State<SignInPage> createState() => _SignInPageState();
 }
 
-class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
+class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _nameController = TextEditingController();
   final AuthService _authService = AuthService();
   final StorageService _storageService = StorageService();
 
@@ -48,6 +49,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _nameController.dispose();
     _fadeController.dispose();
     super.dispose();
   }
@@ -62,9 +64,10 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     });
 
     try {
-      final result = await _authService.login(
-        _emailController.text.trim(),
-        _passwordController.text,
+      final result = await _authService.signIn(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+        name: _nameController.text.trim(),
       );
 
       if (!mounted) return;
@@ -142,22 +145,13 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                   children: [
                     _buildLogo(),
                     const SizedBox(height: 40),
-                    _buildWelcomeText(),
+                    // _buildWelcomeText(),
                     const SizedBox(height: 40),
                     _buildLoginForm(),
                     const SizedBox(height: 24),
                     _buildLoginButton(),
                     const SizedBox(height: 20),
                     _buildForgotPassword(),
-                    TextButton(
-                      onPressed: () {
-                        context.push(RouteConstants.signin);
-                      },
-                      child: Text(
-                        'Sign Up',
-                        style: TextStyle(color: AppColors.primary),
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -219,10 +213,56 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       key: _formKey,
       child: Column(
         children: [
+          _buildNameField(),
+          const SizedBox(height: 16),
           _buildEmailField(),
           const SizedBox(height: 16),
           _buildPasswordField(),
         ],
+      ),
+    );
+  }
+
+  Widget _buildNameField() {
+    return Container(
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowLight,
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: TextFormField(
+        controller: _nameController,
+        keyboardType: TextInputType.name,
+        decoration: InputDecoration(
+          labelText: 'Name',
+          hintText: 'Enter your name',
+          prefixIcon: const Icon(
+            Icons.person_outline,
+            color: AppColors.primary,
+          ),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          filled: true,
+          fillColor: AppColors.white,
+          contentPadding: const EdgeInsets.all(20),
+        ),
+        validator: (value) {
+          if (value == null || value.isEmpty) {
+            return 'Please enter your email';
+          }
+          // if (!value.contains('@')) {
+          //   return 'Please enter a valid email';
+          // }
+          return null;
+        },
       ),
     );
   }
@@ -350,7 +390,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                 ),
               )
             : const Text(
-                'Sign In',
+                'Sign Up',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,

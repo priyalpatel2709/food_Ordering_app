@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/constants/route_constants.dart';
 import '../../../../core/services/storage_service.dart';
 import '../../../../core/models/user.dart';
-import '../../../../routes/app_router.dart';
+import '../../../../shared/theme/app_colors.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -45,7 +46,7 @@ class _HomePageState extends State<HomePage> {
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.deepOrange,
+              backgroundColor: AppColors.primary,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
               ),
@@ -59,7 +60,7 @@ class _HomePageState extends State<HomePage> {
     if (confirm == true) {
       await _storageService.clearUser();
       if (!mounted) return;
-      context.go(AppRouter.login);
+      context.go(RouteConstants.login);
     }
   }
 
@@ -71,14 +72,14 @@ class _HomePageState extends State<HomePage> {
 
     return Scaffold(
       body: Container(
-        decoration: BoxDecoration(
+        decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
             colors: [
-              Colors.orange.shade50,
-              Colors.white,
-              Colors.deepOrange.shade50,
+              AppColors.grey50,
+              AppColors.white,
+              AppColors.primaryContainer,
             ],
           ),
         ),
@@ -98,10 +99,10 @@ class _HomePageState extends State<HomePage> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: AppColors.shadowLight,
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -113,12 +114,10 @@ class _HomePageState extends State<HomePage> {
             width: 60,
             height: 60,
             decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [Colors.orange.shade400, Colors.deepOrange.shade600],
-              ),
+              gradient: AppColors.primaryGradient,
               borderRadius: BorderRadius.circular(15),
             ),
-            child: const Icon(Icons.person, color: Colors.white, size: 30),
+            child: const Icon(Icons.person, color: AppColors.white, size: 30),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -127,7 +126,10 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Text(
                   'Welcome back,',
-                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -135,7 +137,7 @@ class _HomePageState extends State<HomePage> {
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                   ),
                 ),
               ],
@@ -144,7 +146,7 @@ class _HomePageState extends State<HomePage> {
           IconButton(
             onPressed: _handleLogout,
             icon: const Icon(Icons.logout),
-            color: Colors.deepOrange,
+            color: AppColors.primary,
             iconSize: 28,
           ),
         ],
@@ -173,13 +175,11 @@ class _HomePageState extends State<HomePage> {
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Colors.orange.shade400, Colors.deepOrange.shade600],
-        ),
+        gradient: AppColors.primaryGradient,
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.deepOrange.withValues(alpha: 0.3),
+            color: AppColors.primary.withValues(alpha: 0.3),
             blurRadius: 15,
             offset: const Offset(0, 8),
           ),
@@ -193,7 +193,7 @@ class _HomePageState extends State<HomePage> {
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: Colors.white,
+              color: AppColors.white,
             ),
           ),
           const SizedBox(height: 20),
@@ -230,7 +230,7 @@ class _HomePageState extends State<HomePage> {
   Widget _buildInfoRow(IconData icon, String label, String value) {
     return Row(
       children: [
-        Icon(icon, color: Colors.white.withValues(alpha: 0.9), size: 20),
+        Icon(icon, color: AppColors.white.withValues(alpha: 0.9), size: 20),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -240,7 +240,7 @@ class _HomePageState extends State<HomePage> {
                 label,
                 style: TextStyle(
                   fontSize: 12,
-                  color: Colors.white.withValues(alpha: 0.8),
+                  color: AppColors.white.withValues(alpha: 0.8),
                 ),
               ),
               const SizedBox(height: 2),
@@ -249,7 +249,7 @@ class _HomePageState extends State<HomePage> {
                 style: const TextStyle(
                   fontSize: 15,
                   fontWeight: FontWeight.w600,
-                  color: Colors.white,
+                  color: AppColors.white,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
@@ -269,7 +269,7 @@ class _HomePageState extends State<HomePage> {
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 16),
@@ -279,7 +279,7 @@ class _HomePageState extends State<HomePage> {
               child: _buildActionCard(
                 icon: Icons.restaurant_menu,
                 title: 'Menu',
-                color: Colors.orange,
+                color: AppColors.primary,
                 onTap: () {
                   // TODO: Navigate to menu
                 },
@@ -290,7 +290,7 @@ class _HomePageState extends State<HomePage> {
               child: _buildActionCard(
                 icon: Icons.shopping_cart,
                 title: 'Cart',
-                color: Colors.deepOrange,
+                color: AppColors.secondary,
                 onTap: () {
                   // TODO: Navigate to cart
                 },
@@ -305,7 +305,7 @@ class _HomePageState extends State<HomePage> {
               child: _buildActionCard(
                 icon: Icons.receipt_long,
                 title: 'Orders',
-                color: Colors.red,
+                color: AppColors.error,
                 onTap: () {
                   // TODO: Navigate to orders
                 },
@@ -316,7 +316,7 @@ class _HomePageState extends State<HomePage> {
               child: _buildActionCard(
                 icon: Icons.person,
                 title: 'Profile',
-                color: Colors.pink,
+                color: AppColors.accent,
                 onTap: () {
                   // TODO: Navigate to profile
                 },
@@ -340,11 +340,11 @@ class _HomePageState extends State<HomePage> {
       child: Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppColors.white,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.1),
+              color: AppColors.shadowLight,
               blurRadius: 10,
               offset: const Offset(0, 5),
             ),
@@ -366,7 +366,7 @@ class _HomePageState extends State<HomePage> {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Colors.black87,
+                color: AppColors.textPrimary,
               ),
             ),
           ],
@@ -384,7 +384,7 @@ class _HomePageState extends State<HomePage> {
           style: TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: Colors.black87,
+            color: AppColors.textPrimary,
           ),
         ),
         const SizedBox(height: 16),
@@ -413,11 +413,11 @@ class _HomePageState extends State<HomePage> {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.grey.withValues(alpha: 0.1),
+            color: AppColors.shadowLight,
             blurRadius: 10,
             offset: const Offset(0, 5),
           ),
@@ -428,10 +428,10 @@ class _HomePageState extends State<HomePage> {
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.orange.shade50,
+              color: AppColors.primaryContainer,
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, color: Colors.deepOrange, size: 28),
+            child: Icon(icon, color: AppColors.primary, size: 28),
           ),
           const SizedBox(width: 16),
           Expanded(
@@ -443,13 +443,16 @@ class _HomePageState extends State<HomePage> {
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   description,
-                  style: TextStyle(fontSize: 14, color: Colors.grey.shade600),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
                 ),
               ],
             ),
