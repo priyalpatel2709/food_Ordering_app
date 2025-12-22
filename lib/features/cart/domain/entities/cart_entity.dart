@@ -65,7 +65,7 @@ class CartItemEntity {
     int? quantity,
     List<CustomizationSelection>? selectedCustomizations,
     DateTime? addedAt,
-    double? taxRate,
+    TaxRateEntity? taxRate,
   }) {
     return CartItemEntity(
       id: id ?? this.id,

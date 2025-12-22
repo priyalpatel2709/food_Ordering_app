@@ -61,42 +61,40 @@ class CartPage extends ConsumerWidget {
   Widget _buildContent(BuildContext context, WidgetRef ref, CartState state) {
     return switch (state) {
       CartEmpty() => const EmptyCartWidget(),
-      CartLoaded(:final summary) => Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: summary.items.length,
-              itemBuilder: (context, index) {
-                final item = summary.items[index];
-                return CartItemCard(
-                  item: item,
-                  onIncrement: () {
-                    ref
-                        .read(cartNotifierProvider.notifier)
-                        .incrementQuantity(item.id);
-                  },
-                  onDecrement: () {
-                    ref
-                        .read(cartNotifierProvider.notifier)
-                        .decrementQuantity(item.id);
-                  },
-                  onRemove: () {
-                    ref.read(cartNotifierProvider.notifier).removeItem(item.id);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${item.menuItemName} removed from cart'),
-                        duration: const Duration(seconds: 2),
-                        behavior: SnackBarBehavior.floating,
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-          CartSummaryCard(summary: summary),
-        ],
+      CartLoaded(:final summary) => SingleChildScrollView(
+        child: Column(
+          children: [
+            // Cart items list
+            ...summary.items.map((item) {
+              return CartItemCard(
+                item: item,
+                onIncrement: () {
+                  ref
+                      .read(cartNotifierProvider.notifier)
+                      .incrementQuantity(item.id);
+                },
+                onDecrement: () {
+                  ref
+                      .read(cartNotifierProvider.notifier)
+                      .decrementQuantity(item.id);
+                },
+                onRemove: () {
+                  ref.read(cartNotifierProvider.notifier).removeItem(item.id);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('${item.menuItemName} removed from cart'),
+                      duration: const Duration(seconds: 2),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+              );
+            }).toList(),
+
+            // Summary card appears after all items
+            CartSummaryCard(summary: summary),
+          ],
+        ),
       ),
     };
   }

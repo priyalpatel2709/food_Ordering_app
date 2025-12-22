@@ -179,6 +179,11 @@ class MenuItemDto {
   final List<CustomizationOptionDto> customizationOptions;
   final int popularityScore;
   final double averageRating;
+  final bool taxable;
+  final TaxRateDto? taxRate;
+  final int minOrderQuantity;
+  final int maxOrderQuantity;
+  final List<dynamic> metaData;
 
   const MenuItemDto({
     required this.id,
@@ -194,12 +199,17 @@ class MenuItemDto {
     required this.customizationOptions,
     required this.popularityScore,
     required this.averageRating,
+    required this.taxable,
+    required this.taxRate,
+    required this.minOrderQuantity,
+    required this.maxOrderQuantity,
+    required this.metaData,
   });
 
   factory MenuItemDto.fromJson(Map<String, dynamic> json) {
     return MenuItemDto(
       id: json['_id'] as String? ?? json['id'] as String,
-      restaurantId: json['restaurantId'] as String,
+      restaurantId: json['restaurantId'] as String? ?? '',
       category: CategoryDto.fromJson(json['category'] as Map<String, dynamic>),
       name: json['name'] as String,
       description: json['description'] as String,
@@ -215,6 +225,13 @@ class MenuItemDto {
           .toList(),
       popularityScore: json['popularityScore'] as int,
       averageRating: (json['averageRating'] as num).toDouble(),
+      taxable: json['taxable'] as bool? ?? false,
+      taxRate: json['taxRate'] != null
+          ? TaxRateDto.fromJson(json['taxRate'] as Map<String, dynamic>)
+          : null,
+      minOrderQuantity: json['minOrderQuantity'] as int? ?? 1,
+      maxOrderQuantity: json['maxOrderQuantity'] as int? ?? 99,
+      metaData: json['metaData'] as List<dynamic>? ?? [],
     );
   }
 
@@ -235,6 +252,11 @@ class MenuItemDto {
           .toList(),
       'popularityScore': popularityScore,
       'averageRating': averageRating,
+      'taxable': taxable,
+      'taxRate': taxRate?.toJson(),
+      'minOrderQuantity': minOrderQuantity,
+      'maxOrderQuantity': maxOrderQuantity,
+      'metaData': metaData,
     };
   }
 
@@ -255,7 +277,104 @@ class MenuItemDto {
       popularityScore: popularityScore,
       averageRating: averageRating,
       category: category.toEntity(),
+      taxable: taxable,
+      taxRate: taxRate?.toEntity(),
+      minOrderQuantity: minOrderQuantity,
+      maxOrderQuantity: maxOrderQuantity,
+      metaData: metaData,
     );
+  }
+}
+
+class TaxRateDto {
+  final String id;
+  final String restaurantId;
+  final String name;
+  final double percentage;
+  final bool isActive;
+  final List<MetaDataDto> metaData;
+  final int version;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  const TaxRateDto({
+    required this.id,
+    required this.restaurantId,
+    required this.name,
+    required this.percentage,
+    required this.isActive,
+    required this.metaData,
+    required this.version,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory TaxRateDto.fromJson(Map<String, dynamic> json) {
+    return TaxRateDto(
+      id: json['_id'] as String,
+      restaurantId: json['restaurantId'] as String,
+      name: json['name'] as String,
+      percentage: (json['percentage'] as num).toDouble(),
+      isActive: json['isActive'] as bool,
+      metaData: (json['metaData'] as List<dynamic>)
+          .map((item) => MetaDataDto.fromJson(item as Map<String, dynamic>))
+          .toList(),
+      version: json['__v'] as int,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      '_id': id,
+      'restaurantId': restaurantId,
+      'name': name,
+      'percentage': percentage,
+      'isActive': isActive,
+      'metaData': metaData.map((e) => e.toJson()).toList(),
+      '__v': version,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
+
+  TaxRateEntity toEntity() {
+    return TaxRateEntity(
+      id: id,
+      restaurantId: restaurantId,
+      name: name,
+      percentage: percentage,
+      isActive: isActive,
+      metaData: metaData.map((e) => e.toEntity()).toList(),
+      version: version,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    );
+  }
+}
+
+class MetaDataDto {
+  final String id;
+  final String key;
+  final dynamic value;
+
+  const MetaDataDto({required this.id, required this.key, required this.value});
+
+  factory MetaDataDto.fromJson(Map<String, dynamic> json) {
+    return MetaDataDto(
+      id: json['_id'] as String,
+      key: json['key'] as String,
+      value: json['value'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'_id': id, 'key': key, 'value': value};
+  }
+
+  MetaDataEntity toEntity() {
+    return MetaDataEntity(id: id, key: key, value: value);
   }
 }
 
