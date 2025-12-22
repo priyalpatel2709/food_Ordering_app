@@ -1,22 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'core/services/storage_service.dart';
-import 'core/services/api_service.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:food_order_app/core/services/storage_service.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'core/di/providers.dart';
 import 'routes/app_router.dart';
 import 'shared/theme/app_theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize Hive storage
-  await StorageService.init();
+  // Initialize Hive
 
-  // Setup API service with stored token
-  final storageService = StorageService();
-  final token = storageService.getToken();
-  if (token != null) {
-    ApiService().setAuthToken(token);
-  }
+  // await Hive.initFlutter();
+  await StorageService.init();
+  // Open Hive box for app data
+  final box = await Hive.openBox('app_data');
 
   // Set system UI overlay style
   SystemChrome.setSystemUIOverlayStyle(
@@ -26,7 +25,15 @@ void main() async {
     ),
   );
 
-  runApp(const MainApp());
+  runApp(
+    ProviderScope(
+      overrides: [
+        // Provide Hive box to the app
+        hiveBoxProvider.overrideWithValue(box),
+      ],
+      child: const MainApp(),
+    ),
+  );
 }
 
 class MainApp extends StatelessWidget {
@@ -39,8 +46,7 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
       darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode
-          .light, // Can be changed to ThemeMode.system for automatic theme switching
+      themeMode: ThemeMode.light,
       routerConfig: AppRouter.router,
     );
   }

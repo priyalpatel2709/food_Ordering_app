@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import '../constants/api_constants.dart';
 import '../models/user.dart';
 import 'api_service.dart';
@@ -21,6 +23,7 @@ class AuthService {
 
         // Set auth token in API service for future requests
         _apiService.setAuthToken(user.token);
+        _apiService.setRestaurantId(user.restaurantsId);
 
         return AuthResult.success(user);
       } else {
@@ -37,6 +40,7 @@ class AuthService {
     required String name,
   }) async {
     try {
+      log('does me');
       final response = await _apiService.post(
         '${ApiConstants.v1}${ApiConstants.user}',
         data: {
@@ -52,6 +56,7 @@ class AuthService {
 
         // Set auth token in API service for future requests
         _apiService.setAuthToken(user.token);
+        _apiService.setRestaurantId(user.restaurantsId);
 
         return AuthResult.success(user);
       } else {
@@ -77,6 +82,7 @@ class AuthService {
       if (response.isSuccess && response.data != null) {
         final user = User.fromJson(response.data as Map<String, dynamic>);
         _apiService.setAuthToken(user.token);
+        _apiService.setRestaurantId(user.restaurantsId);
         return AuthResult.success(user);
       } else {
         return AuthResult.error(response.error ?? 'Registration failed');
@@ -102,6 +108,7 @@ class AuthService {
   Future<bool> verifyToken(String token) async {
     try {
       _apiService.setAuthToken(token);
+      // _apiService.setRestaurantId(user.restaurantsId);
       final response = await _apiService.get('/verify-token');
       return response.isSuccess;
     } catch (e) {

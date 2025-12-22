@@ -12,6 +12,7 @@ import '../constants/api_constants.dart';
 class ApiService {
   late final Dio _dio;
   String? _authToken;
+  String? _restaurantId;
 
   // Singleton pattern
   static final ApiService _instance = ApiService._internal();
@@ -27,6 +28,7 @@ class ApiService {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
+          'X-Restaurant-Id': '123',
         },
         validateStatus: (status) {
           // Accept all status codes to handle them manually
@@ -46,6 +48,7 @@ class ApiService {
           // Add auth token to headers if available
           if (_authToken != null) {
             options.headers['Authorization'] = 'Bearer $_authToken';
+            options.headers['X-Restaurant-Id'] = '$_restaurantId';
           }
 
           // Log request in debug mode
@@ -93,12 +96,18 @@ class ApiService {
     _authToken = token;
   }
 
+  void setRestaurantId(String? restaurantId) {
+    _restaurantId = restaurantId;
+  }
+
   /// Get authentication token
   String? getAuthToken() => _authToken;
+  String? getRestaurantId() => _restaurantId;
 
   /// Clear authentication token
   void clearAuthToken() {
     _authToken = null;
+    _restaurantId = null;
   }
 
   /// GET request

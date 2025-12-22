@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/user.dart';
 
@@ -33,6 +35,7 @@ class StorageService {
   static Future<void> init() async {
     await Hive.initFlutter();
 
+    log('Hive init');
     // Register adapters
     if (!Hive.isAdapterRegistered(0)) {
       Hive.registerAdapter(UserAdapter());

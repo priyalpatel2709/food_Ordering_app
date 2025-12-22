@@ -1,25 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/route_constants.dart';
-import '../../../../core/services/auth_service.dart';
-import '../../../../core/services/storage_service.dart';
 import '../../../../shared/theme/app_colors.dart';
+import '../../../../presentation/providers/auth_provider.dart';
 
-class LoginPage extends StatefulWidget {
+class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
 
   @override
-  State<LoginPage> createState() => _LoginPageState();
+  ConsumerState<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
+class _LoginPageState extends ConsumerState<LoginPage>
+    with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final AuthService _authService = AuthService();
-  final StorageService _storageService = StorageService();
 
-  bool _isLoading = false;
   bool _obscurePassword = true;
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -57,41 +55,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
-
-    try {
-      final result = await _authService.login(
-        _emailController.text.trim(),
-        _passwordController.text,
-      );
-
-      if (!mounted) return;
-
-      if (result.isSuccess && result.user != null) {
-        await _storageService.saveUser(result.user!);
-
-        if (!mounted) return;
-
-        _showSuccessSnackBar('Login successful!');
-        await Future.delayed(const Duration(milliseconds: 500));
-
-        if (!mounted) return;
-        context.go(RouteConstants.home);
-      } else {
-        _showErrorSnackBar(result.error ?? 'Login failed');
-      }
-    } catch (e) {
-      if (!mounted) return;
-      _showErrorSnackBar('An error occurred: ${e.toString()}');
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    }
+    await ref
+        .read(authNotifierProvider.notifier)
+        .login(_emailController.text.trim(), _passwordController.text);
   }
 
   void _showErrorSnackBar(String message) {
@@ -118,6 +84,26 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
+    // Listen to auth state changes
+    ref.listen<AuthState>(authNotifierProvider, (previous, next) {
+      switch (next) {
+        case AuthAuthenticated(:final user):
+          _showSuccessSnackBar('Login successful!');
+          Future.delayed(const Duration(milliseconds: 500), () {
+            if (mounted) {
+              context.go(RouteConstants.home);
+            }
+          });
+        case AuthError(:final message):
+          _showErrorSnackBar(message);
+        default:
+          break;
+      }
+    });
+
+    final authState = ref.watch(authNotifierProvider);
+    final isLoading = authState is AuthLoading;
+
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -146,14 +132,14 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
                     const SizedBox(height: 40),
                     _buildLoginForm(),
                     const SizedBox(height: 24),
-                    _buildLoginButton(),
+                    _buildLoginButton(isLoading),
                     const SizedBox(height: 20),
                     _buildForgotPassword(),
                     TextButton(
                       onPressed: () {
                         context.push(RouteConstants.signin);
                       },
-                      child: Text(
+                      child: const Text(
                         'Sign Up',
                         style: TextStyle(color: AppColors.primary),
                       ),
@@ -195,9 +181,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   }
 
   Widget _buildWelcomeText() {
-    return Column(
+    return const Column(
       children: [
-        const Text(
+        Text(
           'Welcome Back!',
           style: TextStyle(
             fontSize: 32,
@@ -205,8 +191,8 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
             color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 8),
-        const Text(
+        SizedBox(height: 8),
+        Text(
           'Sign in to continue',
           style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
         ),
@@ -325,12 +311,12 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _buildLoginButton() {
+  Widget _buildLoginButton(bool isLoading) {
     return SizedBox(
       width: double.infinity,
       height: 56,
       child: ElevatedButton(
-        onPressed: _isLoading ? null : _handleLogin,
+        onPressed: isLoading ? null : _handleLogin,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.white,
@@ -340,7 +326,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           elevation: 5,
           shadowColor: AppColors.primary.withValues(alpha: 0.5),
         ),
-        child: _isLoading
+        child: isLoading
             ? const SizedBox(
                 height: 24,
                 width: 24,

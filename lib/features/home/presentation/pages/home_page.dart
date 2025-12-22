@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/route_constants.dart';
 import '../../../../core/services/storage_service.dart';
+import '../../../../core/services/menu_service.dart';
 import '../../../../core/models/user.dart';
+import '../../../../core/models/menu_response.dart';
 import '../../../../shared/theme/app_colors.dart';
 
 class HomePage extends StatefulWidget {
@@ -14,21 +16,50 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final StorageService _storageService = StorageService();
+  final MenuService _menuService = MenuService();
+
   User? _currentUser;
   bool _isLoading = true;
+  MenuResponse? _menuResponse;
+  bool _isLoadingMenu = true;
+  String? _menuError;
 
   @override
   void initState() {
     super.initState();
     _loadUserData();
+    _loadMenuData();
   }
 
   Future<void> _loadUserData() async {
-    final user = await _storageService.getUser();
+    final user = _storageService.getUser();
     setState(() {
       _currentUser = user;
       _isLoading = false;
     });
+  }
+
+  Future<void> _loadMenuData() async {
+    setState(() {
+      _isLoadingMenu = true;
+      _menuError = null;
+    });
+
+    try {
+      final menuResponse = await _menuService.getCurrentMenu();
+      setState(() {
+        _menuResponse = menuResponse;
+        _isLoadingMenu = false;
+        if (menuResponse == null) {
+          _menuError = 'Failed to load menu';
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _isLoadingMenu = false;
+        _menuError = 'Error loading menu: $e';
+      });
+    }
   }
 
   Future<void> _handleLogout() async {
@@ -125,7 +156,7 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Welcome back,',
+                  'Welcome Back,',
                   style: TextStyle(
                     fontSize: 14,
                     color: AppColors.textSecondary,
@@ -155,25 +186,81 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildContent() {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const SizedBox(height: 20),
-          _buildUserInfoCard(),
-          const SizedBox(height: 30),
-          _buildQuickActions(),
-          const SizedBox(height: 30),
-          _buildFeaturesSection(),
-        ],
+    if (_isLoadingMenu) {
+      return const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text(
+              'Loading menu...',
+              style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_menuError != null) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.error_outline, size: 64, color: AppColors.error),
+            const SizedBox(height: 16),
+            Text(
+              _menuError!,
+              style: const TextStyle(fontSize: 16, color: AppColors.error),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _loadMenuData,
+              icon: const Icon(Icons.refresh),
+              label: const Text('Retry'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    if (_menuResponse == null || _menuResponse!.menus.isEmpty) {
+      return const Center(
+        child: Text(
+          'No menu available',
+          style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
+        ),
+      );
+    }
+
+    return RefreshIndicator(
+      onRefresh: _loadMenuData,
+      child: SingleChildScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildMenuHeader(),
+            const SizedBox(height: 24),
+            ..._menuResponse!.menus.map((menu) => _buildMenuSection(menu)),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildUserInfoCard() {
+  Widget _buildMenuHeader() {
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: AppColors.primaryGradient,
         borderRadius: BorderRadius.circular(20),
@@ -185,233 +272,146 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          const Text(
-            'Account Information',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.white.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.restaurant_menu,
               color: AppColors.white,
+              size: 32,
             ),
           ),
-          const SizedBox(height: 20),
-          _buildInfoRow(
-            Icons.person_outline,
-            'Name',
-            _currentUser?.name ?? 'N/A',
-          ),
-          const SizedBox(height: 12),
-          _buildInfoRow(
-            Icons.email_outlined,
-            'Email',
-            _currentUser?.email ?? 'N/A',
-          ),
-          const SizedBox(height: 12),
-          _buildInfoRow(
-            Icons.fingerprint,
-            'User ID',
-            _currentUser?.id ?? 'N/A',
-          ),
-          if (_currentUser?.restaurantsId != null) ...[
-            const SizedBox(height: 12),
-            _buildInfoRow(
-              Icons.restaurant,
-              'Restaurant ID',
-              _currentUser!.restaurantsId!,
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Today\'s Menu',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.white,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${_menuResponse!.currentDay} • ${_menuResponse!.currentTime}',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: AppColors.white.withValues(alpha: 0.9),
+                  ),
+                ),
+              ],
             ),
-          ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String label, String value) {
-    return Row(
+  Widget _buildMenuSection(Menu menu) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: AppColors.white.withValues(alpha: 0.9), size: 20),
-        const SizedBox(width: 12),
-        Expanded(
+        Padding(
+          padding: const EdgeInsets.symmetric(vertical: 16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                label,
-                style: TextStyle(
-                  fontSize: 12,
-                  color: AppColors.white.withValues(alpha: 0.8),
+                menu.name,
+                style: const TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: 2),
+              const SizedBox(height: 4),
               Text(
-                value,
+                menu.description,
                 style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.white,
+                  fontSize: 14,
+                  color: AppColors.textSecondary,
                 ),
-                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),
         ),
+        _buildCategoriesChips(menu.categories),
+        const SizedBox(height: 16),
+        _buildMenuItems(menu.items),
+        const SizedBox(height: 24),
       ],
     );
   }
 
-  Widget _buildQuickActions() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Quick Actions',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildActionCard(
-                icon: Icons.restaurant_menu,
-                title: 'Menu',
-                color: AppColors.primary,
-                onTap: () {
-                  // TODO: Navigate to menu
-                },
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildActionCard(
-                icon: Icons.shopping_cart,
-                title: 'Cart',
-                color: AppColors.secondary,
-                onTap: () {
-                  // TODO: Navigate to cart
-                },
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: _buildActionCard(
-                icon: Icons.receipt_long,
-                title: 'Orders',
-                color: AppColors.error,
-                onTap: () {
-                  // TODO: Navigate to orders
-                },
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildActionCard(
-                icon: Icons.person,
-                title: 'Profile',
-                color: AppColors.accent,
-                onTap: () {
-                  // TODO: Navigate to profile
-                },
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
+  Widget _buildCategoriesChips(List<Category> categories) {
+    // Sort categories by display order
+    final sortedCategories = List<Category>.from(categories)
+      ..sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
 
-  Widget _buildActionCard({
-    required IconData icon,
-    required String title,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: AppColors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.shadowLight,
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
+    return SizedBox(
+      height: 40,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: sortedCategories.length,
+        itemBuilder: (context, index) {
+          final category = sortedCategories[index];
+          return Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: Chip(
+              label: Text(
+                category.name,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
-              child: Icon(icon, color: color, size: 32),
+              backgroundColor: AppColors.primaryContainer,
+              side: BorderSide.none,
+              padding: const EdgeInsets.symmetric(horizontal: 8),
             ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildFeaturesSection() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Features',
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
+  Widget _buildMenuItems(List<MenuItem> items) {
+    if (items.isEmpty) {
+      return const Center(
+        child: Padding(
+          padding: EdgeInsets.all(20),
+          child: Text(
+            'No items available',
+            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
           ),
         ),
-        const SizedBox(height: 16),
-        _buildFeatureItem(
-          Icons.delivery_dining,
-          'Fast Delivery',
-          'Get your food delivered in 30 minutes',
-        ),
-        const SizedBox(height: 12),
-        _buildFeatureItem(
-          Icons.star,
-          'Quality Food',
-          'Fresh ingredients and best recipes',
-        ),
-        const SizedBox(height: 12),
-        _buildFeatureItem(
-          Icons.payment,
-          'Easy Payment',
-          'Multiple payment options available',
-        ),
-      ],
+      );
+    }
+
+    return ListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final menuItem = items[index];
+        return _buildMenuItem(menuItem);
+      },
     );
   }
 
-  Widget _buildFeatureItem(IconData icon, String title, String description) {
+  Widget _buildMenuItem(MenuItem menuItem) {
+    final item = menuItem.item;
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
@@ -423,41 +423,166 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.primaryContainer,
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Icon(icon, color: AppColors.primary, size: 28),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
+      child: InkWell(
+        onTap: () {
+          // TODO: Navigate to item details
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Item Image
+              Container(
+                width: 100,
+                height: 100,
+                decoration: BoxDecoration(
+                  color: AppColors.grey100,
+                  borderRadius: BorderRadius.circular(12),
+                  image: item.image.isNotEmpty
+                      ? DecorationImage(
+                          image: NetworkImage(item.image),
+                          fit: BoxFit.cover,
+                        )
+                      : null,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  description,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                  ),
+                child: item.image.isEmpty
+                    ? const Icon(
+                        Icons.restaurant,
+                        size: 40,
+                        color: AppColors.grey400,
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 12),
+              // Item Details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            item.name,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        if (!item.isAvailable)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.error.withValues(alpha: 0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: const Text(
+                              'Unavailable',
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.error,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      item.description,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.textSecondary,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Icon(Icons.star, size: 16, color: Colors.amber[700]),
+                        const SizedBox(width: 4),
+                        Text(
+                          item.averageRating.toStringAsFixed(1),
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Icon(
+                          Icons.access_time,
+                          size: 16,
+                          color: AppColors.textSecondary,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${item.preparationTime} min',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          '\$${item.finalPrice.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 6,
+                          ),
+                          decoration: BoxDecoration(
+                            gradient: AppColors.primaryGradient,
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: const Row(
+                            children: [
+                              Icon(
+                                Icons.add_shopping_cart,
+                                size: 16,
+                                color: AppColors.white,
+                              ),
+                              SizedBox(width: 4),
+                              Text(
+                                'Add',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.white,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

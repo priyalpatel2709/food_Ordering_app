@@ -1,0 +1,884 @@
+{
+    "success": true,
+    "currentDay": "Friday",
+    "currentTime": "17:24",
+    "menus": [
+        {
+            "_id": "69453b45744ce68429619c24",
+            "name": "Lunch Special",
+            "description": "Available from 2 PM - 6 PM",
+            "categories": [
+                {
+                    "_id": "69453b45744ce68429619b98",
+                    "restaurantId": "restaurant_123",
+                    "name": "BBQ",
+                    "description": "Smoked BBQ platters",
+                    "isActive": true,
+                    "displayOrder": 8,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.095Z",
+                    "updatedAt": "2025-12-19T11:47:17.095Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619b9f",
+                    "restaurantId": "restaurant_123",
+                    "name": "Tacos",
+                    "description": "Mexican street tacos",
+                    "isActive": true,
+                    "displayOrder": 15,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.096Z",
+                    "updatedAt": "2025-12-19T11:47:17.096Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619ba1",
+                    "restaurantId": "restaurant_123",
+                    "name": "Rice Bowls",
+                    "description": "Hearty rice dishes",
+                    "isActive": true,
+                    "displayOrder": 17,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.096Z",
+                    "updatedAt": "2025-12-19T11:47:17.096Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619b91",
+                    "restaurantId": "restaurant_123",
+                    "name": "Burgers",
+                    "description": "Grilled burgers",
+                    "isActive": true,
+                    "displayOrder": 1,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.094Z",
+                    "updatedAt": "2025-12-19T11:47:17.094Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619b9b",
+                    "restaurantId": "restaurant_123",
+                    "name": "Breakfast",
+                    "description": "Morning delights",
+                    "isActive": true,
+                    "displayOrder": 11,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.096Z",
+                    "updatedAt": "2025-12-19T11:47:17.096Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619b94",
+                    "restaurantId": "restaurant_123",
+                    "name": "Salads",
+                    "description": "Fresh and healthy",
+                    "isActive": true,
+                    "displayOrder": 4,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.095Z",
+                    "updatedAt": "2025-12-19T11:47:17.095Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619b9e",
+                    "restaurantId": "restaurant_123",
+                    "name": "Vegan",
+                    "description": "Plant-based meals",
+                    "isActive": true,
+                    "displayOrder": 14,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.096Z",
+                    "updatedAt": "2025-12-19T11:47:17.096Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619ba0",
+                    "restaurantId": "restaurant_123",
+                    "name": "Fries",
+                    "description": "Crispy fries & sides",
+                    "isActive": true,
+                    "displayOrder": 16,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.096Z",
+                    "updatedAt": "2025-12-19T11:47:17.096Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619ba4",
+                    "restaurantId": "restaurant_123",
+                    "name": "Drinks",
+                    "description": "Refreshing beverages",
+                    "isActive": true,
+                    "displayOrder": 20,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.096Z",
+                    "updatedAt": "2025-12-19T11:47:17.096Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619b97",
+                    "restaurantId": "restaurant_123",
+                    "name": "Wraps",
+                    "description": "Flavored wraps",
+                    "isActive": true,
+                    "displayOrder": 7,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.095Z",
+                    "updatedAt": "2025-12-19T11:47:17.095Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619b9a",
+                    "restaurantId": "restaurant_123",
+                    "name": "Asian Cuisine",
+                    "description": "Authentic Asian flavors",
+                    "isActive": true,
+                    "displayOrder": 10,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.096Z",
+                    "updatedAt": "2025-12-19T11:47:17.096Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619ba3",
+                    "restaurantId": "restaurant_123",
+                    "name": "Sushi",
+                    "description": "Freshly made sushi",
+                    "isActive": true,
+                    "displayOrder": 19,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.096Z",
+                    "updatedAt": "2025-12-19T11:47:17.096Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619b93",
+                    "restaurantId": "restaurant_123",
+                    "name": "Pasta",
+                    "description": "Authentic Italian pasta",
+                    "isActive": true,
+                    "displayOrder": 3,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.095Z",
+                    "updatedAt": "2025-12-19T11:47:17.095Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619b96",
+                    "restaurantId": "restaurant_123",
+                    "name": "Steaks",
+                    "description": "Juicy premium cuts",
+                    "isActive": true,
+                    "displayOrder": 6,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.095Z",
+                    "updatedAt": "2025-12-19T11:47:17.095Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619b9d",
+                    "restaurantId": "restaurant_123",
+                    "name": "Smoothies",
+                    "description": "Healthy smoothies",
+                    "isActive": true,
+                    "displayOrder": 13,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.096Z",
+                    "updatedAt": "2025-12-19T11:47:17.096Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619ba2",
+                    "restaurantId": "restaurant_123",
+                    "name": "Indian Cuisine",
+                    "description": "Traditional Indian flavors",
+                    "isActive": true,
+                    "displayOrder": 18,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.096Z",
+                    "updatedAt": "2025-12-19T11:47:17.096Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619b92",
+                    "restaurantId": "restaurant_123",
+                    "name": "Pizza",
+                    "description": "Hand-tossed pizzas",
+                    "isActive": true,
+                    "displayOrder": 2,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.095Z",
+                    "updatedAt": "2025-12-19T11:47:17.095Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619b9c",
+                    "restaurantId": "restaurant_123",
+                    "name": "Sandwiches",
+                    "description": "Gourmet sandwiches",
+                    "isActive": true,
+                    "displayOrder": 12,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.096Z",
+                    "updatedAt": "2025-12-19T11:47:17.096Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619b99",
+                    "restaurantId": "restaurant_123",
+                    "name": "Seafood",
+                    "description": "Fresh seafood",
+                    "isActive": true,
+                    "displayOrder": 9,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.095Z",
+                    "updatedAt": "2025-12-19T11:47:17.095Z"
+                },
+                {
+                    "_id": "69453b45744ce68429619b95",
+                    "restaurantId": "restaurant_123",
+                    "name": "Desserts",
+                    "description": "Sweet and delicious",
+                    "isActive": true,
+                    "displayOrder": 5,
+                    "metaData": [],
+                    "__v": 0,
+                    "createdAt": "2025-12-19T11:47:17.095Z",
+                    "updatedAt": "2025-12-19T11:47:17.095Z"
+                }
+            ],
+            "items": [
+                {
+                    "item": {
+                        "_id": "69453b45744ce68429619bb9",
+                        "restaurantId": "restaurant_123",
+                        "category": {
+                            "_id": "69453b45744ce68429619b94",
+                            "restaurantId": "restaurant_123",
+                            "name": "Salads",
+                            "description": "Fresh and healthy",
+                            "isActive": true,
+                            "displayOrder": 4,
+                            "metaData": [],
+                            "__v": 0,
+                            "createdAt": "2025-12-19T11:47:17.095Z",
+                            "updatedAt": "2025-12-19T11:47:17.095Z"
+                        },
+                        "name": "undefined Item 2",
+                        "description": "Delicious undefined item 2",
+                        "price": 14,
+                        "image": "https://example.com/undefined_item2.jpg",
+                        "isAvailable": true,
+                        "preparationTime": 11,
+                        "allergens": [
+                            "Dairy",
+                            "Gluten"
+                        ],
+                        "customizationOptions": [
+                            {
+                                "_id": "69453b45744ce68429619ba8",
+                                "restaurantId": "restaurant_123",
+                                "name": "Spicy Sauce",
+                                "price": 0.75,
+                                "isActive": true,
+                                "metaData": [],
+                                "__v": 0,
+                                "createdAt": "2025-12-19T11:47:17.171Z",
+                                "updatedAt": "2025-12-19T11:47:17.171Z"
+                            },
+                            {
+                                "_id": "69453b45744ce68429619ba9",
+                                "restaurantId": "restaurant_123",
+                                "name": "Gluten-Free",
+                                "price": 2,
+                                "isActive": true,
+                                "metaData": [],
+                                "__v": 0,
+                                "createdAt": "2025-12-19T11:47:17.171Z",
+                                "updatedAt": "2025-12-19T11:47:17.171Z"
+                            }
+                        ],
+                        "popularityScore": 15,
+                        "averageRating": 3.7,
+                        "taxable": true,
+                        "taxRate": [],
+                        "minOrderQuantity": 1,
+                        "maxOrderQuantity": 5,
+                        "metaData": [],
+                        "__v": 0,
+                        "createdAt": "2025-12-19T11:47:17.198Z",
+                        "updatedAt": "2025-12-19T11:47:17.198Z",
+                        "finalPrice": 14
+                    },
+                    "defaultPrice": 15,
+                    "_id": "69453b45744ce68429619c33"
+                },
+                {
+                    "item": {
+                        "_id": "69453b45744ce68429619bba",
+                        "restaurantId": "restaurant_123",
+                        "category": {
+                            "_id": "69453b45744ce68429619b94",
+                            "restaurantId": "restaurant_123",
+                            "name": "Salads",
+                            "description": "Fresh and healthy",
+                            "isActive": true,
+                            "displayOrder": 4,
+                            "metaData": [],
+                            "__v": 0,
+                            "createdAt": "2025-12-19T11:47:17.095Z",
+                            "updatedAt": "2025-12-19T11:47:17.095Z"
+                        },
+                        "name": "undefined Item 3",
+                        "description": "Delicious undefined item 3",
+                        "price": 6,
+                        "image": "https://example.com/undefined_item3.jpg",
+                        "isAvailable": true,
+                        "preparationTime": 12,
+                        "allergens": [
+                            "Dairy",
+                            "Gluten"
+                        ],
+                        "customizationOptions": [
+                            {
+                                "_id": "69453b45744ce68429619ba9",
+                                "restaurantId": "restaurant_123",
+                                "name": "Gluten-Free",
+                                "price": 2,
+                                "isActive": true,
+                                "metaData": [],
+                                "__v": 0,
+                                "createdAt": "2025-12-19T11:47:17.171Z",
+                                "updatedAt": "2025-12-19T11:47:17.171Z"
+                            },
+                            {
+                                "_id": "69453b45744ce68429619baa",
+                                "restaurantId": "restaurant_123",
+                                "name": "Bacon Bits",
+                                "price": 2,
+                                "isActive": true,
+                                "metaData": [],
+                                "__v": 0,
+                                "createdAt": "2025-12-19T11:47:17.171Z",
+                                "updatedAt": "2025-12-19T11:47:17.171Z"
+                            }
+                        ],
+                        "popularityScore": 80,
+                        "averageRating": 3.8,
+                        "taxable": true,
+                        "taxRate": [],
+                        "minOrderQuantity": 1,
+                        "maxOrderQuantity": 5,
+                        "metaData": [],
+                        "__v": 0,
+                        "createdAt": "2025-12-19T11:47:17.198Z",
+                        "updatedAt": "2025-12-19T11:47:17.198Z",
+                        "finalPrice": 6
+                    },
+                    "defaultPrice": 15,
+                    "_id": "69453b45744ce68429619c34"
+                },
+                {
+                    "item": {
+                        "_id": "69453b45744ce68429619bbb",
+                        "restaurantId": "restaurant_123",
+                        "category": {
+                            "_id": "69453b45744ce68429619b95",
+                            "restaurantId": "restaurant_123",
+                            "name": "Desserts",
+                            "description": "Sweet and delicious",
+                            "isActive": true,
+                            "displayOrder": 5,
+                            "metaData": [],
+                            "__v": 0,
+                            "createdAt": "2025-12-19T11:47:17.095Z",
+                            "updatedAt": "2025-12-19T11:47:17.095Z"
+                        },
+                        "name": "undefined Item 1",
+                        "description": "Delicious undefined item 1",
+                        "price": 10,
+                        "image": "https://example.com/undefined_item1.jpg",
+                        "isAvailable": true,
+                        "preparationTime": 16,
+                        "allergens": [
+                            "Dairy",
+                            "Gluten"
+                        ],
+                        "customizationOptions": [
+                            {
+                                "_id": "69453b45744ce68429619ba8",
+                                "restaurantId": "restaurant_123",
+                                "name": "Spicy Sauce",
+                                "price": 0.75,
+                                "isActive": true,
+                                "metaData": [],
+                                "__v": 0,
+                                "createdAt": "2025-12-19T11:47:17.171Z",
+                                "updatedAt": "2025-12-19T11:47:17.171Z"
+                            },
+                            {
+                                "_id": "69453b45744ce68429619ba9",
+                                "restaurantId": "restaurant_123",
+                                "name": "Gluten-Free",
+                                "price": 2,
+                                "isActive": true,
+                                "metaData": [],
+                                "__v": 0,
+                                "createdAt": "2025-12-19T11:47:17.171Z",
+                                "updatedAt": "2025-12-19T11:47:17.171Z"
+                            }
+                        ],
+                        "popularityScore": 31,
+                        "averageRating": 4.2,
+                        "taxable": true,
+                        "taxRate": [],
+                        "minOrderQuantity": 1,
+                        "maxOrderQuantity": 5,
+                        "metaData": [],
+                        "__v": 0,
+                        "createdAt": "2025-12-19T11:47:17.198Z",
+                        "updatedAt": "2025-12-19T11:47:17.198Z",
+                        "finalPrice": 10
+                    },
+                    "defaultPrice": 15,
+                    "_id": "69453b45744ce68429619c35"
+                },
+                {
+                    "item": {
+                        "_id": "69453b45744ce68429619bbc",
+                        "restaurantId": "restaurant_123",
+                        "category": {
+                            "_id": "69453b45744ce68429619b95",
+                            "restaurantId": "restaurant_123",
+                            "name": "Desserts",
+                            "description": "Sweet and delicious",
+                            "isActive": true,
+                            "displayOrder": 5,
+                            "metaData": [],
+                            "__v": 0,
+                            "createdAt": "2025-12-19T11:47:17.095Z",
+                            "updatedAt": "2025-12-19T11:47:17.095Z"
+                        },
+                        "name": "undefined Item 2",
+                        "description": "Delicious undefined item 2",
+                        "price": 6,
+                        "image": "https://example.com/undefined_item2.jpg",
+                        "isAvailable": true,
+                        "preparationTime": 13,
+                        "allergens": [
+                            "Dairy",
+                            "Gluten"
+                        ],
+                        "customizationOptions": [
+                            {
+                                "_id": "69453b45744ce68429619ba7",
+                                "restaurantId": "restaurant_123",
+                                "name": "Extra Cheese",
+                                "price": 1.5,
+                                "isActive": true,
+                                "metaData": [],
+                                "__v": 0,
+                                "createdAt": "2025-12-19T11:47:17.170Z",
+                                "updatedAt": "2025-12-19T11:47:17.170Z"
+                            },
+                            {
+                                "_id": "69453b45744ce68429619ba8",
+                                "restaurantId": "restaurant_123",
+                                "name": "Spicy Sauce",
+                                "price": 0.75,
+                                "isActive": true,
+                                "metaData": [],
+                                "__v": 0,
+                                "createdAt": "2025-12-19T11:47:17.171Z",
+                                "updatedAt": "2025-12-19T11:47:17.171Z"
+                            }
+                        ],
+                        "popularityScore": 70,
+                        "averageRating": 3.8,
+                        "taxable": true,
+                        "taxRate": [],
+                        "minOrderQuantity": 1,
+                        "maxOrderQuantity": 5,
+                        "metaData": [],
+                        "__v": 0,
+                        "createdAt": "2025-12-19T11:47:17.198Z",
+                        "updatedAt": "2025-12-19T11:47:17.198Z",
+                        "finalPrice": 6
+                    },
+                    "defaultPrice": 15,
+                    "_id": "69453b45744ce68429619c36"
+                },
+                {
+                    "item": {
+                        "_id": "69453b45744ce68429619bbd",
+                        "restaurantId": "restaurant_123",
+                        "category": {
+                            "_id": "69453b45744ce68429619b95",
+                            "restaurantId": "restaurant_123",
+                            "name": "Desserts",
+                            "description": "Sweet and delicious",
+                            "isActive": true,
+                            "displayOrder": 5,
+                            "metaData": [],
+                            "__v": 0,
+                            "createdAt": "2025-12-19T11:47:17.095Z",
+                            "updatedAt": "2025-12-19T11:47:17.095Z"
+                        },
+                        "name": "undefined Item 3",
+                        "description": "Delicious undefined item 3",
+                        "price": 5,
+                        "image": "https://example.com/undefined_item3.jpg",
+                        "isAvailable": true,
+                        "preparationTime": 19,
+                        "allergens": [
+                            "Dairy",
+                            "Gluten"
+                        ],
+                        "customizationOptions": [
+                            {
+                                "_id": "69453b45744ce68429619ba9",
+                                "restaurantId": "restaurant_123",
+                                "name": "Gluten-Free",
+                                "price": 2,
+                                "isActive": true,
+                                "metaData": [],
+                                "__v": 0,
+                                "createdAt": "2025-12-19T11:47:17.171Z",
+                                "updatedAt": "2025-12-19T11:47:17.171Z"
+                            },
+                            {
+                                "_id": "69453b45744ce68429619bab",
+                                "restaurantId": "restaurant_123",
+                                "name": "Double Patty",
+                                "price": 3.5,
+                                "isActive": true,
+                                "metaData": [],
+                                "__v": 0,
+                                "createdAt": "2025-12-19T11:47:17.171Z",
+                                "updatedAt": "2025-12-19T11:47:17.171Z"
+                            }
+                        ],
+                        "popularityScore": 58,
+                        "averageRating": 3.7,
+                        "taxable": true,
+                        "taxRate": [],
+                        "minOrderQuantity": 1,
+                        "maxOrderQuantity": 5,
+                        "metaData": [],
+                        "__v": 0,
+                        "createdAt": "2025-12-19T11:47:17.198Z",
+                        "updatedAt": "2025-12-19T11:47:17.198Z",
+                        "finalPrice": 5
+                    },
+                    "defaultPrice": 15,
+                    "_id": "69453b45744ce68429619c37"
+                },
+                {
+                    "item": {
+                        "_id": "69453b45744ce68429619bbe",
+                        "restaurantId": "restaurant_123",
+                        "category": {
+                            "_id": "69453b45744ce68429619b96",
+                            "restaurantId": "restaurant_123",
+                            "name": "Steaks",
+                            "description": "Juicy premium cuts",
+                            "isActive": true,
+                            "displayOrder": 6,
+                            "metaData": [],
+                            "__v": 0,
+                            "createdAt": "2025-12-19T11:47:17.095Z",
+                            "updatedAt": "2025-12-19T11:47:17.095Z"
+                        },
+                        "name": "undefined Item 1",
+                        "description": "Delicious undefined item 1",
+                        "price": 14,
+                        "image": "https://example.com/undefined_item1.jpg",
+                        "isAvailable": true,
+                        "preparationTime": 11,
+                        "allergens": [
+                            "Dairy",
+                            "Gluten"
+                        ],
+                        "customizationOptions": [
+                            {
+                                "_id": "69453b45744ce68429619ba9",
+                                "restaurantId": "restaurant_123",
+                                "name": "Gluten-Free",
+                                "price": 2,
+                                "isActive": true,
+                                "metaData": [],
+                                "__v": 0,
+                                "createdAt": "2025-12-19T11:47:17.171Z",
+                                "updatedAt": "2025-12-19T11:47:17.171Z"
+                            },
+                            {
+                                "_id": "69453b45744ce68429619bab",
+                                "restaurantId": "restaurant_123",
+                                "name": "Double Patty",
+                                "price": 3.5,
+                                "isActive": true,
+                                "metaData": [],
+                                "__v": 0,
+                                "createdAt": "2025-12-19T11:47:17.171Z",
+                                "updatedAt": "2025-12-19T11:47:17.171Z"
+                            }
+                        ],
+                        "popularityScore": 70,
+                        "averageRating": 4.8,
+                        "taxable": true,
+                        "taxRate": [],
+                        "minOrderQuantity": 1,
+                        "maxOrderQuantity": 5,
+                        "metaData": [],
+                        "__v": 0,
+                        "createdAt": "2025-12-19T11:47:17.198Z",
+                        "updatedAt": "2025-12-19T11:47:17.198Z",
+                        "finalPrice": 14
+                    },
+                    "defaultPrice": 15,
+                    "_id": "69453b45744ce68429619c38"
+                },
+                {
+                    "item": {
+                        "_id": "69453b45744ce68429619bbf",
+                        "restaurantId": "restaurant_123",
+                        "category": {
+                            "_id": "69453b45744ce68429619b96",
+                            "restaurantId": "restaurant_123",
+                            "name": "Steaks",
+                            "description": "Juicy premium cuts",
+                            "isActive": true,
+                            "displayOrder": 6,
+                            "metaData": [],
+                            "__v": 0,
+                            "createdAt": "2025-12-19T11:47:17.095Z",
+                            "updatedAt": "2025-12-19T11:47:17.095Z"
+                        },
+                        "name": "undefined Item 2",
+                        "description": "Delicious undefined item 2",
+                        "price": 9,
+                        "image": "https://example.com/undefined_item2.jpg",
+                        "isAvailable": true,
+                        "preparationTime": 11,
+                        "allergens": [
+                            "Dairy",
+                            "Gluten"
+                        ],
+                        "customizationOptions": [
+                            {
+                                "_id": "69453b45744ce68429619bab",
+                                "restaurantId": "restaurant_123",
+                                "name": "Double Patty",
+                                "price": 3.5,
+                                "isActive": true,
+                                "metaData": [],
+                                "__v": 0,
+                                "createdAt": "2025-12-19T11:47:17.171Z",
+                                "updatedAt": "2025-12-19T11:47:17.171Z"
+                            }
+                        ],
+                        "popularityScore": 37,
+                        "averageRating": 3.5,
+                        "taxable": true,
+                        "taxRate": [],
+                        "minOrderQuantity": 1,
+                        "maxOrderQuantity": 5,
+                        "metaData": [],
+                        "__v": 0,
+                        "createdAt": "2025-12-19T11:47:17.198Z",
+                        "updatedAt": "2025-12-19T11:47:17.198Z",
+                        "finalPrice": 9
+                    },
+                    "defaultPrice": 15,
+                    "_id": "69453b45744ce68429619c39"
+                },
+                {
+                    "item": {
+                        "_id": "69453b45744ce68429619bc0",
+                        "restaurantId": "restaurant_123",
+                        "category": {
+                            "_id": "69453b45744ce68429619b96",
+                            "restaurantId": "restaurant_123",
+                            "name": "Steaks",
+                            "description": "Juicy premium cuts",
+                            "isActive": true,
+                            "displayOrder": 6,
+                            "metaData": [],
+                            "__v": 0,
+                            "createdAt": "2025-12-19T11:47:17.095Z",
+                            "updatedAt": "2025-12-19T11:47:17.095Z"
+                        },
+                        "name": "undefined Item 3",
+                        "description": "Delicious undefined item 3",
+                        "price": 14,
+                        "image": "https://example.com/undefined_item3.jpg",
+                        "isAvailable": true,
+                        "preparationTime": 15,
+                        "allergens": [
+                            "Dairy",
+                            "Gluten"
+                        ],
+                        "customizationOptions": [
+                            {
+                                "_id": "69453b45744ce68429619ba9",
+                                "restaurantId": "restaurant_123",
+                                "name": "Gluten-Free",
+                                "price": 2,
+                                "isActive": true,
+                                "metaData": [],
+                                "__v": 0,
+                                "createdAt": "2025-12-19T11:47:17.171Z",
+                                "updatedAt": "2025-12-19T11:47:17.171Z"
+                            },
+                            {
+                                "_id": "69453b45744ce68429619bab",
+                                "restaurantId": "restaurant_123",
+                                "name": "Double Patty",
+                                "price": 3.5,
+                                "isActive": true,
+                                "metaData": [],
+                                "__v": 0,
+                                "createdAt": "2025-12-19T11:47:17.171Z",
+                                "updatedAt": "2025-12-19T11:47:17.171Z"
+                            }
+                        ],
+                        "popularityScore": 22,
+                        "averageRating": 4,
+                        "taxable": true,
+                        "taxRate": [],
+                        "minOrderQuantity": 1,
+                        "maxOrderQuantity": 5,
+                        "metaData": [],
+                        "__v": 0,
+                        "createdAt": "2025-12-19T11:47:17.198Z",
+                        "updatedAt": "2025-12-19T11:47:17.198Z",
+                        "finalPrice": 14
+                    },
+                    "defaultPrice": 15,
+                    "_id": "69453b45744ce68429619c3a"
+                },
+                {
+                    "item": {
+                        "_id": "69453b45744ce68429619bc1",
+                        "restaurantId": "restaurant_123",
+                        "category": {
+                            "_id": "69453b45744ce68429619b97",
+                            "restaurantId": "restaurant_123",
+                            "name": "Wraps",
+                            "description": "Flavored wraps",
+                            "isActive": true,
+                            "displayOrder": 7,
+                            "metaData": [],
+                            "__v": 0,
+                            "createdAt": "2025-12-19T11:47:17.095Z",
+                            "updatedAt": "2025-12-19T11:47:17.095Z"
+                        },
+                        "name": "undefined Item 1",
+                        "description": "Delicious undefined item 1",
+                        "price": 7,
+                        "image": "https://example.com/undefined_item1.jpg",
+                        "isAvailable": true,
+                        "preparationTime": 16,
+                        "allergens": [
+                            "Dairy",
+                            "Gluten"
+                        ],
+                        "customizationOptions": [
+                            {
+                                "_id": "69453b45744ce68429619ba8",
+                                "restaurantId": "restaurant_123",
+                                "name": "Spicy Sauce",
+                                "price": 0.75,
+                                "isActive": true,
+                                "metaData": [],
+                                "__v": 0,
+                                "createdAt": "2025-12-19T11:47:17.171Z",
+                                "updatedAt": "2025-12-19T11:47:17.171Z"
+                            },
+                            {
+                                "_id": "69453b45744ce68429619ba9",
+                                "restaurantId": "restaurant_123",
+                                "name": "Gluten-Free",
+                                "price": 2,
+                                "isActive": true,
+                                "metaData": [],
+                                "__v": 0,
+                                "createdAt": "2025-12-19T11:47:17.171Z",
+                                "updatedAt": "2025-12-19T11:47:17.171Z"
+                            }
+                        ],
+                        "popularityScore": 19,
+                        "averageRating": 3.7,
+                        "taxable": true,
+                        "taxRate": [],
+                        "minOrderQuantity": 1,
+                        "maxOrderQuantity": 5,
+                        "metaData": [],
+                        "__v": 0,
+                        "createdAt": "2025-12-19T11:47:17.198Z",
+                        "updatedAt": "2025-12-19T11:47:17.198Z",
+                        "finalPrice": 7
+                    },
+                    "defaultPrice": 15,
+                    "_id": "69453b45744ce68429619c3b"
+                },
+                {
+                    "item": {
+                        "_id": "69453b45744ce68429619bc2",
+                        "restaurantId": "restaurant_123",
+                        "category": {
+                            "_id": "69453b45744ce68429619b97",
+                            "restaurantId": "restaurant_123",
+                            "name": "Wraps",
+                            "description": "Flavored wraps",
+                            "isActive": true,
+                            "displayOrder": 7,
+                            "metaData": [],
+                            "__v": 0,
+                            "createdAt": "2025-12-19T11:47:17.095Z",
+                            "updatedAt": "2025-12-19T11:47:17.095Z"
+                        },
+                        "name": "undefined Item 2",
+                        "description": "Delicious undefined item 2",
+                        "price": 12,
+                        "image": "https://example.com/undefined_item2.jpg",
+                        "isAvailable": true,
+                        "preparationTime": 19,
+                        "allergens": [
+                            "Dairy",
+                            "Gluten"
+                        ],
+                        "customizationOptions": [
+                            {
+                                "_id": "69453b45744ce68429619ba9",
+                                "restaurantId": "restaurant_123",
+                                "name": "Gluten-Free",
+                                "price": 2,
+                                "isActive": true,
+                                "metaData": [],
+                                "__v": 0,
+                                "createdAt": "2025-12-19T11:47:17.171Z",
+                                "updatedAt": "2025-12-19T11:47:17.171Z"
+                            }
+                        ],
+                        "popularityScore": 76,
+                        "averageRating": 4.5,
+                        "taxable": true,
+                        "taxRate": [],
+                        "minOrderQuantity": 1,
+                        "maxOrderQuantity": 5,
+                        "metaData": [],
+                        "__v": 0,
+                        "createdAt": "2025-12-19T11:47:17.198Z",
+                        "updatedAt": "2025-12-19T11:47:17.198Z",
+                        "finalPrice": 12
+                    },
+                    "defaultPrice": 15,
+                    "_id": "69453b45744ce68429619c3c"
+                }
+            ]
+        }
+    ]
+}
