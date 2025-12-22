@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../menu/domain/entities/menu_entity.dart';
 import '../../domain/entities/cart_entity.dart';
 
 /// Cart State
@@ -32,6 +33,7 @@ class CartNotifier extends StateNotifier<CartState> {
     required String menuItemName,
     required String menuItemImage,
     required double basePrice,
+    required TaxRateEntity? taxRate,
     required List<CustomizationSelection> selectedCustomizations,
   }) {
     // Generate unique ID based on item and customizations
@@ -59,6 +61,7 @@ class CartNotifier extends StateNotifier<CartState> {
           quantity: 1,
           selectedCustomizations: selectedCustomizations,
           addedAt: DateTime.now(),
+          taxRate: taxRate,
         ),
       );
     }

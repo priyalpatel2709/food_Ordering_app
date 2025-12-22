@@ -1,3 +1,5 @@
+import '../../../menu/domain/entities/menu_entity.dart';
+
 /// Cart Item Entity
 class CartItemEntity {
   final String id; // Unique ID for cart item
@@ -8,6 +10,7 @@ class CartItemEntity {
   final int quantity;
   final List<CustomizationSelection> selectedCustomizations;
   final DateTime addedAt;
+  final TaxRateEntity? taxRate; // Tax rate for this item (e.g., 0.1 for 10%)
 
   const CartItemEntity({
     required this.id,
@@ -18,16 +21,8 @@ class CartItemEntity {
     required this.quantity,
     required this.selectedCustomizations,
     required this.addedAt,
+    this.taxRate, // Default 10% tax
   });
-
-  /// Calculate total price for this cart item (base + customizations) * quantity
-  double get totalPrice {
-    final customizationTotal = selectedCustomizations.fold<double>(
-      0,
-      (sum, customization) => sum + customization.price,
-    );
-    return (basePrice + customizationTotal) * quantity;
-  }
 
   /// Get price per item (base + customizations)
   double get pricePerItem {
@@ -36,6 +31,29 @@ class CartItemEntity {
       (sum, customization) => sum + customization.price,
     );
     return basePrice + customizationTotal;
+  }
+
+  /// Get tax per item
+  double get taxPerItem {
+    if (taxRate == null) return 0.0;
+    // TaxRateEntity.percentage is in percentage (e.g., 10 for 10%)
+    // Convert to decimal by dividing by 100
+    return pricePerItem * (taxRate!.percentage / 100);
+  }
+
+  /// Get total price with tax per item
+  double get pricePerItemWithTax {
+    return pricePerItem + taxPerItem;
+  }
+
+  /// Calculate total price for this cart item (price + tax) * quantity
+  double get totalPrice {
+    return pricePerItemWithTax * quantity;
+  }
+
+  /// Get total tax for this cart item
+  double get totalTax {
+    return taxPerItem * quantity;
   }
 
   CartItemEntity copyWith({
@@ -47,6 +65,7 @@ class CartItemEntity {
     int? quantity,
     List<CustomizationSelection>? selectedCustomizations,
     DateTime? addedAt,
+    double? taxRate,
   }) {
     return CartItemEntity(
       id: id ?? this.id,
@@ -58,6 +77,7 @@ class CartItemEntity {
       selectedCustomizations:
           selectedCustomizations ?? this.selectedCustomizations,
       addedAt: addedAt ?? this.addedAt,
+      taxRate: taxRate ?? this.taxRate,
     );
   }
 
@@ -103,36 +123,38 @@ class CustomizationSelection {
 /// Cart Summary
 class CartSummary {
   final List<CartItemEntity> items;
-  final double subtotal;
-  final double tax;
-  final double deliveryFee;
-  final double total;
+  final double subtotal; // Total before tax
+  final double totalTax; // Sum of all item taxes
+  final double total; // Subtotal + tax
   final int totalItems;
 
   const CartSummary({
     required this.items,
     required this.subtotal,
-    required this.tax,
-    required this.deliveryFee,
+    required this.totalTax,
     required this.total,
     required this.totalItems,
   });
 
   factory CartSummary.fromItems(List<CartItemEntity> items) {
+    // Calculate subtotal (price without tax)
     final subtotal = items.fold<double>(
       0,
-      (sum, item) => sum + item.totalPrice,
+      (sum, item) => sum + (item.pricePerItem * item.quantity),
     );
-    final tax = subtotal * 0.1; // 10% tax
-    final deliveryFee = subtotal > 0 ? 5.0 : 0.0; // $5 delivery fee
-    final total = subtotal + tax + deliveryFee;
+
+    // Calculate total tax (sum of all item taxes)
+    final totalTax = items.fold<double>(0, (sum, item) => sum + item.totalTax);
+
+    // Total = subtotal + tax
+    final total = subtotal + totalTax;
+
     final totalItems = items.fold<int>(0, (sum, item) => sum + item.quantity);
 
     return CartSummary(
       items: items,
       subtotal: subtotal,
-      tax: tax,
-      deliveryFee: deliveryFee,
+      totalTax: totalTax,
       total: total,
       totalItems: totalItems,
     );

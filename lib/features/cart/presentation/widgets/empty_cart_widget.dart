@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/constants/route_constants.dart';
 import '../../../../shared/theme/app_colors.dart';
 
 class EmptyCartWidget extends StatelessWidget {

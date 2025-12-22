@@ -347,6 +347,7 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                   menuItemImage: menuItem.image,
                   basePrice: menuItem.price,
                   selectedCustomizations: selectedCustomizations,
+                  taxRate: menuItem.taxRate,
                 );
           },
           onIncrement: () {
@@ -365,6 +366,7 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                     menuItemImage: menuItem.image,
                     basePrice: menuItem.price,
                     selectedCustomizations: [],
+                    taxRate: menuItem.taxRate,
                   );
             }
           },

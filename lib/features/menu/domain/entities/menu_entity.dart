@@ -86,6 +86,11 @@ class MenuItemEntity {
   final int popularityScore;
   final double averageRating;
   final CategoryEntity category;
+  final bool taxable;
+  final TaxRateEntity? taxRate; // Changed from List<dynamic> to TaxRateEntity?
+  final int minOrderQuantity;
+  final int maxOrderQuantity;
+  final List<dynamic> metaData; // Could be more specific based on your needs
 
   const MenuItemEntity({
     required this.id,
@@ -100,6 +105,11 @@ class MenuItemEntity {
     required this.popularityScore,
     required this.averageRating,
     required this.category,
+    required this.taxable,
+    required this.taxRate,
+    required this.minOrderQuantity,
+    required this.maxOrderQuantity,
+    required this.metaData,
   });
 
   MenuItemEntity copyWith({
@@ -115,6 +125,11 @@ class MenuItemEntity {
     int? popularityScore,
     double? averageRating,
     CategoryEntity? category,
+    bool? taxable,
+    TaxRateEntity? taxRate,
+    int? minOrderQuantity,
+    int? maxOrderQuantity,
+    List<dynamic>? metaData,
   }) {
     return MenuItemEntity(
       id: id ?? this.id,
@@ -129,6 +144,11 @@ class MenuItemEntity {
       popularityScore: popularityScore ?? this.popularityScore,
       averageRating: averageRating ?? this.averageRating,
       category: category ?? this.category,
+      taxable: taxable ?? this.taxable,
+      taxRate: taxRate ?? this.taxRate,
+      minOrderQuantity: minOrderQuantity ?? this.minOrderQuantity,
+      maxOrderQuantity: maxOrderQuantity ?? this.maxOrderQuantity,
+      metaData: metaData ?? this.metaData,
     );
   }
 
@@ -140,8 +160,79 @@ class MenuItemEntity {
     return price + customizationTotal;
   }
 
+  /// Calculate tax amount based on final price and tax rate
+  double get taxAmount {
+    if (!taxable || taxRate == null) return 0.0;
+    return finalPrice * (taxRate!.percentage / 100);
+  }
+
+  /// Calculate total price including tax
+  double get totalPriceWithTax {
+    return finalPrice + taxAmount;
+  }
+
   @override
   String toString() => 'MenuItemEntity(id: $id, name: $name, price: $price)';
+}
+
+class TaxRateEntity {
+  final String id;
+  final String restaurantId;
+  final String name;
+  final double percentage;
+  final bool isActive;
+  final List<MetaDataEntity> metaData;
+  final int version;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  const TaxRateEntity({
+    required this.id,
+    required this.restaurantId,
+    required this.name,
+    required this.percentage,
+    required this.isActive,
+    required this.metaData,
+    required this.version,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  factory TaxRateEntity.fromJson(Map<String, dynamic> json) {
+    return TaxRateEntity(
+      id: json['_id'] as String,
+      restaurantId: json['restaurantId'] as String,
+      name: json['name'] as String,
+      percentage: (json['percentage'] as num).toDouble(),
+      isActive: json['isActive'] as bool,
+      metaData: (json['metaData'] as List)
+          .map((item) => MetaDataEntity.fromJson(item))
+          .toList(),
+      version: json['__v'] as int,
+      createdAt: DateTime.parse(json['createdAt'] as String),
+      updatedAt: DateTime.parse(json['updatedAt'] as String),
+    );
+  }
+}
+
+class MetaDataEntity {
+  final String id;
+  final String key;
+  final dynamic value;
+
+  const MetaDataEntity({
+    required this.id,
+    required this.key,
+    required this.value,
+  });
+
+  factory MetaDataEntity.fromJson(Map<String, dynamic> json) {
+    return MetaDataEntity(
+      id: json['_id'] as String,
+      key: json['key'] as String,
+      value: json['value'],
+    );
+  }
 }
 
 /// Customization Option Entity
