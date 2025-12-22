@@ -11,7 +11,10 @@ class AuthService {
   final ApiService _apiService = ApiService();
 
   /// Login with email and password
-  Future<AuthResult> login(String email, String password) async {
+  Future<AuthResult> login({
+    required String email,
+    required String password,
+  }) async {
     try {
       final response = await _apiService.post(
         '${ApiConstants.v1}${ApiConstants.user}${ApiConstants.loginEndpoint}',

@@ -33,7 +33,7 @@ class User extends HiveObject {
       name: json['name'] as String,
       email: json['email'] as String,
       token: json['token'] as String,
-      restaurantsId: json['restaurantsId'] as String?,
+      restaurantsId: json['restaurantId'] as String?,
     );
   }
 
@@ -43,7 +43,7 @@ class User extends HiveObject {
       'name': name,
       'email': email,
       'token': token,
-      'restaurantsId': restaurantsId,
+      'restaurantId': restaurantsId,
     };
   }
 

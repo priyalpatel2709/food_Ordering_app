@@ -18,6 +18,7 @@ class StorageService {
   // Keys
   static const String _currentUserKey = 'current_user';
   static const String _authTokenKey = 'auth_token';
+  static const String _authRestaurantIdKey = 'restaurant_id';
   static const String _themeKey = 'theme_mode';
   static const String _languageKey = 'language';
 
@@ -68,6 +69,7 @@ class StorageService {
   Future<void> saveUser(User user) async {
     await _getUserBox.put(_currentUserKey, user);
     await _getSettingsBox.put(_authTokenKey, user.token);
+    await _getSettingsBox.put(_authRestaurantIdKey, user.restaurantsId);
   }
 
   /// Get current user
@@ -89,6 +91,7 @@ class StorageService {
   Future<void> clearUser() async {
     await _getUserBox.delete(_currentUserKey);
     await _getSettingsBox.delete(_authTokenKey);
+    await _getSettingsBox.delete(_authRestaurantIdKey);
   }
 
   /// Check if user is logged in
@@ -105,9 +108,17 @@ class StorageService {
     return _getSettingsBox.get(_authTokenKey);
   }
 
+  String? getRestaurantId() {
+    return _getSettingsBox.get(_authRestaurantIdKey);
+  }
+
   /// Save authentication token
   Future<void> saveToken(String token) async {
     await _getSettingsBox.put(_authTokenKey, token);
+  }
+
+  Future<void> saveRestaurantId(String restaurantId) async {
+    await _getSettingsBox.put(_authRestaurantIdKey, restaurantId);
   }
 
   /// Clear authentication token

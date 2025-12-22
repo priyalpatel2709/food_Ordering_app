@@ -1,25 +1,25 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/route_constants.dart';
+import '../../../../core/services/auth_service.dart';
+import '../../../../core/services/storage_service.dart';
 import '../../../../shared/theme/app_colors.dart';
-import '../providers/auth_provider.dart';
 
-class LoginPage extends ConsumerStatefulWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
   @override
-  ConsumerState<LoginPage> createState() => _LoginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
-class _LoginPageState extends ConsumerState<LoginPage>
-    with TickerProviderStateMixin {
+class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final AuthService _authService = AuthService();
+  final StorageService _storageService = StorageService();
 
+  bool _isLoading = false;
   bool _obscurePassword = true;
   late AnimationController _fadeController;
   late Animation<double> _fadeAnimation;
@@ -57,9 +57,41 @@ class _LoginPageState extends ConsumerState<LoginPage>
       return;
     }
 
-    await ref
-        .read(authNotifierProvider.notifier)
-        .login(_emailController.text.trim(), _passwordController.text);
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final result = await _authService.login(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
+
+      if (!mounted) return;
+
+      if (result.isSuccess && result.user != null) {
+        await _storageService.saveUser(result.user!);
+
+        if (!mounted) return;
+
+        _showSuccessSnackBar('Login successful!');
+        await Future.delayed(const Duration(milliseconds: 500));
+
+        if (!mounted) return;
+        context.go(RouteConstants.home);
+      } else {
+        _showErrorSnackBar(result.error ?? 'Login failed');
+      }
+    } catch (e) {
+      if (!mounted) return;
+      _showErrorSnackBar('An error occurred: ${e.toString()}');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
   }
 
   void _showErrorSnackBar(String message) {
@@ -86,28 +118,6 @@ class _LoginPageState extends ConsumerState<LoginPage>
 
   @override
   Widget build(BuildContext context) {
-    // Listen to auth state changes
-    ref.listen<AuthState>(authNotifierProvider, (previous, next) {
-      switch (next) {
-        case AuthAuthenticated(:final user):
-          // _showSuccessSnackBar('Login successful!');
-
-          log('message ${user.name}');
-          Future.delayed(const Duration(milliseconds: 500), () {
-            if (mounted) {
-              context.go(RouteConstants.home);
-            }
-          });
-        case AuthError(:final message):
-          _showErrorSnackBar(message);
-        default:
-          break;
-      }
-    });
-
-    final authState = ref.watch(authNotifierProvider);
-    final isLoading = authState is AuthLoading;
-
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -136,18 +146,11 @@ class _LoginPageState extends ConsumerState<LoginPage>
                     const SizedBox(height: 40),
                     _buildLoginForm(),
                     const SizedBox(height: 24),
-                    _buildLoginButton(isLoading),
+                    _buildLoginButton(),
                     const SizedBox(height: 20),
                     _buildForgotPassword(),
-                    TextButton(
-                      onPressed: () {
-                        context.push(RouteConstants.signin);
-                      },
-                      child: const Text(
-                        'Sign Up',
-                        style: TextStyle(color: AppColors.primary),
-                      ),
-                    ),
+                    const SizedBox(height: 10),
+                    _buildSignUpLink(),
                   ],
                 ),
               ),
@@ -315,12 +318,12 @@ class _LoginPageState extends ConsumerState<LoginPage>
     );
   }
 
-  Widget _buildLoginButton(bool isLoading) {
+  Widget _buildLoginButton() {
     return SizedBox(
       width: double.infinity,
       height: 56,
       child: ElevatedButton(
-        onPressed: isLoading ? null : _handleLogin,
+        onPressed: _isLoading ? null : _handleLogin,
         style: ElevatedButton.styleFrom(
           backgroundColor: AppColors.primary,
           foregroundColor: AppColors.white,
@@ -330,7 +333,7 @@ class _LoginPageState extends ConsumerState<LoginPage>
           elevation: 5,
           shadowColor: AppColors.primary.withValues(alpha: 0.5),
         ),
-        child: isLoading
+        child: _isLoading
             ? const SizedBox(
                 height: 24,
                 width: 24,
@@ -364,6 +367,34 @@ class _LoginPageState extends ConsumerState<LoginPage>
           fontWeight: FontWeight.w600,
         ),
       ),
+    );
+  }
+
+  Widget _buildSignUpLink() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Text(
+          "Don't have an account? ",
+          style: TextStyle(color: AppColors.textSecondary, fontSize: 15),
+        ),
+        TextButton(
+          onPressed: () {
+            context.push(RouteConstants.signin);
+          },
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 4),
+          ),
+          child: const Text(
+            'Sign Up',
+            style: TextStyle(
+              color: AppColors.primary,
+              fontSize: 15,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -1,7 +1,10 @@
+import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import '../constants/api_constants.dart';
 import '../error/exceptions.dart';
+import '../services/storage_service.dart';
 
 /// Centralized Dio Client with interceptors
 class DioClient {
@@ -18,7 +21,6 @@ class DioClient {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'X-Restaurant-Id': '123',
         },
       ),
     );
@@ -36,6 +38,7 @@ class DioClient {
 
   /// Set authentication token
   void setAuthToken(String? token) {
+    log('setAuthToken $setAuthToken');
     _authToken = token;
   }
 
@@ -186,11 +189,16 @@ class _AuthInterceptor extends Interceptor {
 
   _AuthInterceptor(this._dioClient);
 
+  final StorageService _storageService = StorageService();
+
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    final token = _dioClient.getAuthToken();
-    if (token != null) {
+    final token = _storageService.getToken();
+    final restaurantId = _storageService.getRestaurantId();
+
+    if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
+      options.headers['X-Restaurant-Id'] = '${restaurantId?.split('_')[1]}';
     }
     handler.next(options);
   }
