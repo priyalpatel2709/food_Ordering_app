@@ -1,19 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../network/dio_client.dart';
-import '../../data/datasources/local/menu_local_data_source.dart';
-import '../../data/datasources/local/user_local_data_source.dart';
-import '../../data/datasources/remote/auth_remote_data_source.dart';
-import '../../data/datasources/remote/menu_remote_data_source.dart';
-import '../../data/repositories/auth_repository_impl.dart';
-import '../../data/repositories/menu_repository_impl.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../../domain/repositories/menu_repository.dart';
-import '../../domain/usecases/get_current_menu_use_case.dart';
-import '../../domain/usecases/get_current_user_use_case.dart';
-import '../../domain/usecases/login_use_case.dart';
-import '../../domain/usecases/logout_use_case.dart';
-import '../../domain/usecases/sign_up_use_case.dart';
+import '../../features/menu/data/datasources/menu_local_data_source.dart';
+import '../../features/authentication/data/datasources/local/user_local_data_source.dart';
+import '../../features/authentication/data/datasources/remote/auth_remote_data_source.dart';
+import '../../features/menu/data/datasources/menu_remote_data_source.dart';
+import '../../features/authentication/data/repositories/auth_repository_impl.dart';
+import '../../features/menu/data/repositories/menu_repository_impl.dart';
+import '../../features/authentication/domain/repositories/auth_repository.dart';
+import '../../features/menu/domain/repositories/menu_repository.dart';
+import '../../features/menu/domain/usecases/get_current_menu_use_case.dart';
+import '../../features/authentication/domain/usecases/get_current_user_use_case.dart';
+import '../../features/authentication/domain/usecases/login_use_case.dart';
+import '../../features/authentication/domain/usecases/logout_use_case.dart';
+import '../../features/authentication/domain/usecases/sign_up_use_case.dart';
 
 /// Manual Provider Definitions
 /// TODO: When build_runner is fixed, restore @riverpod code generation

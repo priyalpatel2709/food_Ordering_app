@@ -4,7 +4,7 @@ import '../core/constants/route_constants.dart';
 import '../features/authentication/presentation/pages/sign_up_page.dart';
 import '../features/splash/presentation/pages/splash_page.dart';
 import '../features/authentication/presentation/pages/login_page.dart';
-import '../features/home/presentation/pages/home_page.dart';
+import '../features/menu/presentation/views/menu_page.dart';
 
 class AppRouter {
   // Route paths and names are now centralized in RouteConstants
@@ -71,7 +71,7 @@ class AppRouter {
         name: RouteConstants.homeName,
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
-          child: const HomePage(),
+          child: const MenuPage(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(opacity: animation, child: child);
           },

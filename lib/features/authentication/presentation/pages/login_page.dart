@@ -1,9 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/route_constants.dart';
 import '../../../../shared/theme/app_colors.dart';
-import '../../../../presentation/providers/auth_provider.dart';
+import '../providers/auth_provider.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
@@ -88,7 +90,9 @@ class _LoginPageState extends ConsumerState<LoginPage>
     ref.listen<AuthState>(authNotifierProvider, (previous, next) {
       switch (next) {
         case AuthAuthenticated(:final user):
-          _showSuccessSnackBar('Login successful!');
+          // _showSuccessSnackBar('Login successful!');
+
+          log('message ${user.name}');
           Future.delayed(const Duration(milliseconds: 500), () {
             if (mounted) {
               context.go(RouteConstants.home);

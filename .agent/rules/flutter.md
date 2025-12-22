@@ -1,198 +1,313 @@
+# Enterprise Flutter Coding Rules (Feature-Wise)
+
+## MVVM + Manual Riverpod + Dio + Hive + GoRouter
+
+> **No code generation. No build_runner. Feature-first architecture.**
+
 ---
-trigger: always_on
+
+## 0. Global Technology Policy (MANDATORY)
+
+### ❌ Removed
+
+- Freezed
+- json_serializable
+- Riverpod code generation
+- Drift
+- build_runner
+- Any annotation-based codegen
+
+### ✅ Kept
+
+- Manual Riverpod
+- Dio
+- Hive (manual adapters only)
+- GoRouter
+- Pure Dart models
+- Explicit constructors + copyWith
+
 ---
 
-# Enterprise Coding Rules for Flutter  
-### Riverpod + Drift + Dio
+## 1. Feature-Wise Architecture (MANDATORY)
 
-## 1. Architecture Requirements
+Each **feature is isolated** and contains **all layers inside it**.
 
-Project structure must follow:
+### Dependency Flow (STRICT)
+
+View
+↓
+ViewModel
+↓
+UseCase
+↓
+Repository
+↓
+DataSource (Remote / Local)
+
+yaml
+Copy code
+
+❌ Cross-feature imports are NOT allowed  
+❌ UI must never access Repository / Dio / Hive
+
+---
+
+## 2. Project Structure (Feature-First)
 
 lib/
 ├─ core/
 │ ├─ constants/
 │ ├─ error/
+│ │ ├─ result.dart
+│ │ └─ failure.dart
 │ ├─ network/
-│ ├─ utils/
+│ │ ├─ dio_client.dart
+│ │ └─ interceptors/
+│ ├─ storage/
+│ │ └─ hive_service.dart
 │ └─ di/
-├─ data/
-│ ├─ datasources/
-│ │ ├─ remote/
-│ │ └─ local/
-│ ├─ dto/
-│ └─ repositories/
-├─ domain/
-│ ├─ entities/
-│ ├─ repositories/
-│ └─ usecases/
+│ └─ providers.dart
+│
+├─ features/
+│ ├─ auth/
+│ │ ├─ data/
+│ │ │ ├─ datasources/
+│ │ │ │ ├─ auth_remote_ds.dart
+│ │ │ │ └─ auth_local_ds.dart
+│ │ │ ├─ dto/
+│ │ │ └─ repositories/
+│ │ ├─ domain/
+│ │ │ ├─ entities/
+│ │ │ ├─ repositories/
+│ │ │ └─ usecases/
+│ │ └─ presentation/
+│ │ ├─ viewmodels/
+│ │ ├─ views/
+│ │ └─ widgets/
+│ │
+│ ├─ user/
+│ │ ├─ data/
+│ │ ├─ domain/
+│ │ └─ presentation/
+│ │
+│ └─ dashboard/
+│ ├─ data/
+│ ├─ domain/
+│ └─ presentation/
+│
 └─ presentation/
-├─ providers/
-├─ views/
-├─ widgets/
 └─ routing/
 
-markdown
+yaml
 Copy code
-
-### Mandatory Layer Rules
-- UI → Providers → Use Cases → Repositories → Data Sources
-- UI must never call Dio or Drift directly
-- Domain must be pure (no Flutter, Dio, Drift imports)
 
 ---
 
-## 2. Riverpod Rules
-- Use `StateNotifier`, `AsyncNotifier`, or `FutureProvider`
-- State must be immutable
-- Providers must be defined in core/di
-- Separate concerns:
-  - `Provider` → configs/services
-  - `StateNotifierProvider` → business logic
-  - `FutureProvider`/`AsyncNotifier` → async flows
+## 3. Feature Isolation Rules
+
+- A feature **owns its entire stack**
+- No feature imports another feature’s:
+  - Data
+  - Domain
+  - ViewModels
+
+✅ Shared logic must live in `core/`
+
+---
+
+## 4. View Rules (Per Feature)
+
+### Allowed
+
+- `StatelessWidget`
+- `ConsumerWidget`
+
+### Rules
+
+- UI only
+- No business logic
+- Reads state from ViewModel provider
+- Navigation via GoRouter only
+
+❌ No Dio / Hive / Repository usage  
+❌ No `setState` for logic
+
+---
+
+## 5. ViewModel Rules (Per Feature)
+
+- Uses `StateNotifier` or `AsyncNotifier`
+- Holds immutable state
+- Calls **only UseCases**
+- Emits UI-ready state
+
+❌ No Dio / Hive imports  
+❌ No raw JSON
+
+---
+
+## 6. UseCase Rules (Per Feature)
+
+- One action per use case
+- Pure Dart
+- Returns `Result<T>`
+- No Flutter / Dio / Hive imports
 
 Example:
+
 ```dart
-final userProvider = FutureProvider.autoDispose(
-  (ref) => ref.watch(getUserUseCaseProvider).execute(),
-);
-3. Dio Rules
-Create a centralized DioClient with:
+class LoginUseCase {
+  final AuthRepository repository;
 
-base URL
+  LoginUseCase(this.repository);
 
-interceptors
+  Future<Result<UserEntity>> execute(LoginParams params) {
+    return repository.login(params);
+  }
+}
+7. Repository Rules (Per Feature)
+Implements domain repository interface
 
-timeouts
+Decides remote vs local
 
-retry logic
+Maps DTO → Entity
 
-Never instantiate Dio directly in UI or repositories
+Handles caching
 
-Use typed DTOs (no raw JSON)
+❌ UI must never see DTOs
 
-Implement token injection interceptor
+8. DataSource Rules (Per Feature)
+Remote DataSource
+Uses Dio
 
-Interceptors requirement:
+Returns DTOs
 
-Auth
+No entities
 
-Logging in debug only
+Local DataSource
+Uses Hive
 
-Retry handling
+Manual adapters only
 
-4. Drift Rules
-Create tables, DAOs, and migrations
+No entities
 
-Use repositories to call DAOs
+9. DTO & Entity Rules
+DTO
+Feature-scoped
 
-Implement caching strategy:
+Immutable
 
-remote → cache → serve
+Manual fromJson / toJson
 
-Domain layer must never contain Drift imports
+No annotations
 
-5. Error & Result Handling
-Use Result type:
+Entity
+Pure domain model
 
-Success<T>
+No dependencies
 
-Failure
+Used by ViewModels & UI
 
-Map:
+10. Error Handling (Global)
+Result Pattern
+dart
+Copy code
+sealed class Result<T> {
+  const Result();
+}
 
+class Success<T> extends Result<T> {
+  final T data;
+  const Success(this.data);
+}
+
+class Failure extends Result<Never> {
+  final String message;
+  const Failure(this.message);
+}
+Mapping
 DioException → Failure
 
-DriftException → Failure
+HiveException → Failure
 
-Never throw raw exceptions to UI
+No raw exceptions reach UI
 
-6. DTO & Entity Rules
-DTO:
+11. Navigation (GoRouter)
+Defined in presentation/routing
 
-immutable
+Feature screens registered centrally
 
-fromJson/toJson
+No Navigator API usage
 
-Entities:
-
-pure domain types
-
-no dependency on Flutter/Dio/Drift
-
-7. Security Requirements
+12. Security Rules
 HTTPS mandatory
 
-Token storage must be secure (not Drift)
+Tokens in secure storage (NOT Hive)
 
-Sensitive values must not be logged
+No secrets in code
 
-8. Testing Requirements
-At minimum:
+No sensitive logging
 
-provider tests
+13. Testing Rules (Per Feature)
+Minimum per feature:
 
-repository tests
+ViewModel tests
 
-use case tests
+UseCase tests
 
-Mocks must be used for Dio & Drift.
+Repository tests
 
-9. Performance Standards
-use const constructors
+Rules:
 
-caching and pagination
+Mock Dio
 
-debounce heavy operations
+Mock Hive
 
-provider granularity to reduce rebuilds
+No real IO
 
-10. Forbidden Practices
-The following are not allowed:
+14. Performance Rules
+const widgets
 
-setState for business logic
+Pagination
 
-direct HTTP calls in UI
+Debounced API calls
 
-direct database access in UI
+Fine-grained providers
 
-exposing DTOs to UI
+Avoid rebuild storms
 
-using GetX/Bloc/MobX/etc.
+15. Forbidden Practices (GLOBAL)
+❌ Freezed
+❌ json_serializable
+❌ build_runner
+❌ Drift
+❌ Riverpod codegen
+❌ setState for business logic
+❌ DTO exposure to UI
+❌ Direct HTTP / DB access in UI
 
-bypassing error mapping
+16. Naming Conventions
+Feature Example: auth
+AuthViewModel
 
-hardcoding secrets
+AuthState
 
-11. Documentation Requirements
-describe complex use cases
+LoginUseCase
 
-document repositories
+AuthRepository
 
-document interceptors
-
-explain migrations
-
-12. Naming Conventions (Mandatory)
-Examples:
-
-UserRepositoryImpl
-
-GetUserUseCase
+AuthRepositoryImpl
 
 UserEntity
 
 UserDto
 
-userProvider
+authViewModelProvider
 
-Providers:
-
-dart
-Copy code
-final userProvider = FutureProvider((ref) { ... });
-Repositories:
-
-dart
-Copy code
-class UserRepositoryImpl implements UserRepository { ... }
+17. Final Guarantee
+✅ Feature isolation
+✅ No codegen
+✅ No build_runner
+✅ Stable CI
+✅ Scales to large teams
+```

@@ -53,11 +53,13 @@ class _SplashPageState extends State<SplashPage>
     log("navigateToNextScreen");
     if (!mounted) return;
 
-    // final isLoggedIn = await _storageService.isLoggedIn();
+    final isLoggedIn = _storageService.isLoggedIn();
 
     if (!mounted) return;
 
-    if (false) {
+    log('isLoggedIn   ${isLoggedIn}');
+
+    if (isLoggedIn) {
       context.go(RouteConstants.home);
     } else {
       context.go(RouteConstants.login);
