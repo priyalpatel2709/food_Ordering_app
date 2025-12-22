@@ -7,6 +7,13 @@ import '../../../../core/models/user.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../viewmodels/menu_view_model.dart';
 import '../../domain/entities/menu_entity.dart';
+import '../../../cart/domain/entities/cart_entity.dart';
+import '../../../cart/presentation/providers/cart_provider.dart';
+import '../widgets/user_header_card.dart';
+import '../widgets/menu_header.dart';
+import '../widgets/category_chips.dart';
+import '../widgets/menu_item_card.dart';
+import '../widgets/custom_bottom_navigation_bar.dart';
 
 class MenuPage extends ConsumerStatefulWidget {
   const MenuPage({super.key});
@@ -19,6 +26,8 @@ class _MenuPageState extends ConsumerState<MenuPage> {
   final StorageService _storageService = StorageService();
   User? _currentUser;
   bool _isLoadingUser = true;
+  String? _selectedCategoryId;
+  int _currentBottomNavIndex = 0;
 
   @override
   void initState() {
@@ -71,6 +80,47 @@ class _MenuPageState extends ConsumerState<MenuPage> {
     }
   }
 
+  void _handleBottomNavTap(int index) {
+    // Navigate to different pages based on index
+    switch (index) {
+      case 0:
+        // Already on menu page
+        break;
+      case 1:
+        // Navigate to cart page
+        context.push(RouteConstants.cart);
+        break;
+      case 2:
+        // TODO: Navigate to orders page
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Orders page - Coming soon!')),
+        );
+        break;
+      case 3:
+        // TODO: Navigate to profile page
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profile page - Coming soon!')),
+        );
+        break;
+    }
+  }
+
+  void _handleCategorySelected(String? categoryId) {
+    setState(() {
+      _selectedCategoryId = categoryId;
+    });
+  }
+
+  List<MenuItemEntity> _filterItemsByCategory(
+    List<MenuItemEntity> items,
+    String? categoryId,
+  ) {
+    if (categoryId == null) {
+      return items;
+    }
+    return items.where((item) => item.category.id == categoryId).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoadingUser) {
@@ -78,6 +128,7 @@ class _MenuPageState extends ConsumerState<MenuPage> {
     }
 
     final menuState = ref.watch(menuNotifierProvider);
+    final cartItemCount = ref.watch(cartItemCountProvider);
 
     return Scaffold(
       body: Container(
@@ -95,70 +146,16 @@ class _MenuPageState extends ConsumerState<MenuPage> {
         child: SafeArea(
           child: Column(
             children: [
-              _buildHeader(),
+              UserHeaderCard(user: _currentUser, onLogout: _handleLogout),
               Expanded(child: _buildContent(menuState)),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowLight,
-            blurRadius: 10,
-            offset: const Offset(0, 5),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              gradient: AppColors.primaryGradient,
-              borderRadius: BorderRadius.circular(15),
-            ),
-            child: const Icon(Icons.person, color: AppColors.white, size: 30),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Welcome Back,',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  _currentUser?.name ?? 'User',
-                  style: const TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          IconButton(
-            onPressed: _handleLogout,
-            icon: const Icon(Icons.logout),
-            color: AppColors.primary,
-            iconSize: 28,
-          ),
-        ],
+      bottomNavigationBar: CustomBottomNavigationBar(
+        currentIndex: _currentBottomNavIndex,
+        onTap: _handleBottomNavTap,
+        cartItemCount: cartItemCount,
       ),
     );
   }
@@ -227,8 +224,8 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      _buildMenuHeader(),
-                      const SizedBox(height: 24),
+                      // const MenuHeader(),
+                      // const SizedBox(height: 24),
                       ...menus.map((menu) => _buildMenuSection(menu)),
                     ],
                   ),
@@ -237,61 +234,12 @@ class _MenuPageState extends ConsumerState<MenuPage> {
     };
   }
 
-  Widget _buildMenuHeader() {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.primary.withValues(alpha: 0.3),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(
-              Icons.restaurant_menu,
-              color: AppColors.white,
-              size: 32,
-            ),
-          ),
-          const SizedBox(width: 16),
-          const Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Today\'s Menu',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.white,
-                  ),
-                ),
-                SizedBox(height: 4),
-                Text(
-                  'Fresh & Delicious',
-                  style: TextStyle(fontSize: 14, color: AppColors.white),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildMenuSection(MenuEntity menu) {
+    final filteredItems = _filterItemsByCategory(
+      menu.items,
+      _selectedCategoryId,
+    );
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -319,58 +267,42 @@ class _MenuPageState extends ConsumerState<MenuPage> {
             ],
           ),
         ),
-        _buildCategoriesChips(menu.categories),
+        CategoryChips(
+          categories: menu.categories,
+          selectedCategoryId: _selectedCategoryId,
+          onCategorySelected: _handleCategorySelected,
+        ),
         const SizedBox(height: 16),
-        _buildMenuItems(menu.items),
+        _buildMenuItems(filteredItems),
         const SizedBox(height: 24),
       ],
     );
   }
 
-  Widget _buildCategoriesChips(List<CategoryEntity> categories) {
-    // Sort categories by display order
-    final sortedCategories = List<CategoryEntity>.from(categories)
-      ..sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
-
-    return SizedBox(
-      height: 40,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: sortedCategories.length,
-        itemBuilder: (context, index) {
-          final category = sortedCategories[index];
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: Chip(
-              label: Text(
-                category.name,
-                style: const TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              backgroundColor: AppColors.primaryContainer,
-              side: BorderSide.none,
-              padding: const EdgeInsets.symmetric(horizontal: 8),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   Widget _buildMenuItems(List<MenuItemEntity> items) {
     if (items.isEmpty) {
-      return const Center(
+      return Center(
         child: Padding(
-          padding: EdgeInsets.all(20),
-          child: Text(
-            'No items available',
-            style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+          padding: const EdgeInsets.all(40),
+          child: Column(
+            children: [
+              Icon(Icons.search_off, size: 64, color: AppColors.grey400),
+              const SizedBox(height: 16),
+              const Text(
+                'No items found in this category',
+                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+              ),
+            ],
           ),
         ),
       );
     }
+
+    // Get cart state
+    final cartState = ref.watch(cartNotifierProvider);
+    final cartItems = cartState is CartLoaded
+        ? cartState.items
+        : <CartItemEntity>[];
 
     return ListView.builder(
       shrinkWrap: true,
@@ -378,186 +310,74 @@ class _MenuPageState extends ConsumerState<MenuPage> {
       itemCount: items.length,
       itemBuilder: (context, index) {
         final menuItem = items[index];
-        return _buildMenuItem(menuItem);
-      },
-    );
-  }
 
-  Widget _buildMenuItem(MenuItemEntity item) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowLight,
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+        // Find if this item is in cart (without customizations)
+        final cartItemWithoutCustomizations = cartItems.firstWhere(
+          (cartItem) =>
+              cartItem.menuItemId == menuItem.id &&
+              cartItem.selectedCustomizations.isEmpty,
+          orElse: () => CartItemEntity(
+            id: '',
+            menuItemId: '',
+            menuItemName: '',
+            menuItemImage: '',
+            basePrice: 0,
+            quantity: 0,
+            selectedCustomizations: [],
+            addedAt: DateTime.now(),
           ),
-        ],
-      ),
-      child: InkWell(
-        onTap: () {
-          // TODO: Navigate to item details
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Item Image
-              Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  color: AppColors.grey100,
-                  borderRadius: BorderRadius.circular(12),
-                  image: item.image.isNotEmpty
-                      ? DecorationImage(
-                          image: NetworkImage(item.image),
-                          fit: BoxFit.cover,
-                        )
-                      : null,
-                ),
-                child: item.image.isEmpty
-                    ? const Icon(
-                        Icons.restaurant,
-                        size: 40,
-                        color: AppColors.grey400,
-                      )
-                    : null,
-              ),
-              const SizedBox(width: 12),
-              // Item Details
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            item.name,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                            ),
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ),
-                        if (!item.isAvailable)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.error.withValues(alpha: 0.1),
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: const Text(
-                              'Unavailable',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.error,
-                              ),
-                            ),
-                          ),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      item.description,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textSecondary,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      children: [
-                        Icon(Icons.star, size: 16, color: Colors.amber[700]),
-                        const SizedBox(width: 4),
-                        Text(
-                          item.averageRating.toStringAsFixed(1),
-                          style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        const Icon(
-                          Icons.access_time,
-                          size: 16,
-                          color: AppColors.textSecondary,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${item.preparationTime} min',
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '\$${item.finalPrice.toStringAsFixed(2)}',
-                          style: const TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            gradient: AppColors.primaryGradient,
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: const Row(
-                            children: [
-                              Icon(
-                                Icons.add_shopping_cart,
-                                size: 16,
-                                color: AppColors.white,
-                              ),
-                              SizedBox(width: 4),
-                              Text(
-                                'Add',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.white,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
+        );
+
+        final hasItemInCart = cartItemWithoutCustomizations.id.isNotEmpty;
+        final currentQuantity = hasItemInCart
+            ? cartItemWithoutCustomizations.quantity
+            : 0;
+
+        return MenuItemCard(
+          item: menuItem,
+          hasItemInCart: hasItemInCart,
+          currentQuantity: currentQuantity,
+          onAddToCart: (selectedCustomizations) {
+            // Add item to cart with selected customizations
+            ref
+                .read(cartNotifierProvider.notifier)
+                .addItem(
+                  menuItemId: menuItem.id,
+                  menuItemName: menuItem.name,
+                  menuItemImage: menuItem.image,
+                  basePrice: menuItem.price,
+                  selectedCustomizations: selectedCustomizations,
+                );
+          },
+          onIncrement: () {
+            // Increment the item without customizations
+            if (hasItemInCart) {
+              ref
+                  .read(cartNotifierProvider.notifier)
+                  .incrementQuantity(cartItemWithoutCustomizations.id);
+            } else {
+              // Add new item without customizations
+              ref
+                  .read(cartNotifierProvider.notifier)
+                  .addItem(
+                    menuItemId: menuItem.id,
+                    menuItemName: menuItem.name,
+                    menuItemImage: menuItem.image,
+                    basePrice: menuItem.price,
+                    selectedCustomizations: [],
+                  );
+            }
+          },
+          onDecrement: () {
+            // Decrement the item without customizations
+            if (hasItemInCart) {
+              ref
+                  .read(cartNotifierProvider.notifier)
+                  .decrementQuantity(cartItemWithoutCustomizations.id);
+            }
+          },
+        );
+      },
     );
   }
 }
