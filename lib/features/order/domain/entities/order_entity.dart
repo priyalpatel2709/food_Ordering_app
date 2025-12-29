@@ -156,7 +156,7 @@ class OrderEntity {
       orderStatus: json['orderStatus'] as String,
       totalItemCount: json['totalItemCount'] as int,
       orderItems: (json['orderItems'] as List)
-          .map((item) => OrderItemEntity.fromJson(item as Map<String, dynamic>))
+          .map((item) => OrderItemEntity.fromJson(item))
           .toList(),
       statusHistory: json['statusHistory'] as List<dynamic>? ?? [],
       metaData: json['metaData'] as List<dynamic>? ?? [],
@@ -172,9 +172,78 @@ class OrderEntity {
   double get totalDiscountAmount => discount.totalDiscountAmount;
 }
 
+/// Menu Item Details within Order Item
+class MenuItem {
+  final String? id;
+  final String? restaurantId;
+  final String? category;
+  final String? name;
+  final String? description;
+  final double? price;
+  final String? image;
+  final bool? isAvailable;
+  final int? preparationTime;
+  final List<String>? allergens;
+  final List<String>? customizationOptions;
+  final int? popularityScore;
+  final double? averageRating;
+  final bool? taxable;
+  final List<String>? taxRate;
+  final int? minOrderQuantity;
+  final int? maxOrderQuantity;
+  final DateTime? createdAt;
+  final DateTime? updatedAt;
+
+  const MenuItem({
+    this.id,
+    this.restaurantId,
+    this.category,
+    this.name,
+    this.description,
+    this.price,
+    this.image,
+    this.isAvailable,
+    this.preparationTime,
+    this.allergens,
+    this.customizationOptions,
+    this.popularityScore,
+    this.averageRating,
+    this.taxable,
+    this.taxRate,
+    this.minOrderQuantity,
+    this.maxOrderQuantity,
+    this.createdAt,
+    this.updatedAt,
+  });
+
+  factory MenuItem.fromJson(Map<String, dynamic> json) {
+    return MenuItem(
+      id: json['_id'] as String,
+      restaurantId: json['restaurantId'],
+      category: json['category'],
+      name: json['name'],
+      description: json['description'],
+      price: (json['price'] as num).toDouble(),
+      image: json['image'],
+      isAvailable: json['isAvailable'] as bool? ?? true,
+      preparationTime: json['preparationTime'],
+      allergens: (json['allergens'] as List).cast<String>(),
+      customizationOptions: (json['customizationOptions']).cast<String>(),
+      popularityScore: json['popularityScore'],
+      averageRating: (json['averageRating']).toDouble(),
+      taxable: json['taxable'] as bool? ?? false,
+      taxRate: (json['taxRate'] as List).cast<String>(),
+      minOrderQuantity: json['minOrderQuantity'],
+      maxOrderQuantity: json['maxOrderQuantity'],
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
+    );
+  }
+}
+
 class OrderItemEntity {
   final String id;
-  final String item;
+  final MenuItem item;
   final int quantity;
   final double price;
   final double discountPrice;
@@ -192,7 +261,7 @@ class OrderItemEntity {
   factory OrderItemEntity.fromJson(Map<String, dynamic> json) {
     return OrderItemEntity(
       id: json['_id'] as String,
-      item: json['item'] as String,
+      item: MenuItem.fromJson(json['item'] as Map<String, dynamic>),
       quantity: json['quantity'] as int,
       price: (json['price'] as num).toDouble(),
       discountPrice: (json['discountPrice'] as num?)?.toDouble() ?? 0.0,

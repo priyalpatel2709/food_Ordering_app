@@ -10,10 +10,8 @@ import '../../domain/entities/menu_entity.dart';
 import '../../../cart/domain/entities/cart_entity.dart';
 import '../../../cart/presentation/providers/cart_provider.dart';
 import '../widgets/user_header_card.dart';
-import '../widgets/menu_header.dart';
 import '../widgets/category_chips.dart';
 import '../widgets/menu_item_card.dart';
-import '../widgets/custom_bottom_navigation_bar.dart';
 
 class MenuPage extends ConsumerStatefulWidget {
   const MenuPage({super.key});
@@ -27,7 +25,6 @@ class _MenuPageState extends ConsumerState<MenuPage> {
   User? _currentUser;
   bool _isLoadingUser = true;
   String? _selectedCategoryId;
-  int _currentBottomNavIndex = 0;
 
   @override
   void initState() {
@@ -80,31 +77,6 @@ class _MenuPageState extends ConsumerState<MenuPage> {
     }
   }
 
-  void _handleBottomNavTap(int index) {
-    // Navigate to different pages based on index
-    switch (index) {
-      case 0:
-        // Already on menu page
-        break;
-      case 1:
-        // Navigate to cart page
-        context.push(RouteConstants.cart);
-        break;
-      case 2:
-        // TODO: Navigate to orders page
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Orders page - Coming soon!')),
-        );
-        break;
-      case 3:
-        // TODO: Navigate to profile page
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile page - Coming soon!')),
-        );
-        break;
-    }
-  }
-
   void _handleCategorySelected(String? categoryId) {
     setState(() {
       _selectedCategoryId = categoryId;
@@ -128,7 +100,6 @@ class _MenuPageState extends ConsumerState<MenuPage> {
     }
 
     final menuState = ref.watch(menuNotifierProvider);
-    final cartItemCount = ref.watch(cartItemCountProvider);
 
     return Scaffold(
       body: Container(
@@ -151,11 +122,6 @@ class _MenuPageState extends ConsumerState<MenuPage> {
             ],
           ),
         ),
-      ),
-      bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: _currentBottomNavIndex,
-        onTap: _handleBottomNavTap,
-        cartItemCount: cartItemCount,
       ),
     );
   }

@@ -10,6 +10,7 @@ import '../widgets/cart_summary_card.dart';
 import '../widgets/empty_cart_widget.dart';
 import '../../../order/domain/entities/order_entity.dart';
 import '../../../order/presentation/providers/order_provider.dart';
+import '../../../discount/presentation/providers/discount_provider.dart';
 
 class CartPage extends ConsumerStatefulWidget {
   const CartPage({super.key});
@@ -22,6 +23,15 @@ class _CartPageState extends ConsumerState<CartPage> {
   bool _isProcessingCheckout = false;
 
   final StorageService _storageService = StorageService();
+
+  @override
+  void initState() {
+    super.initState();
+    // Fetch valid discounts when page loads
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(discountNotifierProvider.notifier).getValidDiscounts();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +60,7 @@ class _CartPageState extends ConsumerState<CartPage> {
         );
 
         // Navigate back to menu
-        context.pop();
+        // context.pop();
       } else if (next is OrderError) {
         setState(() {
           _isProcessingCheckout = false;
@@ -79,10 +89,7 @@ class _CartPageState extends ConsumerState<CartPage> {
         ),
         backgroundColor: AppColors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
-          onPressed: () => context.pop(),
-        ),
+
         actions: [
           if (cartState is CartLoaded && cartState.isNotEmpty)
             IconButton(
@@ -143,6 +150,9 @@ class _CartPageState extends ConsumerState<CartPage> {
                 },
               );
             }).toList(),
+
+            // Discount section
+            _buildDiscountSection(context, ref, summary),
 
             // Summary card appears after all items
             CartSummaryCard(summary: summary),
@@ -239,19 +249,190 @@ class _CartPageState extends ConsumerState<CartPage> {
         .toSet()
         .toList();
 
+    // Get selected discount
+    final selectedDiscount = ref.read(selectedDiscountProvider);
+    final discountIds = selectedDiscount != null
+        ? <String>[selectedDiscount.id]
+        : <String>[];
+
     // Create order request
     final orderRequest = CreateOrderRequest(
       orderItems: orderItems,
       tax: taxIds,
-      discount: [], // No discounts for now
+      discount: discountIds,
       restaurantTipCharge: 0,
       deliveryCharge: 0,
       deliveryTipCharge: 0,
-      restaurantId: _storageService.getRestaurantId()?.split('_')[1] ?? '',
+      restaurantId: _storageService.getRestaurantId() ?? '',
     );
 
     // Call API
     ref.read(orderNotifierProvider.notifier).createOrder(orderRequest);
+  }
+
+  Widget _buildDiscountSection(
+    BuildContext context,
+    WidgetRef ref,
+    CartSummary summary,
+  ) {
+    final discountState = ref.watch(discountNotifierProvider);
+    final selectedDiscount = ref.watch(selectedDiscountProvider);
+
+    return Container(
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.shadowLight,
+            blurRadius: 10,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(Icons.local_offer, color: AppColors.primary, size: 20),
+              const SizedBox(width: 8),
+              const Text(
+                'Available Discounts',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Discount list or loading/error state
+          switch (discountState) {
+            DiscountLoading() => const Center(
+              child: Padding(
+                padding: EdgeInsets.all(8.0),
+                child: CircularProgressIndicator(),
+              ),
+            ),
+            DiscountError(:final message) => Text(
+              message,
+              style: const TextStyle(color: AppColors.error, fontSize: 12),
+            ),
+            DiscountLoaded(:final discounts) =>
+              discounts.isEmpty
+                  ? const Text(
+                      'No discounts available',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                      ),
+                    )
+                  : Column(
+                      children: discounts.map((discount) {
+                        final isSelected = selectedDiscount?.id == discount.id;
+                        final discountAmount = discount.calculateDiscountAmount(
+                          summary.subtotal,
+                        );
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          decoration: BoxDecoration(
+                            border: Border.all(
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : AppColors.grey300,
+                              width: isSelected ? 2 : 1,
+                            ),
+                            borderRadius: BorderRadius.circular(8),
+                            color: isSelected
+                                ? AppColors.primaryContainer
+                                : AppColors.grey50,
+                          ),
+                          child: ListTile(
+                            dense: true,
+                            leading: Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.percent,
+                                color: AppColors.white,
+                                size: 20,
+                              ),
+                            ),
+                            title: Text(
+                              discount.discountCode,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                            ),
+                            subtitle: Text(
+                              discount.type == 'percentage'
+                                  ? '${discount.value.toInt()}% off'
+                                  : '\$${discount.value.toStringAsFixed(2)} off',
+                              style: const TextStyle(fontSize: 12),
+                            ),
+                            trailing: isSelected
+                                ? Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        '-\$${discountAmount.toStringAsFixed(2)}',
+                                        style: const TextStyle(
+                                          color: AppColors.success,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 14,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 8),
+                                      const Icon(
+                                        Icons.check_circle,
+                                        color: AppColors.success,
+                                      ),
+                                    ],
+                                  )
+                                : TextButton(
+                                    onPressed: () {
+                                      ref
+                                              .read(
+                                                selectedDiscountProvider
+                                                    .notifier,
+                                              )
+                                              .state =
+                                          discount;
+                                    },
+                                    child: const Text('Apply'),
+                                  ),
+                            onTap: () {
+                              if (isSelected) {
+                                ref
+                                        .read(selectedDiscountProvider.notifier)
+                                        .state =
+                                    null;
+                              } else {
+                                ref
+                                        .read(selectedDiscountProvider.notifier)
+                                        .state =
+                                    discount;
+                              }
+                            },
+                          ),
+                        );
+                      }).toList(),
+                    ),
+            _ => const SizedBox.shrink(),
+          },
+        ],
+      ),
+    );
   }
 
   void _showClearCartDialog(BuildContext context, WidgetRef ref) {

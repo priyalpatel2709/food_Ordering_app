@@ -1,0 +1,512 @@
+{
+    "status": "success",
+    "results": 6,
+    "data": {
+        "orders": [
+            {
+                "tax": {
+                    "taxes": [
+                        {
+                            "taxId": "6949238f1edb9d858f5bbb58",
+                            "taxCharge": 0.6,
+                            "_id": "694b8ac722602b6526bba1b3"
+                        }
+                    ],
+                    "totalTaxAmount": 0.6
+                },
+                "discount": {
+                    "discounts": [],
+                    "totalDiscountAmount": 0
+                },
+                "payment": {
+                    "totalPaid": 0,
+                    "balanceDue": 0,
+                    "paymentStatus": "pending",
+                    "history": []
+                },
+                "refunds": {
+                    "history": [],
+                    "remainingCharge": 0
+                },
+                "_id": "694b8ac722602b6526bba1b2",
+                "restaurantId": "123",
+                "customerId": "69493494d0d4e0d372b04249",
+                "restaurantTipCharge": 0,
+                "isScheduledOrder": false,
+                "isDeliveryOrder": false,
+                "deliveryTipCharge": 0,
+                "deliveryCharge": 0,
+                "subtotal": 6,
+                "orderFinalCharge": 6.6,
+                "orderStatus": "pending",
+                "totalItemCount": 0,
+                "orderItems": [
+                    {
+                        "item": {
+                            "_id": "6949238f1edb9d858f5bbb68",
+                            "restaurantId": "restaurant_123",
+                            "category": "6949238f1edb9d858f5bbb3f",
+                            "name": "undefined Item 2",
+                            "description": "Delicious undefined item 2",
+                            "price": 6,
+                            "image": "https://example.com/undefined_item2.jpg",
+                            "isAvailable": true,
+                            "preparationTime": 15,
+                            "allergens": [
+                                "Dairy",
+                                "Gluten"
+                            ],
+                            "customizationOptions": [
+                                "6949238f1edb9d858f5bbb52",
+                                "6949238f1edb9d858f5bbb54"
+                            ],
+                            "popularityScore": 84,
+                            "averageRating": 4.7,
+                            "taxable": true,
+                            "taxRate": [
+                                "6949238f1edb9d858f5bbb58"
+                            ],
+                            "minOrderQuantity": 1,
+                            "maxOrderQuantity": 5,
+                            "metaData": [],
+                            "__v": 0,
+                            "createdAt": "2025-12-22T10:55:11.720Z",
+                            "updatedAt": "2025-12-22T10:55:11.720Z"
+                        },
+                        "quantity": 1,
+                        "price": 6,
+                        "discountPrice": 0,
+                        "_id": "694b8ac722602b6526bba1b4",
+                        "modifiers": []
+                    }
+                ],
+                "statusHistory": [],
+                "metaData": [],
+                "createdAt": "2025-12-24T06:40:07.145Z",
+                "updatedAt": "2025-12-24T06:40:07.145Z",
+                "orderId": "GEN-GEN-20251224-4517",
+                "__v": 0
+            },
+            {
+                "tax": {
+                    "taxes": [
+                        {
+                            "taxId": "6949238f1edb9d858f5bbb58",
+                            "taxCharge": 0.6,
+                            "_id": "694b8ab3016634fcf176a303"
+                        }
+                    ],
+                    "totalTaxAmount": 0.6
+                },
+                "discount": {
+                    "discounts": [],
+                    "totalDiscountAmount": 0
+                },
+                "payment": {
+                    "totalPaid": 0,
+                    "balanceDue": 0,
+                    "paymentStatus": "pending",
+                    "history": []
+                },
+                "refunds": {
+                    "history": [],
+                    "remainingCharge": 0
+                },
+                "_id": "694b8ab3016634fcf176a302",
+                "restaurantId": "123",
+                "customerId": "69493494d0d4e0d372b04249",
+                "restaurantTipCharge": 0,
+                "isScheduledOrder": false,
+                "isDeliveryOrder": false,
+                "deliveryTipCharge": 0,
+                "deliveryCharge": 0,
+                "subtotal": 6,
+                "orderFinalCharge": 6.6,
+                "orderStatus": "pending",
+                "totalItemCount": 0,
+                "orderItems": [
+                    {
+                        "item": {
+                            "_id": "6949238f1edb9d858f5bbb68",
+                            "restaurantId": "restaurant_123",
+                            "category": "6949238f1edb9d858f5bbb3f",
+                            "name": "undefined Item 2",
+                            "description": "Delicious undefined item 2",
+                            "price": 6,
+                            "image": "https://example.com/undefined_item2.jpg",
+                            "isAvailable": true,
+                            "preparationTime": 15,
+                            "allergens": [
+                                "Dairy",
+                                "Gluten"
+                            ],
+                            "customizationOptions": [
+                                "6949238f1edb9d858f5bbb52",
+                                "6949238f1edb9d858f5bbb54"
+                            ],
+                            "popularityScore": 84,
+                            "averageRating": 4.7,
+                            "taxable": true,
+                            "taxRate": [
+                                "6949238f1edb9d858f5bbb58"
+                            ],
+                            "minOrderQuantity": 1,
+                            "maxOrderQuantity": 5,
+                            "metaData": [],
+                            "__v": 0,
+                            "createdAt": "2025-12-22T10:55:11.720Z",
+                            "updatedAt": "2025-12-22T10:55:11.720Z"
+                        },
+                        "quantity": 1,
+                        "price": 6,
+                        "discountPrice": 0,
+                        "_id": "694b8ab3016634fcf176a304",
+                        "modifiers": []
+                    }
+                ],
+                "statusHistory": [],
+                "metaData": [],
+                "createdAt": "2025-12-24T06:39:47.256Z",
+                "updatedAt": "2025-12-24T06:39:47.256Z",
+                "orderId": "GEN-GEN-20251224-2718",
+                "__v": 0
+            },
+            {
+                "tax": {
+                    "taxes": [
+                        {
+                            "taxId": "6949238f1edb9d858f5bbb58",
+                            "taxCharge": 0.6,
+                            "_id": "694b8957aa165702e1391edd"
+                        }
+                    ],
+                    "totalTaxAmount": 0.6
+                },
+                "discount": {
+                    "discounts": [],
+                    "totalDiscountAmount": 0
+                },
+                "payment": {
+                    "totalPaid": 0,
+                    "balanceDue": 0,
+                    "paymentStatus": "pending",
+                    "history": []
+                },
+                "refunds": {
+                    "history": [],
+                    "remainingCharge": 0
+                },
+                "_id": "694b8957aa165702e1391edc",
+                "restaurantId": "123",
+                "customerId": "69493494d0d4e0d372b04249",
+                "restaurantTipCharge": 0,
+                "isScheduledOrder": false,
+                "isDeliveryOrder": false,
+                "deliveryTipCharge": 0,
+                "deliveryCharge": 0,
+                "subtotal": 6,
+                "orderFinalCharge": 6.6,
+                "orderStatus": "pending",
+                "totalItemCount": 0,
+                "orderItems": [
+                    {
+                        "item": {
+                            "_id": "6949238f1edb9d858f5bbb68",
+                            "restaurantId": "restaurant_123",
+                            "category": "6949238f1edb9d858f5bbb3f",
+                            "name": "undefined Item 2",
+                            "description": "Delicious undefined item 2",
+                            "price": 6,
+                            "image": "https://example.com/undefined_item2.jpg",
+                            "isAvailable": true,
+                            "preparationTime": 15,
+                            "allergens": [
+                                "Dairy",
+                                "Gluten"
+                            ],
+                            "customizationOptions": [
+                                "6949238f1edb9d858f5bbb52",
+                                "6949238f1edb9d858f5bbb54"
+                            ],
+                            "popularityScore": 84,
+                            "averageRating": 4.7,
+                            "taxable": true,
+                            "taxRate": [
+                                "6949238f1edb9d858f5bbb58"
+                            ],
+                            "minOrderQuantity": 1,
+                            "maxOrderQuantity": 5,
+                            "metaData": [],
+                            "__v": 0,
+                            "createdAt": "2025-12-22T10:55:11.720Z",
+                            "updatedAt": "2025-12-22T10:55:11.720Z"
+                        },
+                        "quantity": 1,
+                        "price": 6,
+                        "discountPrice": 0,
+                        "_id": "694b8957aa165702e1391ede",
+                        "modifiers": []
+                    }
+                ],
+                "statusHistory": [],
+                "metaData": [],
+                "createdAt": "2025-12-24T06:33:59.823Z",
+                "updatedAt": "2025-12-24T06:33:59.823Z",
+                "orderId": "GEN-GEN-20251224-6390",
+                "__v": 0
+            },
+            {
+                "tax": {
+                    "taxes": [
+                        {
+                            "taxId": "6949238f1edb9d858f5bbb58",
+                            "taxCharge": 0.6,
+                            "_id": "694946aceba4c0264a3309c4"
+                        }
+                    ],
+                    "totalTaxAmount": 0.6
+                },
+                "discount": {
+                    "discounts": [],
+                    "totalDiscountAmount": 0
+                },
+                "payment": {
+                    "totalPaid": 0,
+                    "balanceDue": 0,
+                    "paymentStatus": "pending",
+                    "history": []
+                },
+                "refunds": {
+                    "history": [],
+                    "remainingCharge": 0
+                },
+                "_id": "694946aceba4c0264a3309c3",
+                "restaurantId": "123",
+                "customerId": "69493494d0d4e0d372b04249",
+                "restaurantTipCharge": 0,
+                "isScheduledOrder": false,
+                "isDeliveryOrder": false,
+                "deliveryTipCharge": 0,
+                "deliveryCharge": 0,
+                "subtotal": 6,
+                "orderFinalCharge": 6.6,
+                "orderStatus": "pending",
+                "totalItemCount": 0,
+                "orderItems": [
+                    {
+                        "item": {
+                            "_id": "6949238f1edb9d858f5bbb68",
+                            "restaurantId": "restaurant_123",
+                            "category": "6949238f1edb9d858f5bbb3f",
+                            "name": "undefined Item 2",
+                            "description": "Delicious undefined item 2",
+                            "price": 6,
+                            "image": "https://example.com/undefined_item2.jpg",
+                            "isAvailable": true,
+                            "preparationTime": 15,
+                            "allergens": [
+                                "Dairy",
+                                "Gluten"
+                            ],
+                            "customizationOptions": [
+                                "6949238f1edb9d858f5bbb52",
+                                "6949238f1edb9d858f5bbb54"
+                            ],
+                            "popularityScore": 84,
+                            "averageRating": 4.7,
+                            "taxable": true,
+                            "taxRate": [
+                                "6949238f1edb9d858f5bbb58"
+                            ],
+                            "minOrderQuantity": 1,
+                            "maxOrderQuantity": 5,
+                            "metaData": [],
+                            "__v": 0,
+                            "createdAt": "2025-12-22T10:55:11.720Z",
+                            "updatedAt": "2025-12-22T10:55:11.720Z"
+                        },
+                        "quantity": 1,
+                        "price": 6,
+                        "discountPrice": 0,
+                        "_id": "694946aceba4c0264a3309c5",
+                        "modifiers": []
+                    }
+                ],
+                "statusHistory": [],
+                "metaData": [],
+                "createdAt": "2025-12-22T13:25:00.931Z",
+                "updatedAt": "2025-12-22T13:25:00.931Z",
+                "orderId": "GEN-GEN-20251222-6059",
+                "__v": 0
+            },
+            {
+                "tax": {
+                    "taxes": [
+                        {
+                            "taxId": "6949238f1edb9d858f5bbb58",
+                            "taxCharge": 0.5,
+                            "_id": "6949455beba4c0264a3309b9"
+                        }
+                    ],
+                    "totalTaxAmount": 0.5
+                },
+                "discount": {
+                    "discounts": [],
+                    "totalDiscountAmount": 0
+                },
+                "payment": {
+                    "totalPaid": 0,
+                    "balanceDue": 0,
+                    "paymentStatus": "pending",
+                    "history": []
+                },
+                "refunds": {
+                    "history": [],
+                    "remainingCharge": 0
+                },
+                "_id": "6949455beba4c0264a3309b8",
+                "restaurantId": "123",
+                "customerId": "69493494d0d4e0d372b04249",
+                "restaurantTipCharge": 0,
+                "isScheduledOrder": false,
+                "isDeliveryOrder": false,
+                "deliveryTipCharge": 0,
+                "deliveryCharge": 0,
+                "subtotal": 5,
+                "orderFinalCharge": 5.5,
+                "orderStatus": "pending",
+                "totalItemCount": 0,
+                "orderItems": [
+                    {
+                        "item": {
+                            "_id": "6949238f1edb9d858f5bbb67",
+                            "restaurantId": "restaurant_123",
+                            "category": "6949238f1edb9d858f5bbb3f",
+                            "name": "undefined Item 1",
+                            "description": "Delicious undefined item 1",
+                            "price": 5,
+                            "image": "https://example.com/undefined_item1.jpg",
+                            "isAvailable": true,
+                            "preparationTime": 12,
+                            "allergens": [
+                                "Dairy",
+                                "Gluten"
+                            ],
+                            "customizationOptions": [
+                                "6949238f1edb9d858f5bbb52",
+                                "6949238f1edb9d858f5bbb52"
+                            ],
+                            "popularityScore": 36,
+                            "averageRating": 4,
+                            "taxable": true,
+                            "taxRate": [
+                                "6949238f1edb9d858f5bbb58"
+                            ],
+                            "minOrderQuantity": 1,
+                            "maxOrderQuantity": 5,
+                            "metaData": [],
+                            "__v": 0,
+                            "createdAt": "2025-12-22T10:55:11.720Z",
+                            "updatedAt": "2025-12-22T10:55:11.720Z"
+                        },
+                        "quantity": 1,
+                        "price": 5,
+                        "discountPrice": 0,
+                        "_id": "6949455beba4c0264a3309ba",
+                        "modifiers": []
+                    }
+                ],
+                "statusHistory": [],
+                "metaData": [],
+                "createdAt": "2025-12-22T13:19:23.955Z",
+                "updatedAt": "2025-12-22T13:19:23.955Z",
+                "orderId": "GEN-GEN-20251222-6804",
+                "__v": 0
+            },
+            {
+                "tax": {
+                    "taxes": [
+                        {
+                            "taxId": "6949238f1edb9d858f5bbb58",
+                            "taxCharge": 0.6,
+                            "_id": "69493f7f0ee22d68161987cc"
+                        }
+                    ],
+                    "totalTaxAmount": 0.6
+                },
+                "discount": {
+                    "discounts": [],
+                    "totalDiscountAmount": 0
+                },
+                "payment": {
+                    "totalPaid": 0,
+                    "balanceDue": 0,
+                    "paymentStatus": "pending",
+                    "history": []
+                },
+                "refunds": {
+                    "history": [],
+                    "remainingCharge": 0
+                },
+                "_id": "69493f7f0ee22d68161987cb",
+                "restaurantId": "123",
+                "customerId": "69493494d0d4e0d372b04249",
+                "restaurantTipCharge": 0,
+                "isScheduledOrder": false,
+                "isDeliveryOrder": false,
+                "deliveryTipCharge": 0,
+                "deliveryCharge": 0,
+                "subtotal": 6,
+                "orderFinalCharge": 6.6,
+                "orderStatus": "pending",
+                "totalItemCount": 0,
+                "orderItems": [
+                    {
+                        "item": {
+                            "_id": "6949238f1edb9d858f5bbb5e",
+                            "restaurantId": "restaurant_123",
+                            "category": "6949238f1edb9d858f5bbb3c",
+                            "name": "undefined Item 1",
+                            "description": "Delicious undefined item 1",
+                            "price": 6,
+                            "image": "https://example.com/undefined_item1.jpg",
+                            "isAvailable": true,
+                            "preparationTime": 11,
+                            "allergens": [
+                                "Dairy",
+                                "Gluten"
+                            ],
+                            "customizationOptions": [
+                                "6949238f1edb9d858f5bbb53",
+                                "6949238f1edb9d858f5bbb53"
+                            ],
+                            "popularityScore": 28,
+                            "averageRating": 3.6,
+                            "taxable": true,
+                            "taxRate": [
+                                "6949238f1edb9d858f5bbb58"
+                            ],
+                            "minOrderQuantity": 1,
+                            "maxOrderQuantity": 5,
+                            "metaData": [],
+                            "__v": 0,
+                            "createdAt": "2025-12-22T10:55:11.719Z",
+                            "updatedAt": "2025-12-22T10:55:11.719Z"
+                        },
+                        "quantity": 1,
+                        "price": 6,
+                        "discountPrice": 0,
+                        "_id": "69493f7f0ee22d68161987cd",
+                        "modifiers": []
+                    }
+                ],
+                "statusHistory": [],
+                "metaData": [],
+                "createdAt": "2025-12-22T12:54:23.265Z",
+                "updatedAt": "2025-12-22T12:54:23.265Z",
+                "orderId": "GEN-GEN-20251222-8497",
+                "__v": 0
+            }
+        ]
+    }
+}

@@ -18,4 +18,8 @@ class OrderRepository {
   Future<List<OrderEntity>> getOrders() async {
     return await _remoteDataSource.getOrders();
   }
+
+  Future<List<OrderEntity>> getMyOrders() async {
+    return await _remoteDataSource.getMyOrders();
+  }
 }

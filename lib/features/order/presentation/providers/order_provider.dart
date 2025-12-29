@@ -38,6 +38,23 @@ class OrderError extends OrderState {
   OrderError(this.message);
 }
 
+/// Orders List State (for multiple orders)
+sealed class OrdersListState {}
+
+class OrdersListInitial extends OrdersListState {}
+
+class OrdersListLoading extends OrdersListState {}
+
+class OrdersListSuccess extends OrdersListState {
+  final List<OrderEntity> orders;
+  OrdersListSuccess(this.orders);
+}
+
+class OrdersListError extends OrdersListState {
+  final String message;
+  OrdersListError(this.message);
+}
+
 /// Order Notifier
 class OrderNotifier extends StateNotifier<OrderState> {
   final OrderRepository _repository;
@@ -51,8 +68,8 @@ class OrderNotifier extends StateNotifier<OrderState> {
       final order = await _repository.createOrder(request);
 
       state = OrderSuccess(order);
-    } catch (e) {
-      log('order error: $e');
+    } catch (e,st) {
+      log('order error: $e /n $st');
       state = OrderError(e.toString());
     }
   }
@@ -63,6 +80,30 @@ class OrderNotifier extends StateNotifier<OrderState> {
   }
 }
 
+/// Orders List Notifier
+class OrdersListNotifier extends StateNotifier<OrdersListState> {
+  final OrderRepository _repository;
+
+  OrdersListNotifier(this._repository) : super(OrdersListInitial());
+
+  /// Get my orders
+  Future<void> getMyOrders() async {
+    state = OrdersListLoading();
+    try {
+      final orders = await _repository.getMyOrders();
+      state = OrdersListSuccess(orders);
+    } catch (e) {
+      log('get my orders error: $e');
+      state = OrdersListError(e.toString());
+    }
+  }
+
+  /// Reset state
+  void reset() {
+    state = OrdersListInitial();
+  }
+}
+
 /// Order Notifier Provider
 final orderNotifierProvider = StateNotifierProvider<OrderNotifier, OrderState>((
   ref,
@@ -70,3 +111,10 @@ final orderNotifierProvider = StateNotifierProvider<OrderNotifier, OrderState>((
   final repository = ref.watch(orderRepositoryProvider);
   return OrderNotifier(repository);
 });
+
+/// Orders List Notifier Provider
+final ordersListNotifierProvider =
+    StateNotifierProvider<OrdersListNotifier, OrdersListState>((ref) {
+      final repository = ref.watch(orderRepositoryProvider);
+      return OrdersListNotifier(repository);
+    });

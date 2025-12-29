@@ -38,7 +38,6 @@ class DioClient {
 
   /// Set authentication token
   void setAuthToken(String? token) {
-    log('setAuthToken $setAuthToken');
     _authToken = token;
   }
 
@@ -158,7 +157,6 @@ class DioClient {
         return const ServerException('Security certificate error');
 
       case DioExceptionType.unknown:
-      default:
         return ServerException('Network error: ${error.message}');
     }
   }
@@ -195,10 +193,10 @@ class _AuthInterceptor extends Interceptor {
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     final token = _storageService.getToken();
     final restaurantId = _storageService.getRestaurantId();
-
+    log('restaurantId $restaurantId');
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
-      options.headers['X-Restaurant-Id'] = '${restaurantId?.split('_')[1]}';
+      options.headers['X-Restaurant-Id'] = '$restaurantId';
     }
     handler.next(options);
   }

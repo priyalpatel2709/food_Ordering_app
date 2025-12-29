@@ -14,6 +14,10 @@ class ApiConstants {
 
   //orders
   static const String orders = 'orders';
+  static const String myOrders = '/my-orders';
+
+  //discount
+  static const String discount = 'discount';
 
   // Full URLs
   static String get loginUrl => '$baseUrl$loginEndpoint';

@@ -7,6 +7,7 @@ abstract class OrderRemoteDataSource {
   Future<OrderEntity> createOrder(CreateOrderRequest request);
   Future<OrderEntity> getOrder(String orderId);
   Future<List<OrderEntity>> getOrders();
+  Future<List<OrderEntity>> getMyOrders();
 }
 
 class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
@@ -57,6 +58,25 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
       return orders;
     } else {
       throw Exception(data['message'] ?? 'Failed to get orders');
+    }
+  }
+
+  @override
+  Future<List<OrderEntity>> getMyOrders() async {
+    final response = await _dioClient.get(
+      '${ApiConstants.v1}${ApiConstants.orders}${ApiConstants.myOrders}',
+    );
+
+    final data = response.data as Map<String, dynamic>;
+    if (data['status'] == 'success') {
+      // The response has a nested structure: data.orders
+      final ordersData = data['data'] as Map<String, dynamic>;
+      final orders = (ordersData['orders'] as List)
+          .map((order) => OrderEntity.fromJson(order as Map<String, dynamic>))
+          .toList();
+      return orders;
+    } else {
+      throw Exception(data['message'] ?? 'Failed to get my orders');
     }
   }
 }

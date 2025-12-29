@@ -28,7 +28,6 @@ class ApiService {
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          'X-Restaurant-Id': '123',
         },
         validateStatus: (status) {
           // Accept all status codes to handle them manually

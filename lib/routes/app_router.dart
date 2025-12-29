@@ -4,8 +4,7 @@ import '../core/constants/route_constants.dart';
 import '../features/authentication/presentation/pages/sign_up_page.dart';
 import '../features/splash/presentation/pages/splash_page.dart';
 import '../features/authentication/presentation/pages/login_page.dart';
-import '../features/menu/presentation/views/menu_page.dart';
-import '../features/cart/presentation/pages/cart_page.dart';
+import '../shared/navigation/main_navigation_page.dart';
 
 class AppRouter {
   // Route paths and names are now centralized in RouteConstants
@@ -72,30 +71,9 @@ class AppRouter {
         name: RouteConstants.homeName,
         pageBuilder: (context, state) => CustomTransitionPage(
           key: state.pageKey,
-          child: const MenuPage(),
+          child: const MainNavigationPage(),
           transitionsBuilder: (context, animation, secondaryAnimation, child) {
             return FadeTransition(opacity: animation, child: child);
-          },
-        ),
-      ),
-      GoRoute(
-        path: RouteConstants.cart,
-        name: RouteConstants.cartName,
-        pageBuilder: (context, state) => CustomTransitionPage(
-          key: state.pageKey,
-          child: const CartPage(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            const begin = Offset(0.0, 1.0);
-            const end = Offset.zero;
-            const curve = Curves.easeInOut;
-            var tween = Tween(
-              begin: begin,
-              end: end,
-            ).chain(CurveTween(curve: curve));
-            return SlideTransition(
-              position: animation.drive(tween),
-              child: child,
-            );
           },
         ),
       ),
