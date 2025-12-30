@@ -8,6 +8,7 @@ import '../features/dine_in/presentation/pages/dine_in_tables_page.dart';
 import '../features/dine_in/presentation/pages/table_details_page.dart';
 import '../features/dine_in/domain/entities/table_entity.dart';
 import '../shared/navigation/main_navigation_page.dart';
+import '../features/kds/presentation/pages/kds_page.dart';
 
 class AppRouter {
   // Route paths and names are now centralized in RouteConstants
@@ -116,6 +117,11 @@ class AppRouter {
                 },
           );
         },
+      ),
+      GoRoute(
+        path: RouteConstants.kds,
+        name: RouteConstants.kdsName,
+        builder: (context, state) => const KdsPage(),
       ),
     ],
   );

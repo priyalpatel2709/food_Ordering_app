@@ -21,6 +21,7 @@ class RouteConstants {
   static const String search = '/search';
   static const String dineInTables = '/dine-in/tables';
   static const String dineInTableDetails = '/dine-in/table/:id';
+  static const String kds = '/kds';
 
   // Route Names (for named navigation)
   static const String splashName = 'splash';
@@ -37,4 +38,5 @@ class RouteConstants {
   static const String searchName = 'search';
   static const String dineInTablesName = 'dineInTables';
   static const String dineInTableDetailsName = 'dineInTableDetails';
+  static const String kdsName = 'kds';
 }

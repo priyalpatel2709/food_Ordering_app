@@ -8,16 +8,11 @@ import '../../features/dine_in/presentation/pages/dine_in_tables_page.dart';
 import '../../features/menu/presentation/widgets/custom_bottom_navigation_bar.dart';
 import '../../features/cart/presentation/providers/cart_provider.dart';
 
+import 'navigation_provider.dart';
+
 /// Main navigation page that uses IndexedStack for bottom navigation
-class MainNavigationPage extends ConsumerStatefulWidget {
+class MainNavigationPage extends ConsumerWidget {
   const MainNavigationPage({super.key});
-
-  @override
-  ConsumerState<MainNavigationPage> createState() => _MainNavigationPageState();
-}
-
-class _MainNavigationPageState extends ConsumerState<MainNavigationPage> {
-  int _currentIndex = 0;
 
   // List of pages for IndexedStack
   final List<Widget> _pages = const [
@@ -28,21 +23,17 @@ class _MainNavigationPageState extends ConsumerState<MainNavigationPage> {
     ProfilePage(),
   ];
 
-  void _onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final currentIndex = ref.watch(bottomNavIndexProvider);
     final cartItemCount = ref.watch(cartItemCountProvider);
 
     return Scaffold(
-      body: IndexedStack(index: _currentIndex, children: _pages),
+      body: IndexedStack(index: currentIndex, children: _pages),
       bottomNavigationBar: CustomBottomNavigationBar(
-        currentIndex: _currentIndex,
-        onTap: _onTabTapped,
+        currentIndex: currentIndex,
+        onTap: (index) =>
+            ref.read(bottomNavIndexProvider.notifier).state = index,
         cartItemCount: cartItemCount,
       ),
     );

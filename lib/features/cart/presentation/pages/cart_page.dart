@@ -14,6 +14,7 @@ import '../../../order/presentation/providers/order_provider.dart';
 import '../../../discount/presentation/providers/discount_provider.dart';
 import '../../../dine_in/presentation/providers/dine_in_providers.dart';
 import '../../../dine_in/domain/entities/dine_in_order_entity.dart';
+import '../../../../shared/navigation/navigation_provider.dart';
 
 class CartPage extends ConsumerStatefulWidget {
   const CartPage({super.key});
@@ -347,7 +348,7 @@ class _CartPageState extends ConsumerState<CartPage> {
     // Get selected discount
     final selectedDiscount = ref.read(selectedDiscountProvider);
     final discountIds = selectedDiscount != null
-        ? <String>[selectedDiscount.id]
+        ? <String>[selectedDiscount.id!]
         : <String>[];
 
     // Create order request
@@ -410,8 +411,9 @@ class _CartPageState extends ConsumerState<CartPage> {
             backgroundColor: AppColors.success,
           ),
         );
-        // Navigate back to Tables
-        context.go(RouteConstants.dineInTables);
+        // Update navigation index to "Tables" tab (index 3) and go home
+        ref.read(bottomNavIndexProvider.notifier).state = 3;
+        context.go(RouteConstants.home);
       }
     } catch (e) {
       if (context.mounted) {
@@ -526,7 +528,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                               ),
                             ),
                             title: Text(
-                              discount.discountCode,
+                              discount.discountCode ?? '',
                               style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
@@ -534,8 +536,8 @@ class _CartPageState extends ConsumerState<CartPage> {
                             ),
                             subtitle: Text(
                               discount.type == 'percentage'
-                                  ? '${discount.value.toInt()}% off'
-                                  : '\$${discount.value.toStringAsFixed(2)} off',
+                                  ? '${discount.value?.toInt()}% off'
+                                  : '\$${discount.value?.toStringAsFixed(2)} off',
                               style: const TextStyle(fontSize: 12),
                             ),
                             trailing: isSelected

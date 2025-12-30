@@ -21,6 +21,10 @@ class ApiConstants {
   //discount
   static const String discount = 'discount';
 
+  //kds
+  static const String kds = 'kds';
+  static const String kdsConfig = '/config';
+
   // Full URLs
   static String get loginUrl => '$baseUrl$loginEndpoint';
   static String get menuCurrentUrl => '$baseUrl$menuCurrentEndpoint';

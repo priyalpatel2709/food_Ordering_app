@@ -46,8 +46,8 @@ class DiscountNotifier extends StateNotifier<DiscountState> {
     try {
       final discounts = await _repository.getValidDiscounts();
       state = DiscountLoaded(discounts);
-    } catch (e) {
-      log('get discounts error: $e');
+    } catch (e ,st) {
+      log('get discounts error: $e $st');
       state = DiscountError(e.toString());
     }
   }

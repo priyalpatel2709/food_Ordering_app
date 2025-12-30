@@ -23,6 +23,7 @@ class DineInOrderItem {
   final double price;
   final List<DineInModifier> modifiers;
   final String? specialInstructions;
+  final String status;
 
   const DineInOrderItem({
     required this.itemId,
@@ -31,6 +32,7 @@ class DineInOrderItem {
     required this.price,
     this.modifiers = const [],
     this.specialInstructions,
+    this.status = 'new',
   });
 
   factory DineInOrderItem.fromJson(Map<String, dynamic> json) {
@@ -52,6 +54,7 @@ class DineInOrderItem {
       name: itemName ?? 'Unknown Item',
       quantity: json['quantity'] ?? 1,
       price: (json['price'] ?? 0).toDouble(),
+      status: json['status'] ?? json['itemStatus'] ?? 'new',
       modifiers:
           (json['modifiers'] as List<dynamic>?)
               ?.map((e) => DineInModifier.fromJson(e))

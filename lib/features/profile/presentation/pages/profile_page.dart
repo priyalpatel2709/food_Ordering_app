@@ -228,6 +228,12 @@ class _ProfilePageState extends ConsumerState<ProfilePage> {
                   },
                 ),
 
+                _buildProfileOption(
+                  icon: Icons.kitchen_outlined,
+                  title: 'KDS (Kitchen Display)',
+                  onTap: () => context.push(RouteConstants.kds),
+                ),
+
                 const SizedBox(height: 20),
 
                 // Logout Button

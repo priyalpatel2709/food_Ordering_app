@@ -5,6 +5,7 @@ import '../../domain/entities/dine_in_order_entity.dart';
 import '../providers/dine_in_providers.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/entities/dine_in_session.dart';
+import '../../../../shared/navigation/navigation_provider.dart';
 import '../../../../core/constants/route_constants.dart';
 import '../../../../shared/theme/app_colors.dart';
 
@@ -66,6 +67,7 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
                 ref.read(dineInSessionProvider.notifier).state = DineInSession(
                   tableNumber: widget.table.tableNumber,
                 );
+                ref.read(bottomNavIndexProvider.notifier).state = 0; // Menu Tab
                 context.go(RouteConstants.home);
               },
               icon: const Icon(Icons.restaurant_menu),
@@ -99,7 +101,31 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
             itemBuilder: (context, index) {
               final item = order.items[index];
               return ListTile(
-                title: Text(item.name),
+                title: Row(
+                  children: [
+                    Expanded(child: Text(item.name)),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primaryContainer,
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: AppColors.primary),
+                      ),
+                      child: Text(
+                        item.status.toUpperCase(),
+                        style: const TextStyle(
+                          color: AppColors.primary,
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
                 subtitle: item.specialInstructions != null
                     ? Text(item.specialInstructions!)
                     : null,
@@ -148,6 +174,8 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
                                 tableNumber: widget.table.tableNumber,
                                 orderId: order.id,
                               );
+                              ref.read(bottomNavIndexProvider.notifier).state =
+                                  0; // Menu Tab
                               context.go(RouteConstants.home);
                             },
                       icon: const Icon(Icons.add),
