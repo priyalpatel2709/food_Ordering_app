@@ -12,6 +12,7 @@ import '../../../cart/presentation/providers/cart_provider.dart';
 import '../widgets/user_header_card.dart';
 import '../widgets/category_chips.dart';
 import '../widgets/menu_item_card.dart';
+import '../../../dine_in/presentation/providers/dine_in_providers.dart';
 
 class MenuPage extends ConsumerStatefulWidget {
   const MenuPage({super.key});
@@ -93,6 +94,42 @@ class _MenuPageState extends ConsumerState<MenuPage> {
     return items.where((item) => item.category.id == categoryId).toList();
   }
 
+  Widget _buildDineInBanner() {
+    final session = ref.watch(dineInSessionProvider);
+    if (session == null) return const SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: AppColors.primary.withOpacity(0.1),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.table_restaurant,
+            color: AppColors.primary,
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Ordering for Table ${session.tableNumber}',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              ref.read(dineInSessionProvider.notifier).state = null;
+            },
+            child: const Text('Cancel'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (_isLoadingUser) {
@@ -118,6 +155,7 @@ class _MenuPageState extends ConsumerState<MenuPage> {
           child: Column(
             children: [
               UserHeaderCard(user: _currentUser, onLogout: _handleLogout),
+              _buildDineInBanner(),
               Expanded(child: _buildContent(menuState)),
             ],
           ),

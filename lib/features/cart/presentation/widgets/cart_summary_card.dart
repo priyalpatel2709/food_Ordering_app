@@ -76,6 +76,16 @@ class CartSummaryCard extends StatelessWidget {
             false,
             Icons.receipt_outlined,
           ),
+          if (summary.discountAmount > 0) ...[
+            const SizedBox(height: 12),
+            _buildSummaryRow(
+              'Discount',
+              '-\$${summary.discountAmount.toStringAsFixed(2)}',
+              false,
+              Icons.local_offer_outlined,
+              valueColor: AppColors.success,
+            ),
+          ],
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Container(
@@ -106,8 +116,9 @@ class CartSummaryCard extends StatelessWidget {
     String label,
     String value,
     bool isTotal,
-    IconData icon,
-  ) {
+    IconData icon, {
+    Color? valueColor,
+  }) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -147,7 +158,9 @@ class CartSummaryCard extends StatelessWidget {
             style: TextStyle(
               fontSize: isTotal ? 20 : 16,
               fontWeight: FontWeight.bold,
-              color: isTotal ? AppColors.white : AppColors.textPrimary,
+              color: isTotal
+                  ? AppColors.white
+                  : (valueColor ?? AppColors.textPrimary),
             ),
           ),
         ),

@@ -30,7 +30,7 @@ class CreateOrderRequest {
   final double restaurantTipCharge;
   final double deliveryCharge;
   final double deliveryTipCharge;
-  final String restaurantId;
+  // final String restaurantId;
 
   const CreateOrderRequest({
     required this.orderItems,
@@ -39,7 +39,7 @@ class CreateOrderRequest {
     this.restaurantTipCharge = 0,
     this.deliveryCharge = 0,
     this.deliveryTipCharge = 0,
-    required this.restaurantId,
+    // required this.restaurantId,
   });
 
   Map<String, dynamic> toJson() {
@@ -50,7 +50,7 @@ class CreateOrderRequest {
       'restaurantTipCharge': restaurantTipCharge,
       'deliveryCharge': deliveryCharge,
       'deliveryTipCharge': deliveryTipCharge,
-      'restaurantId': restaurantId,
+      // 'restaurantId': restaurantId,
     };
   }
 }

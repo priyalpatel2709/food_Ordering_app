@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
@@ -192,8 +191,8 @@ class _AuthInterceptor extends Interceptor {
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     final token = _storageService.getToken();
-    final restaurantId = _storageService.getRestaurantId();
-    log('restaurantId $restaurantId');
+    final restaurantId = _storageService.getRestaurantId()?.split('_').last;
+
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = 'Bearer $token';
       options.headers['X-Restaurant-Id'] = '$restaurantId';
@@ -222,7 +221,7 @@ class _LoggingInterceptor extends Interceptor {
       print(
         '✅ RESPONSE[${response.statusCode}] => ${response.requestOptions.uri}',
       );
-      print('Data: ${response.data}');
+      // print('Data: ${response.data}');
     }
     handler.next(response);
   }

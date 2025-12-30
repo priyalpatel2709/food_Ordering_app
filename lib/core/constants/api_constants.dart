@@ -15,6 +15,8 @@ class ApiConstants {
   //orders
   static const String orders = 'orders';
   static const String myOrders = '/my-orders';
+  static const String dineIn = '/dine-in';
+  static const String tables = '/tables';
 
   //discount
   static const String discount = 'discount';
@@ -22,5 +24,5 @@ class ApiConstants {
   // Full URLs
   static String get loginUrl => '$baseUrl$loginEndpoint';
   static String get menuCurrentUrl => '$baseUrl$menuCurrentEndpoint';
-  static String get ordersUrl => '$baseUrl$orders';
+  static String get ordersUrl => '$baseUrl$v1$orders';
 }

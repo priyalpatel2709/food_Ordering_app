@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:food_order_app/core/network/dio_client.dart';
+
 import '../constants/api_constants.dart';
 import '../models/user.dart';
 import 'api_service.dart';
@@ -9,6 +11,7 @@ import 'api_service.dart';
 /// Handles all authentication-related operations using ApiService
 class AuthService {
   final ApiService _apiService = ApiService();
+  final DioClient _dioClient = DioClient();
 
   /// Login with email and password
   Future<AuthResult> login({
@@ -16,12 +19,12 @@ class AuthService {
     required String password,
   }) async {
     try {
-      final response = await _apiService.post(
+      final response = await _dioClient.post(
         '${ApiConstants.v1}${ApiConstants.user}${ApiConstants.loginEndpoint}',
         data: {'email': email, 'password': password},
       );
 
-      if (response.isSuccess && response.data != null) {
+      if (response.data != null) {
         final user = User.fromJson(response.data as Map<String, dynamic>);
 
         // Set auth token in API service for future requests
@@ -30,7 +33,7 @@ class AuthService {
 
         return AuthResult.success(user);
       } else {
-        return AuthResult.error(response.error ?? 'Login failed');
+        return AuthResult.error('Login failed');
       }
     } catch (e) {
       return AuthResult.error('An error occurred: ${e.toString()}');
@@ -43,8 +46,7 @@ class AuthService {
     required String name,
   }) async {
     try {
-      log('does me');
-      final response = await _apiService.post(
+      final response = await _dioClient.post(
         '${ApiConstants.v1}${ApiConstants.user}',
         data: {
           'email': email,
@@ -54,7 +56,7 @@ class AuthService {
         },
       );
 
-      if (response.isSuccess && response.data != null) {
+      if (response.data != null) {
         final user = User.fromJson(response.data as Map<String, dynamic>);
 
         // Set auth token in API service for future requests
@@ -63,7 +65,7 @@ class AuthService {
 
         return AuthResult.success(user);
       } else {
-        return AuthResult.error(response.error ?? 'Login failed');
+        return AuthResult.error('Login failed');
       }
     } catch (e) {
       return AuthResult.error('An error occurred: ${e.toString()}');
@@ -77,18 +79,18 @@ class AuthService {
     required String password,
   }) async {
     try {
-      final response = await _apiService.post(
+      final response = await _dioClient.post(
         '/register',
         data: {'name': name, 'email': email, 'password': password},
       );
 
-      if (response.isSuccess && response.data != null) {
+      if (response.data != null) {
         final user = User.fromJson(response.data as Map<String, dynamic>);
         _apiService.setAuthToken(user.token);
         _apiService.setRestaurantId(user.restaurantsId);
         return AuthResult.success(user);
       } else {
-        return AuthResult.error(response.error ?? 'Registration failed');
+        return AuthResult.error('Registration failed');
       }
     } catch (e) {
       return AuthResult.error('An error occurred: ${e.toString()}');
@@ -98,7 +100,7 @@ class AuthService {
   /// Logout user
   Future<void> logout() async {
     try {
-      await _apiService.post('/logout');
+      await _dioClient.post('/logout');
     } catch (e) {
       // Ignore logout errors
     } finally {
@@ -112,8 +114,8 @@ class AuthService {
     try {
       _apiService.setAuthToken(token);
       // _apiService.setRestaurantId(user.restaurantsId);
-      final response = await _apiService.get('/verify-token');
-      return response.isSuccess;
+      final response = await _dioClient.get('/verify-token');
+      return true;
     } catch (e) {
       return false;
     }
@@ -122,16 +124,16 @@ class AuthService {
   /// Forgot password
   Future<AuthResult> forgotPassword(String email) async {
     try {
-      final response = await _apiService.post(
+      final response = await _dioClient.post(
         '/forgot-password',
         data: {'email': email},
       );
 
-      if (response.isSuccess) {
-        return AuthResult.success(null);
-      } else {
-        return AuthResult.error(response.error ?? 'Failed to send reset email');
-      }
+      // if (response.isSuccess) {
+      return AuthResult.success(null);
+      // } else {
+      //   return AuthResult.error(response.error ?? 'Failed to send reset email');
+      // }
     } catch (e) {
       return AuthResult.error('An error occurred: ${e.toString()}');
     }
@@ -143,16 +145,16 @@ class AuthService {
     required String newPassword,
   }) async {
     try {
-      final response = await _apiService.post(
+      final response = await _dioClient.post(
         '/reset-password',
         data: {'token': token, 'password': newPassword},
       );
 
-      if (response.isSuccess) {
-        return AuthResult.success(null);
-      } else {
-        return AuthResult.error(response.error ?? 'Failed to reset password');
-      }
+      // if (response.isSuccess) {
+      return AuthResult.success(null);
+      // } else {
+      //   return AuthResult.error(response.error ?? 'Failed to reset password');
+      // }
     } catch (e) {
       return AuthResult.error('An error occurred: ${e.toString()}');
     }
@@ -164,16 +166,16 @@ class AuthService {
     required String newPassword,
   }) async {
     try {
-      final response = await _apiService.post(
+      final response = await _dioClient.post(
         '/change-password',
         data: {'currentPassword': currentPassword, 'newPassword': newPassword},
       );
 
-      if (response.isSuccess) {
-        return AuthResult.success(null);
-      } else {
-        return AuthResult.error(response.error ?? 'Failed to change password');
-      }
+      // if (response.isSuccess) {
+      return AuthResult.success(null);
+      // } else {
+      //   return AuthResult.error(response.error ?? 'Failed to change password');
+      // }
     } catch (e) {
       return AuthResult.error('An error occurred: ${e.toString()}');
     }
@@ -182,13 +184,13 @@ class AuthService {
   /// Get current user profile
   Future<AuthResult> getCurrentUser() async {
     try {
-      final response = await _apiService.get('/profile');
+      final response = await _dioClient.get('/profile');
 
-      if (response.isSuccess && response.data != null) {
+      if (response.data != null) {
         final user = User.fromJson(response.data as Map<String, dynamic>);
         return AuthResult.success(user);
       } else {
-        return AuthResult.error(response.error ?? 'Failed to get user profile');
+        return AuthResult.error('Failed to get user profile');
       }
     } catch (e) {
       return AuthResult.error('An error occurred: ${e.toString()}');
@@ -202,13 +204,13 @@ class AuthService {
       if (name != null) data['name'] = name;
       if (email != null) data['email'] = email;
 
-      final response = await _apiService.put('/profile', data: data);
+      final response = await _dioClient.put('/profile', data: data);
 
-      if (response.isSuccess && response.data != null) {
+      if (response.data != null) {
         final user = User.fromJson(response.data as Map<String, dynamic>);
         return AuthResult.success(user);
       } else {
-        return AuthResult.error(response.error ?? 'Failed to update profile');
+        return AuthResult.error('Failed to update profile');
       }
     } catch (e) {
       return AuthResult.error('An error occurred: ${e.toString()}');

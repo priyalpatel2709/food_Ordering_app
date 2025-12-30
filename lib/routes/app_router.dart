@@ -4,6 +4,9 @@ import '../core/constants/route_constants.dart';
 import '../features/authentication/presentation/pages/sign_up_page.dart';
 import '../features/splash/presentation/pages/splash_page.dart';
 import '../features/authentication/presentation/pages/login_page.dart';
+import '../features/dine_in/presentation/pages/dine_in_tables_page.dart';
+import '../features/dine_in/presentation/pages/table_details_page.dart';
+import '../features/dine_in/domain/entities/table_entity.dart';
 import '../shared/navigation/main_navigation_page.dart';
 
 class AppRouter {
@@ -76,6 +79,43 @@ class AppRouter {
             return FadeTransition(opacity: animation, child: child);
           },
         ),
+      ),
+      GoRoute(
+        path: RouteConstants.dineInTables,
+        name: RouteConstants.dineInTablesName,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const DineInTablesPage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
+      ),
+      GoRoute(
+        path: RouteConstants.dineInTableDetails,
+        name: RouteConstants.dineInTableDetailsName,
+        pageBuilder: (context, state) {
+          final table = state.extra as TableEntity?;
+          // Fallback if accessed directly via URL without extra object
+          if (table == null) {
+            return CustomTransitionPage(
+              key: state.pageKey,
+              child: const Scaffold(
+                body: Center(child: Text("Table data missing")),
+              ),
+              transitionsBuilder: (context, anim, sec, child) =>
+                  FadeTransition(opacity: anim, child: child),
+            );
+          }
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: TableDetailsPage(table: table),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+                  return FadeTransition(opacity: animation, child: child);
+                },
+          );
+        },
       ),
     ],
   );

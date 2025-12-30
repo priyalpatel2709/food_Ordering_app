@@ -125,13 +125,15 @@ class CartSummary {
   final List<CartItemEntity> items;
   final double subtotal; // Total before tax
   final double totalTax; // Sum of all item taxes
-  final double total; // Subtotal + tax
+  final double discountAmount; // Discount applied
+  final double total; // Subtotal + tax - discount
   final int totalItems;
 
   const CartSummary({
     required this.items,
     required this.subtotal,
     required this.totalTax,
+    this.discountAmount = 0.0,
     required this.total,
     required this.totalItems,
   });
@@ -155,8 +157,27 @@ class CartSummary {
       items: items,
       subtotal: subtotal,
       totalTax: totalTax,
+      discountAmount: 0.0,
       total: total,
       totalItems: totalItems,
+    );
+  }
+
+  CartSummary copyWith({
+    List<CartItemEntity>? items,
+    double? subtotal,
+    double? totalTax,
+    double? discountAmount,
+    double? total,
+    int? totalItems,
+  }) {
+    return CartSummary(
+      items: items ?? this.items,
+      subtotal: subtotal ?? this.subtotal,
+      totalTax: totalTax ?? this.totalTax,
+      discountAmount: discountAmount ?? this.discountAmount,
+      total: total ?? this.total,
+      totalItems: totalItems ?? this.totalItems,
     );
   }
 

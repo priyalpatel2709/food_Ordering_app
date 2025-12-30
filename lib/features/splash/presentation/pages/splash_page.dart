@@ -50,14 +50,12 @@ class _SplashPageState extends State<SplashPage>
 
   Future<void> _navigateToNextScreen() async {
     await Future.delayed(const Duration(seconds: 3));
-    log("navigateToNextScreen");
+
     if (!mounted) return;
 
     final isLoggedIn = _storageService.isLoggedIn();
 
     if (!mounted) return;
-
-    log('isLoggedIn   ${isLoggedIn}');
 
     if (isLoggedIn) {
       context.go(RouteConstants.home);

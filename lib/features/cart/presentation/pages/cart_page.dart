@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/constants/route_constants.dart';
 import '../../../../core/services/storage_service.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../domain/entities/cart_entity.dart';
@@ -11,6 +12,8 @@ import '../widgets/empty_cart_widget.dart';
 import '../../../order/domain/entities/order_entity.dart';
 import '../../../order/presentation/providers/order_provider.dart';
 import '../../../discount/presentation/providers/discount_provider.dart';
+import '../../../dine_in/presentation/providers/dine_in_providers.dart';
+import '../../../dine_in/domain/entities/dine_in_order_entity.dart';
 
 class CartPage extends ConsumerStatefulWidget {
   const CartPage({super.key});
@@ -36,6 +39,23 @@ class _CartPageState extends ConsumerState<CartPage> {
   @override
   Widget build(BuildContext context) {
     final cartState = ref.watch(cartNotifierProvider);
+    final selectedDiscount = ref.watch(selectedDiscountProvider);
+
+    CartSummary? discountedSummary;
+    if (cartState is CartLoaded) {
+      final summary = cartState.summary;
+      if (selectedDiscount != null) {
+        final discountAmount = selectedDiscount.calculateDiscountAmount(
+          summary.subtotal,
+        );
+        discountedSummary = summary.copyWith(
+          discountAmount: discountAmount,
+          total: (summary.total - discountAmount).clamp(0, double.infinity),
+        );
+      } else {
+        discountedSummary = summary;
+      }
+    }
 
     // Listen to order state changes
     ref.listen<OrderState>(orderNotifierProvider, (previous, next) {
@@ -44,8 +64,9 @@ class _CartPageState extends ConsumerState<CartPage> {
           _isProcessingCheckout = false;
         });
 
-        // Clear cart
+        // Clear cart and discount
         ref.read(cartNotifierProvider.notifier).clearCart();
+        ref.read(selectedDiscountProvider.notifier).state = null;
 
         // Show success message
         ScaffoldMessenger.of(context).showSnackBar(
@@ -89,7 +110,6 @@ class _CartPageState extends ConsumerState<CartPage> {
         ),
         backgroundColor: AppColors.white,
         elevation: 0,
-
         actions: [
           if (cartState is CartLoaded && cartState.isNotEmpty)
             IconButton(
@@ -110,56 +130,124 @@ class _CartPageState extends ConsumerState<CartPage> {
             ],
           ),
         ),
-        child: _buildContent(context, ref, cartState),
+        child: _buildContent(context, ref, cartState, discountedSummary),
       ),
-      bottomNavigationBar: cartState is CartLoaded && cartState.isNotEmpty
-          ? _buildCheckoutButton(context, ref, cartState.summary)
+      bottomNavigationBar:
+          cartState is CartLoaded &&
+              cartState.isNotEmpty &&
+              discountedSummary != null
+          ? _buildCheckoutButton(context, ref, discountedSummary)
           : null,
     );
   }
 
-  Widget _buildContent(BuildContext context, WidgetRef ref, CartState state) {
-    return switch (state) {
-      CartEmpty() => const EmptyCartWidget(),
-      CartLoaded(:final summary) => SingleChildScrollView(
-        child: Column(
-          children: [
-            // Cart items list
-            ...summary.items.map((item) {
-              return CartItemCard(
-                item: item,
-                onIncrement: () {
-                  ref
-                      .read(cartNotifierProvider.notifier)
-                      .incrementQuantity(item.id);
-                },
-                onDecrement: () {
-                  ref
-                      .read(cartNotifierProvider.notifier)
-                      .decrementQuantity(item.id);
-                },
-                onRemove: () {
-                  ref.read(cartNotifierProvider.notifier).removeItem(item.id);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${item.menuItemName} removed from cart'),
-                      duration: const Duration(seconds: 2),
-                      behavior: SnackBarBehavior.floating,
-                    ),
-                  );
-                },
-              );
-            }).toList(),
+  String _getCheckoutButtonText(WidgetRef ref, CartSummary summary) {
+    final session = ref.watch(dineInSessionProvider);
+    if (session != null) {
+      if (session.orderId == null) {
+        return 'Create Order for Table ${session.tableNumber} • \$${summary.total.toStringAsFixed(2)}';
+      } else {
+        return 'Add to Table ${session.tableNumber} • \$${summary.total.toStringAsFixed(2)}';
+      }
+    }
+    return 'Checkout • \$${summary.total.toStringAsFixed(2)}';
+  }
 
-            // Discount section
-            _buildDiscountSection(context, ref, summary),
+  Widget _buildContent(
+    BuildContext context,
+    WidgetRef ref,
+    CartState state,
+    CartSummary? discountedSummary,
+  ) {
+    return Column(
+      children: [
+        _buildDineInBanner(ref),
+        Expanded(
+          child: switch (state) {
+            CartEmpty() => const EmptyCartWidget(),
+            CartLoaded(:final summary) => SingleChildScrollView(
+              child: Column(
+                children: [
+                  // Cart items list
+                  ...summary.items.map((item) {
+                    return CartItemCard(
+                      item: item,
+                      onIncrement: () {
+                        ref
+                            .read(cartNotifierProvider.notifier)
+                            .incrementQuantity(item.id);
+                      },
+                      onDecrement: () {
+                        ref
+                            .read(cartNotifierProvider.notifier)
+                            .decrementQuantity(item.id);
+                      },
+                      onRemove: () {
+                        ref
+                            .read(cartNotifierProvider.notifier)
+                            .removeItem(item.id);
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(
+                              '${item.menuItemName} removed from cart',
+                            ),
+                            duration: const Duration(seconds: 2),
+                            behavior: SnackBarBehavior.floating,
+                          ),
+                        );
+                      },
+                    );
+                  }),
 
-            // Summary card appears after all items
-            CartSummaryCard(summary: summary),
-          ],
+                  // Discount section
+                  _buildDiscountSection(context, ref, summary),
+
+                  // Summary card appears after all items
+                  if (discountedSummary != null)
+                    CartSummaryCard(summary: discountedSummary),
+                ],
+              ),
+            ),
+          },
         ),
+      ],
+    );
+  }
+
+  Widget _buildDineInBanner(WidgetRef ref) {
+    final session = ref.watch(dineInSessionProvider);
+    if (session == null) return const SizedBox.shrink();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      color: AppColors.primary.withOpacity(0.1),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.table_restaurant,
+            color: AppColors.primary,
+            size: 20,
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Text(
+              'Ordering for Table ${session.tableNumber}',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              ref.read(dineInSessionProvider.notifier).state = null;
+            },
+            child: const Text('Cancel'),
+          ),
+        ],
       ),
-    };
+    );
   }
 
   Widget _buildCheckoutButton(
@@ -207,7 +295,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                     const Icon(Icons.shopping_bag, color: AppColors.white),
                     const SizedBox(width: 8),
                     Text(
-                      'Checkout • \$${summary.total.toStringAsFixed(2)}',
+                      _getCheckoutButtonText(ref, summary),
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.bold,
@@ -221,11 +309,18 @@ class _CartPageState extends ConsumerState<CartPage> {
     );
   }
 
-  void _handleCheckout(
+  Future<void> _handleCheckout(
     BuildContext context,
     WidgetRef ref,
     CartSummary summary,
-  ) {
+  ) async {
+    final session = ref.read(dineInSessionProvider);
+
+    if (session != null) {
+      await _handleDineInCheckout(context, ref, summary, session);
+      return;
+    }
+
     setState(() {
       _isProcessingCheckout = true;
     });
@@ -263,11 +358,74 @@ class _CartPageState extends ConsumerState<CartPage> {
       restaurantTipCharge: 0,
       deliveryCharge: 0,
       deliveryTipCharge: 0,
-      restaurantId: _storageService.getRestaurantId() ?? '',
+      // restaurantId: _storageService.getRestaurantId() ?? '',
     );
 
     // Call API
     ref.read(orderNotifierProvider.notifier).createOrder(orderRequest);
+  }
+
+  Future<void> _handleDineInCheckout(
+    BuildContext context,
+    WidgetRef ref,
+    CartSummary summary,
+    dynamic session,
+  ) async {
+    setState(() {
+      _isProcessingCheckout = true;
+    });
+
+    try {
+      final dineInItems = summary.items.map((cartItem) {
+        return DineInOrderItem(
+          itemId: cartItem.menuItemId,
+          name: cartItem.menuItemName,
+          quantity: cartItem.quantity,
+          price: cartItem.basePrice,
+          modifiers: [], // TODO: handle modifiers if needed
+        );
+      }).toList();
+
+      if (session.orderId == null) {
+        // Create new dine-in order
+        await ref
+            .read(createDineInOrderUseCaseProvider)
+            .call(session.tableNumber, items: dineInItems);
+      } else {
+        // Add items to existing order
+        await ref
+            .read(addItemsToDineInOrderUseCaseProvider)
+            .call(session.orderId!, dineInItems);
+      }
+
+      // Success
+      ref.read(cartNotifierProvider.notifier).clearCart();
+      ref.read(dineInSessionProvider.notifier).state = null;
+      ref.invalidate(tablesProvider);
+
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Dine-In order updated successfully!'),
+            backgroundColor: AppColors.success,
+          ),
+        );
+        // Navigate back to Tables
+        context.go(RouteConstants.dineInTables);
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isProcessingCheckout = false;
+        });
+      }
+    }
   }
 
   Widget _buildDiscountSection(
@@ -452,6 +610,7 @@ class _CartPageState extends ConsumerState<CartPage> {
           ElevatedButton(
             onPressed: () {
               ref.read(cartNotifierProvider.notifier).clearCart();
+              ref.read(selectedDiscountProvider.notifier).state = null;
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
