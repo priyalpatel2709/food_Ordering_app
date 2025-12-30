@@ -126,9 +126,22 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
                     ),
                   ],
                 ),
-                subtitle: item.specialInstructions != null
-                    ? Text(item.specialInstructions!)
-                    : null,
+                subtitle: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    if (item.modifiers.isNotEmpty)
+                      Text(
+                        item.modifiers.map((m) => '+ ${m.name}').join(', '),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontStyle: FontStyle.italic,
+                          color: AppColors.grey600,
+                        ),
+                      ),
+                    if (item.specialInstructions != null)
+                      Text(item.specialInstructions!),
+                  ],
+                ),
                 trailing: Text(
                   '${item.quantity}x  \$${item.price.toStringAsFixed(2)}',
                 ),

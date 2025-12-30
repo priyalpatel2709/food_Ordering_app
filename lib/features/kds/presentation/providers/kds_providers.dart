@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/providers.dart';
 import '../../data/datasources/kds_remote_datasource.dart';
@@ -24,8 +26,8 @@ final kdsPollingProvider = StreamProvider<List<KdsOrder>>((ref) async* {
       final orders = await ref.read(kdsRemoteDataSourceProvider).getOrders();
       yield orders;
     } catch (e) {
-      // log error
+      log('Error polling orders: $e');
     }
-    await Future.delayed(const Duration(seconds: 20));
+    await Future.delayed(const Duration(minutes: 20));
   }
 });

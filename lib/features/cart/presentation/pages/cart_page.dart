@@ -332,8 +332,9 @@ class _CartPageState extends ConsumerState<CartPage> {
         item: cartItem.menuItemId,
         quantity: cartItem.quantity,
         price: cartItem.basePrice,
+
         customizationOptions: cartItem.selectedCustomizations
-            .map((c) => c.id)
+            .map((c) => DineInModifier(name: c.name, price: c.price))
             .toList(),
       );
     }).toList();
@@ -383,7 +384,11 @@ class _CartPageState extends ConsumerState<CartPage> {
           name: cartItem.menuItemName,
           quantity: cartItem.quantity,
           price: cartItem.basePrice,
-          modifiers: [], // TODO: handle modifiers if needed
+
+          modifiers: cartItem.selectedCustomizations
+              .map((c) => DineInModifier(name: c.name, price: c.price))
+              .toList(),
+          specialInstructions: null, // Add if needed in cart
         );
       }).toList();
 

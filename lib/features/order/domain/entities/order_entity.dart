@@ -1,9 +1,11 @@
+import '../../../dine_in/domain/entities/dine_in_order_entity.dart';
+
 /// Order Item Entity for API request
 class OrderItemRequest {
   final String item; // Menu item ID
   final int quantity;
   final double price;
-  final List<String> customizationOptions;
+  final List<DineInModifier> customizationOptions;
 
   const OrderItemRequest({
     required this.item,

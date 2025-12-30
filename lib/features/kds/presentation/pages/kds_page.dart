@@ -173,33 +173,50 @@ class _OrderCard extends ConsumerWidget {
             ...order.items.map(
               (item) => Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      '${item.quantity}x ',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    Row(
+                      children: [
+                        Text(
+                          '${item.quantity}x ',
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        Expanded(child: Text(item.name)),
+                        GestureDetector(
+                          onTap: () => _advanceItemStatus(context, ref, item),
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              border: Border.all(color: AppColors.primary),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              item.status,
+                              style: const TextStyle(
+                                fontSize: 10,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    Expanded(child: Text(item.name)),
-                    GestureDetector(
-                      onTap: () => _advanceItemStatus(context, ref, item),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 6,
-                          vertical: 2,
-                        ),
-                        decoration: BoxDecoration(
-                          border: Border.all(color: AppColors.primary),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
+                    if (item.modifiers.isNotEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(left: 24, top: 2),
                         child: Text(
-                          item.status,
+                          item.modifiers.map((m) => '+ $m').join(', '),
                           style: const TextStyle(
-                            fontSize: 10,
-                            color: AppColors.primary,
+                            fontSize: 11,
+                            color: Colors.grey,
+                            fontStyle: FontStyle.italic,
                           ),
                         ),
                       ),
-                    ),
                   ],
                 ),
               ),

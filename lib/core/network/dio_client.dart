@@ -225,7 +225,7 @@ class _LoggingInterceptor extends Interceptor {
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (kDebugMode) {
       print('🌐 REQUEST[${options.method}] => ${options.uri}');
-      print('Headers: ${options.headers}');
+      // print('Headers: ${options.headers}');
       if (options.data != null) {
         print('Body: ${options.data}');
       }

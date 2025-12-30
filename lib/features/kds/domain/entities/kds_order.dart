@@ -14,6 +14,7 @@ class KdsOrderItem {
   final int quantity;
   final String status;
   final Map<String, dynamic>? itemDetails;
+  final List<String> modifiers;
 
   const KdsOrderItem({
     required this.id,
@@ -21,6 +22,7 @@ class KdsOrderItem {
     required this.quantity,
     required this.status,
     this.itemDetails,
+    this.modifiers = const [],
   });
 
   factory KdsOrderItem.fromJson(Map<String, dynamic> json) {
@@ -32,12 +34,24 @@ class KdsOrderItem {
       name = json['name'];
     }
 
+    final modifiersData = json['modifiers'] as List<dynamic>?;
+    final modifiers =
+        modifiersData
+            ?.map((m) {
+              if (m is Map) return m['name']?.toString() ?? '';
+              return m.toString();
+            })
+            .where((m) => m.isNotEmpty)
+            .toList() ??
+        [];
+
     return KdsOrderItem(
       id: json['_id'] ?? json['id'] ?? '',
       name: name,
       quantity: json['quantity'] ?? 1,
       status: json['status'] ?? json['itemStatus'] ?? 'new',
       itemDetails: itemData is Map ? itemData as Map<String, dynamic> : null,
+      modifiers: modifiers,
     );
   }
 }
