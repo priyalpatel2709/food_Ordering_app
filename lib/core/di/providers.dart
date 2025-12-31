@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../network/dio_client.dart';
+import '../services/socket_service.dart';
 import '../../features/menu/data/datasources/menu_local_data_source.dart';
 import '../../features/authentication/data/datasources/local/user_local_data_source.dart';
 import '../../features/authentication/data/datasources/remote/auth_remote_data_source.dart';
@@ -30,6 +31,13 @@ final hiveBoxProvider = Provider<Box>((ref) {
 /// DioClient Provider
 final dioClientProvider = Provider<DioClient>((ref) {
   return DioClient();
+});
+
+/// Socket Service Provider
+final socketServiceProvider = Provider<SocketService>((ref) {
+  final service = SocketService();
+  ref.onDispose(() => service.dispose());
+  return service;
 });
 
 // ============================================================================

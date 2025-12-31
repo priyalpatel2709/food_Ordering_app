@@ -10,7 +10,7 @@ class KdsPage extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final configAsync = ref.watch(kdsConfigProvider);
-    final ordersAsync = ref.watch(kdsPollingProvider);
+    final ordersAsync = ref.watch(kdsSocketProvider);
 
     return Scaffold(
       backgroundColor: AppColors.grey50,
@@ -19,7 +19,10 @@ class KdsPage extends ConsumerWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
-            onPressed: () => ref.refresh(kdsOrdersProvider),
+            onPressed: () {
+              ref.invalidate(kdsSocketProvider);
+              ref.invalidate(kdsConfigProvider);
+            },
           ),
         ],
       ),
