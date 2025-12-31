@@ -7,9 +7,13 @@ class SocketService {
   IO.Socket? _socket;
   final _kdsUpdateController =
       StreamController<Map<String, dynamic>>.broadcast();
+  final _groupCartUpdateController =
+      StreamController<Map<String, dynamic>>.broadcast();
 
   Stream<Map<String, dynamic>> get kdsUpdateStream =>
       _kdsUpdateController.stream;
+  Stream<Map<String, dynamic>> get groupCartUpdateStream =>
+      _groupCartUpdateController.stream;
 
   void connect() {
     if (_socket != null && _socket!.connected) return;
@@ -37,6 +41,11 @@ class SocketService {
       _kdsUpdateController.add(Map<String, dynamic>.from(data));
     });
 
+    _socket!.on('group_cart_updated', (data) {
+      log('Group cart update received: $data');
+      _groupCartUpdateController.add(Map<String, dynamic>.from(data));
+    });
+
     _socket!.onConnectError((err) => log('Connect Error: $err'));
     _socket!.onError((err) => log('Error: $err'));
 
@@ -56,10 +65,25 @@ class SocketService {
         'Socket not connected yet. Waiting for connect to join $restaurantId',
       );
       // Using off to avoid duplicate listeners if called multiple times before connect
-      _socket!.off('connect');
       _socket!.onConnect((_) {
         log('Connected to socket, now joining restaurant room: $restaurantId');
         _socket!.emit('join_restaurant', restaurantId);
+      });
+    }
+  }
+
+  void joinGroup(String groupId) {
+    if (_socket == null) {
+      connect();
+    }
+
+    if (_socket!.connected) {
+      log('Joining group room: $groupId');
+      _socket!.emit('join_group', groupId);
+    } else {
+      _socket!.onConnect((_) {
+        log('Connected to socket, now joining group room: $groupId');
+        _socket!.emit('join_group', groupId);
       });
     }
   }
@@ -72,6 +96,7 @@ class SocketService {
   void dispose() {
     log('Does meee');
     _kdsUpdateController.close();
+    _groupCartUpdateController.close();
     disconnect();
   }
 }

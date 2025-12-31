@@ -23,6 +23,14 @@ class RouteConstants {
   static const String dineInTables = '/dine-in/tables';
   static const String dineInTableDetails = '/dine-in/table/:id';
   static const String kds = '/kds';
+  static const String menuManagement = '/staff/menu-management';
+  static const String itemsManagement = '/staff/items';
+  static const String categoriesManagement = '/staff/categories';
+  static const String customizationManagement = '/staff/customizations';
+  static const String discountsManagement = '/staff/discounts';
+  static const String taxesManagement = '/staff/taxes';
+  static const String restaurantSettings = '/staff/restaurant-settings';
+  static const String reports = '/staff/reports';
 
   // Route Names (for named navigation)
   static const String splashName = 'splash';
@@ -41,4 +49,12 @@ class RouteConstants {
   static const String dineInTablesName = 'dineInTables';
   static const String dineInTableDetailsName = 'dineInTableDetails';
   static const String kdsName = 'kds';
+  static const String menuManagementName = 'menuManagement';
+  static const String itemsManagementName = 'itemsManagement';
+  static const String categoriesManagementName = 'categoriesManagement';
+  static const String customizationManagementName = 'customizationManagement';
+  static const String discountsManagementName = 'discountsManagement';
+  static const String taxesManagementName = 'taxesManagement';
+  static const String restaurantSettingsName = 'restaurantSettings';
+  static const String reportsName = 'reports';
 }

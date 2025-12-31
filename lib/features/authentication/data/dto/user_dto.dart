@@ -9,6 +9,8 @@ class UserDto {
   final String token;
   final String role;
   final String? restaurantsId;
+  final String? gender;
+  final int? age;
 
   const UserDto({
     required this.id,
@@ -17,6 +19,8 @@ class UserDto {
     required this.token,
     required this.role,
     this.restaurantsId,
+    this.gender,
+    this.age,
   });
 
   /// Manual JSON deserialization
@@ -28,6 +32,8 @@ class UserDto {
       token: json['token'] as String,
       role: json['role'] as String? ?? 'customer',
       restaurantsId: json['restaurantsId'] as String?,
+      gender: json['gender'] as String?,
+      age: json['age'] as int?,
     );
   }
 
@@ -40,6 +46,8 @@ class UserDto {
       'token': token,
       'role': role,
       if (restaurantsId != null) 'restaurantsId': restaurantsId,
+      if (gender != null) 'gender': gender,
+      if (age != null) 'age': age,
     };
   }
 
@@ -52,6 +60,8 @@ class UserDto {
       token: token,
       role: role,
       restaurantsId: restaurantsId,
+      gender: gender,
+      age: age,
     );
   }
 
@@ -64,6 +74,8 @@ class UserDto {
       token: entity.token,
       role: entity.role,
       restaurantsId: entity.restaurantsId,
+      gender: entity.gender,
+      age: entity.age,
     );
   }
 

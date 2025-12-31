@@ -13,6 +13,8 @@ import '../features/restaurant/presentation/pages/staff_home_page.dart';
 import '../features/menu/presentation/views/menu_page.dart';
 import '../features/cart/presentation/pages/cart_page.dart';
 import '../features/orders/presentation/pages/orders_page.dart';
+import '../features/menu/presentation/views/menu_management_page.dart';
+import '../features/restaurant/presentation/pages/management_placeholder_page.dart';
 
 class AppRouter {
   // Route paths and names are now centralized in RouteConstants
@@ -152,6 +154,53 @@ class AppRouter {
         path: RouteConstants.orders,
         name: RouteConstants.ordersName,
         builder: (context, state) => const OrdersPage(),
+      ),
+      GoRoute(
+        path: RouteConstants.menuManagement,
+        name: RouteConstants.menuManagementName,
+        builder: (context, state) => const MenuManagementPage(),
+      ),
+      GoRoute(
+        path: RouteConstants.itemsManagement,
+        name: RouteConstants.itemsManagementName,
+        builder: (context, state) =>
+            const ManagementPlaceholderPage(title: 'Items Management'),
+      ),
+      GoRoute(
+        path: RouteConstants.categoriesManagement,
+        name: RouteConstants.categoriesManagementName,
+        builder: (context, state) =>
+            const ManagementPlaceholderPage(title: 'Categories Management'),
+      ),
+      GoRoute(
+        path: RouteConstants.customizationManagement,
+        name: RouteConstants.customizationManagementName,
+        builder: (context, state) =>
+            const ManagementPlaceholderPage(title: 'Customizations Management'),
+      ),
+      GoRoute(
+        path: RouteConstants.discountsManagement,
+        name: RouteConstants.discountsManagementName,
+        builder: (context, state) =>
+            const ManagementPlaceholderPage(title: 'Discounts Management'),
+      ),
+      GoRoute(
+        path: RouteConstants.taxesManagement,
+        name: RouteConstants.taxesManagementName,
+        builder: (context, state) =>
+            const ManagementPlaceholderPage(title: 'Taxes Management'),
+      ),
+      GoRoute(
+        path: RouteConstants.restaurantSettings,
+        name: RouteConstants.restaurantSettingsName,
+        builder: (context, state) =>
+            const ManagementPlaceholderPage(title: 'Restaurant Settings'),
+      ),
+      GoRoute(
+        path: RouteConstants.reports,
+        name: RouteConstants.reportsName,
+        builder: (context, state) =>
+            const ManagementPlaceholderPage(title: 'Reports & Analytics'),
       ),
     ],
   );

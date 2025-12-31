@@ -7,6 +7,8 @@ class UserEntity {
   final String token;
   final String role; // 'customer' or 'staff'
   final String? restaurantsId;
+  final String? gender;
+  final int? age;
 
   const UserEntity({
     required this.id,
@@ -15,6 +17,8 @@ class UserEntity {
     required this.token,
     required this.role,
     this.restaurantsId,
+    this.gender,
+    this.age,
   });
 
   UserEntity copyWith({
@@ -24,6 +28,8 @@ class UserEntity {
     String? token,
     String? role,
     String? restaurantsId,
+    String? gender,
+    int? age,
   }) {
     return UserEntity(
       id: id ?? this.id,
@@ -32,6 +38,8 @@ class UserEntity {
       token: token ?? this.token,
       role: role ?? this.role,
       restaurantsId: restaurantsId ?? this.restaurantsId,
+      gender: gender ?? this.gender,
+      age: age ?? this.age,
     );
   }
 
@@ -45,7 +53,9 @@ class UserEntity {
           email == other.email &&
           token == other.token &&
           role == other.role &&
-          restaurantsId == other.restaurantsId;
+          restaurantsId == other.restaurantsId &&
+          gender == other.gender &&
+          age == other.age;
 
   @override
   int get hashCode =>
@@ -54,10 +64,12 @@ class UserEntity {
       email.hashCode ^
       token.hashCode ^
       role.hashCode ^
-      restaurantsId.hashCode;
+      restaurantsId.hashCode ^
+      gender.hashCode ^
+      age.hashCode;
 
   @override
   String toString() {
-    return 'UserEntity(id: $id, name: $name, email: $email, token: $token, role: $role, restaurantsId: $restaurantsId)';
+    return 'UserEntity(id: $id, name: $name, email: $email, token: $token, role: $role, restaurantsId: $restaurantsId, gender: $gender, age: $age)';
   }
 }

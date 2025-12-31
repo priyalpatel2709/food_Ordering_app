@@ -28,6 +28,8 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
       token: userData['token'] as String,
       role: userData['role'] as String? ?? 'customer',
       restaurantsId: userData['restaurantsId'] as String?,
+      gender: userData['gender'] as String?,
+      age: userData['age'] as int?,
     );
   }
 
@@ -40,6 +42,8 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
       'token': user.token,
       'role': user.role,
       'restaurantsId': user.restaurantsId,
+      'gender': user.gender,
+      'age': user.age,
     });
   }
 

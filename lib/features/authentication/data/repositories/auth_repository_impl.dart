@@ -53,13 +53,17 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
     required String restaurantId,
+    String? gender,
+    int? age,
   }) async {
     try {
       final userDto = await _remoteDataSource.signUp(
-        name,
-        email,
-        password,
-        restaurantId,
+        name: name,
+        email: email,
+        password: password,
+        restaurantId: restaurantId,
+        gender: gender,
+        age: age,
       );
       final userEntity = userDto.toEntity();
 

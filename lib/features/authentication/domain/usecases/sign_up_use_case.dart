@@ -13,12 +13,16 @@ class SignUpUseCase {
     required String email,
     required String password,
     required String restaurantId,
+    String? gender,
+    int? age,
   }) {
     return _repository.signUp(
       name: name,
       email: email,
       password: password,
       restaurantId: restaurantId,
+      gender: gender,
+      age: age,
     );
   }
 }

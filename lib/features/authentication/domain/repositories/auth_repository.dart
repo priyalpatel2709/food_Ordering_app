@@ -9,6 +9,8 @@ abstract class AuthRepository {
     required String email,
     required String password,
     required String restaurantId,
+    String? gender,
+    int? age,
   });
   Future<Result<void>> logout();
   Future<Result<UserEntity?>> getCurrentUser();

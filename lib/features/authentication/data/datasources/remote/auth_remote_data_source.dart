@@ -5,12 +5,14 @@ import '../../dto/user_dto.dart';
 /// Remote data source for authentication
 abstract class AuthRemoteDataSource {
   Future<UserDto> login(String email, String password);
-  Future<UserDto> signUp(
-    String name,
-    String email,
-    String password,
-    String restaurantId,
-  );
+  Future<UserDto> signUp({
+    required String name,
+    required String email,
+    required String password,
+    required String restaurantId,
+    String? gender,
+    int? age,
+  });
   Future<void> logout();
 }
 
@@ -30,19 +32,23 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserDto> signUp(
-    String name,
-    String email,
-    String password,
-    String restaurantId,
-  ) async {
+  Future<UserDto> signUp({
+    required String name,
+    required String email,
+    required String password,
+    required String restaurantId,
+    String? gender,
+    int? age,
+  }) async {
     final response = await _dioClient.post(
-      '${ApiConstants.v1}${ApiConstants.user}',
+      '${ApiConstants.v1}${ApiConstants.user}${ApiConstants.registerEndpoint}',
       data: {
         'name': name,
         'email': email,
         'password': password,
         'restaurantId': restaurantId,
+        if (gender != null) 'gender': gender,
+        if (age != null) 'age': age,
       },
     );
 

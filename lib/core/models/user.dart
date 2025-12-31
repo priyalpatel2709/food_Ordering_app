@@ -22,6 +22,12 @@ class User extends HiveObject {
   @HiveField(5, defaultValue: 'customer')
   final String role;
 
+  @HiveField(6)
+  final String? gender;
+
+  @HiveField(7)
+  final int? age;
+
   User({
     required this.id,
     required this.name,
@@ -29,6 +35,8 @@ class User extends HiveObject {
     required this.token,
     required this.role,
     this.restaurantsId,
+    this.gender,
+    this.age,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -39,6 +47,8 @@ class User extends HiveObject {
       token: json['token'] as String,
       role: json['role'] as String? ?? 'customer',
       restaurantsId: json['restaurantId'] as String?,
+      gender: json['gender'] as String?,
+      age: json['age'] as int?,
     );
   }
 
@@ -50,6 +60,8 @@ class User extends HiveObject {
       'token': token,
       'role': role,
       'restaurantId': restaurantsId,
+      'gender': gender,
+      'age': age,
     };
   }
 
@@ -69,6 +81,8 @@ class User extends HiveObject {
       token: token ?? this.token,
       role: role ?? this.role,
       restaurantsId: restaurantsId ?? this.restaurantsId,
+      gender: gender ?? this.gender,
+      age: age ?? this.age,
     );
   }
 }

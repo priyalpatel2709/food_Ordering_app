@@ -8,6 +8,8 @@ import '../../features/authentication/data/datasources/remote/auth_remote_data_s
 import '../../features/menu/data/datasources/menu_remote_data_source.dart';
 import '../../features/authentication/data/repositories/auth_repository_impl.dart';
 import '../../features/menu/data/repositories/menu_repository_impl.dart';
+import '../../features/restaurant/data/datasources/restaurant_remote_data_source.dart';
+import '../network/crud_remote_data_source.dart';
 import '../../features/authentication/domain/repositories/auth_repository.dart';
 import '../../features/menu/domain/repositories/menu_repository.dart';
 import '../../features/menu/domain/usecases/get_current_menu_use_case.dart';
@@ -15,6 +17,8 @@ import '../../features/authentication/domain/usecases/get_current_user_use_case.
 import '../../features/authentication/domain/usecases/login_use_case.dart';
 import '../../features/authentication/domain/usecases/logout_use_case.dart';
 import '../../features/authentication/domain/usecases/sign_up_use_case.dart';
+import '../../features/menu/domain/usecases/update_menu_use_case.dart';
+import '../../features/menu/domain/usecases/update_menu_advanced_use_case.dart';
 
 /// Manual Provider Definitions
 /// TODO: When build_runner is fixed, restore @riverpod code generation
@@ -64,6 +68,18 @@ final menuLocalDataSourceProvider = Provider<MenuLocalDataSource>((ref) {
   return MenuLocalDataSourceImpl(ref.watch(hiveBoxProvider));
 });
 
+/// CRUD Remote Data Source Provider
+final crudRemoteDataSourceProvider = Provider<CrudRemoteDataSource>((ref) {
+  return CrudRemoteDataSourceImpl(ref.watch(dioClientProvider));
+});
+
+/// Restaurant Remote Data Source Provider
+final restaurantRemoteDataSourceProvider = Provider<RestaurantRemoteDataSource>(
+  (ref) {
+    return RestaurantRemoteDataSourceImpl(ref.watch(dioClientProvider));
+  },
+);
+
 // ============================================================================
 // Repository Providers
 // ============================================================================
@@ -112,4 +128,16 @@ final getCurrentUserUseCaseProvider = Provider<GetCurrentUserUseCase>((ref) {
 /// Get Current Menu Use Case Provider
 final getCurrentMenuUseCaseProvider = Provider<GetCurrentMenuUseCase>((ref) {
   return GetCurrentMenuUseCase(ref.watch(menuRepositoryProvider));
+});
+
+/// Update Menu Use Case Provider
+final updateMenuUseCaseProvider = Provider<UpdateMenuUseCase>((ref) {
+  return UpdateMenuUseCase(ref.watch(menuRepositoryProvider));
+});
+
+/// Update Menu Advanced Use Case Provider
+final updateMenuAdvancedUseCaseProvider = Provider<UpdateMenuAdvancedUseCase>((
+  ref,
+) {
+  return UpdateMenuAdvancedUseCase(ref.watch(menuRepositoryProvider));
 });

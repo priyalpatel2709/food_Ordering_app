@@ -7,26 +7,47 @@ class ApiConstants {
 
   //uses
 
-  static const String user = '/user';
+  // auth
+  static const String user = 'user';
   static const String loginEndpoint = '/login';
-  static const String menuEndpoint = '/menu';
-  static const String menuCurrentEndpoint = '/current';
+  static const String registerEndpoint = '/register';
 
-  //orders
+  // menu & crud
+  static const String menuEndpoint = 'menu';
+  static const String menuCurrentEndpoint = '/current';
+  static const String menuCreateEndpoint = '/createMenu';
+  static const String menuUpdateAdvanced = '/updateById';
+  static const String menuAddItemEndpoint = '/add-item';
+
+  static const String itemEndpoint = 'item';
+  static const String categoryEndpoint = 'category';
+  static const String customizationOptionEndpoint = 'customizationOption';
+  static const String taxEndpoint = 'tax';
+  static const String orderTypeEndpoint = 'orderType';
+  static const String restaurantEndpoint = 'restaurant';
+
+  // orders
   static const String orders = 'orders';
   static const String myOrders = '/my-orders';
   static const String dineIn = '/dine-in';
   static const String tables = '/tables';
 
-  //discount
+  // discount
   static const String discount = 'discount';
 
-  //kds
+  // kds
   static const String kds = 'kds';
   static const String kdsConfig = '/config';
 
+  // dashboard
+  static const String dashboard = 'restaurant/dashboard';
+  static const String dashboardStats = '/stats';
+  static const String dashboardExport = '/export';
+
   // Full URLs
-  static String get loginUrl => '$baseUrl$loginEndpoint';
-  static String get menuCurrentUrl => '$baseUrl$menuCurrentEndpoint';
+  static String get loginUrl => '$baseUrl$v1$user$loginEndpoint';
+  static String get registerUrl => '$baseUrl$v1$user$registerEndpoint';
+  static String get menuCurrentUrl =>
+      '$baseUrl$v1$menuEndpoint$menuCurrentEndpoint';
   static String get ordersUrl => '$baseUrl$v1$orders';
 }

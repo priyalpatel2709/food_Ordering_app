@@ -78,17 +78,53 @@ class StaffHomePage extends StatelessWidget {
                       title: 'Menu Management',
                       icon: Icons.menu_book,
                       color: AppColors.accent,
-                      onTap: () {
-                        // TODO: Implement Menu Management
-                      },
+                      onTap: () => context.push(RouteConstants.menuManagement),
                     ),
                     _DashboardCard(
                       title: 'Reports',
                       icon: Icons.bar_chart,
                       color: Colors.blue,
-                      onTap: () {
-                        // TODO: Implement Reports
-                      },
+                      onTap: () => context.push(RouteConstants.reports),
+                    ),
+                    _DashboardCard(
+                      title: 'Items',
+                      icon: Icons.fastfood,
+                      color: Colors.orange,
+                      onTap: () => context.push(RouteConstants.itemsManagement),
+                    ),
+                    _DashboardCard(
+                      title: 'Categories',
+                      icon: Icons.category,
+                      color: Colors.teal,
+                      onTap: () =>
+                          context.push(RouteConstants.categoriesManagement),
+                    ),
+                    _DashboardCard(
+                      title: 'Customizations',
+                      icon: Icons.tune,
+                      color: Colors.purple,
+                      onTap: () =>
+                          context.push(RouteConstants.customizationManagement),
+                    ),
+                    _DashboardCard(
+                      title: 'Discounts',
+                      icon: Icons.local_offer,
+                      color: Colors.redAccent,
+                      onTap: () =>
+                          context.push(RouteConstants.discountsManagement),
+                    ),
+                    _DashboardCard(
+                      title: 'Taxes',
+                      icon: Icons.receipt_long,
+                      color: Colors.green,
+                      onTap: () => context.push(RouteConstants.taxesManagement),
+                    ),
+                    _DashboardCard(
+                      title: 'Settings',
+                      icon: Icons.store,
+                      color: Colors.blueGrey,
+                      onTap: () =>
+                          context.push(RouteConstants.restaurantSettings),
                     ),
                   ],
                 ),
