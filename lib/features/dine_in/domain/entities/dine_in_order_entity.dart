@@ -17,7 +17,8 @@ class DineInModifier {
 }
 
 class DineInOrderItem {
-  final String itemId;
+  final String id; // Unique ID for this order item entry
+  final String itemId; // ID of the menu item
   final String name;
   final int quantity;
   final double price;
@@ -26,6 +27,7 @@ class DineInOrderItem {
   final String status;
 
   const DineInOrderItem({
+    required this.id,
     required this.itemId,
     required this.name,
     required this.quantity,
@@ -50,6 +52,7 @@ class DineInOrderItem {
     }
 
     return DineInOrderItem(
+      id: json['_id'] ?? json['id'] ?? '',
       itemId: itemId,
       name: itemName ?? 'Unknown Item',
       quantity: json['quantity'] ?? 1,

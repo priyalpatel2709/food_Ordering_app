@@ -41,4 +41,17 @@ class DineInRepositoryImpl implements DineInRepository {
   Future<DineInOrderEntity> getOrderDetails(String orderId) async {
     return await _remoteDataSource.getOrderDetails(orderId);
   }
+
+  @override
+  Future<void> deleteDineInOrder(String orderId) async {
+    await _remoteDataSource.deleteDineInOrder(orderId);
+  }
+
+  @override
+  Future<DineInOrderEntity> deleteDineInOrderItem(
+    String orderId,
+    String itemId,
+  ) async {
+    return await _remoteDataSource.deleteDineInOrderItem(orderId, itemId);
+  }
 }

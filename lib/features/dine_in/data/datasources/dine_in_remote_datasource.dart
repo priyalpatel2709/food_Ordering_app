@@ -101,4 +101,20 @@ class DineInRemoteDataSource {
     );
     return DineInOrderEntity.fromJson(response.data);
   }
+
+  Future<void> deleteDineInOrder(String orderId) async {
+    await _dioClient.delete(
+      '${ApiConstants.v1}${ApiConstants.orders}${ApiConstants.dineIn}/$orderId',
+    );
+  }
+
+  Future<DineInOrderEntity> deleteDineInOrderItem(
+    String orderId,
+    String itemId,
+  ) async {
+    final response = await _dioClient.delete(
+      '${ApiConstants.v1}${ApiConstants.orders}${ApiConstants.dineIn}/$orderId/item/$itemId',
+    );
+    return DineInOrderEntity.fromJson(response.data);
+  }
 }

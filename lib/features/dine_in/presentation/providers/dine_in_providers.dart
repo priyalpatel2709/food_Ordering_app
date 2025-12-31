@@ -8,6 +8,8 @@ import '../../domain/usecases/create_dine_in_order_usecase.dart';
 import '../../domain/usecases/add_items_to_dine_in_order_usecase.dart';
 import '../../domain/usecases/complete_dine_in_payment_usecase.dart';
 import '../../domain/usecases/get_order_details_usecase.dart';
+import '../../domain/usecases/remove_dine_in_order_usecase.dart';
+import '../../domain/usecases/remove_dine_in_item_usecase.dart';
 import '../../domain/entities/table_entity.dart';
 import '../../domain/entities/dine_in_order_entity.dart';
 import '../../domain/entities/dine_in_session.dart';
@@ -47,6 +49,18 @@ final getDineInOrderDetailsUseCaseProvider =
     Provider<GetDineInOrderDetailsUseCase>((ref) {
       return GetDineInOrderDetailsUseCase(ref.watch(dineInRepositoryProvider));
     });
+
+final removeDineInOrderUseCaseProvider = Provider<RemoveDineInOrderUseCase>((
+  ref,
+) {
+  return RemoveDineInOrderUseCase(ref.watch(dineInRepositoryProvider));
+});
+
+final removeDineInItemUseCaseProvider = Provider<RemoveDineInItemUseCase>((
+  ref,
+) {
+  return RemoveDineInItemUseCase(ref.watch(dineInRepositoryProvider));
+});
 
 // Controllers/State
 final tablesProvider = FutureProvider.autoDispose<List<TableEntity>>((

@@ -142,8 +142,28 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
                       Text(item.specialInstructions!),
                   ],
                 ),
-                trailing: Text(
-                  '${item.quantity}x  \$${item.price.toStringAsFixed(2)}',
+                trailing: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      '${item.quantity}x  \$${item.price.toStringAsFixed(2)}',
+                    ),
+                    if (item.status.toLowerCase() == 'new') ...[
+                      const SizedBox(width: 8),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.delete_outline,
+                          color: Colors.red,
+                        ),
+                        onPressed: () => _showRemoveItemDialog(
+                          context,
+                          ref,
+                          order.id,
+                          item.id,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               );
             },
@@ -214,6 +234,24 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
                   ),
                 ],
               ),
+              if (order.status.toLowerCase() == 'pending') ...[
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton.icon(
+                    onPressed: () =>
+                        _showCancelOrderDialog(context, ref, order.id),
+                    icon: const Icon(Icons.cancel, color: Colors.red),
+                    label: const Text(
+                      "Cancel Order / Reset Table",
+                      style: TextStyle(color: Colors.red),
+                    ),
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
@@ -234,6 +272,10 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
           title: const Text("Complete Payment"),
           content: Text("Pay \$${amount.toStringAsFixed(2)}?"),
           actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel"),
+            ),
             TextButton(
               onPressed: () async {
                 try {
@@ -257,6 +299,130 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
                 }
               },
               child: const Text("Confirm Cash Pay"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showRemoveItemDialog(
+    BuildContext context,
+    WidgetRef ref,
+    String orderId,
+    String itemId,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Remove Item"),
+          content: const Text("Are you sure you want to remove this item?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("No"),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  Navigator.pop(context); // Close dialog
+                  // Show loading
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Removing item...'),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
+
+                  await ref
+                      .read(removeDineInItemUseCaseProvider)
+                      .call(orderId, itemId);
+
+                  // Refresh order details
+                  ref.invalidate(orderDetailsProvider(orderId));
+
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Item removed')),
+                    );
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                  }
+                }
+              },
+              child: const Text(
+                "Yes, Remove",
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showCancelOrderDialog(
+    BuildContext context,
+    WidgetRef ref,
+    String orderId,
+  ) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Cancel Order"),
+          content: const Text(
+            "Are you sure you want to cancel the entire order and reset this table?",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("No"),
+            ),
+            TextButton(
+              onPressed: () async {
+                try {
+                  Navigator.pop(context); // Close dialog
+                  // Show loading
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Cancelling order...'),
+                      duration: Duration(seconds: 1),
+                    ),
+                  );
+
+                  await ref
+                      .read(removeDineInOrderUseCaseProvider)
+                      .call(orderId);
+
+                  // Invalidate tables and navigate back
+                  ref.invalidate(tablesProvider);
+
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Order cancelled and table reset'),
+                      ),
+                    );
+                    context.pop(); // Go back to table grid
+                  }
+                } catch (e) {
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('Error: $e')));
+                  }
+                }
+              },
+              child: const Text(
+                "Yes, Cancel Order",
+                style: TextStyle(color: Colors.red),
+              ),
             ),
           ],
         );

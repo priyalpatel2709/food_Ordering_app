@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/constants/route_constants.dart';
 import '../../../../core/services/storage_service.dart';
 import '../../../../shared/theme/app_colors.dart';
+import '../../../dine_in/domain/entities/dine_in_session.dart';
 import '../../domain/entities/cart_entity.dart';
 import '../providers/cart_provider.dart';
 import '../widgets/cart_item_card.dart';
@@ -371,7 +372,7 @@ class _CartPageState extends ConsumerState<CartPage> {
     BuildContext context,
     WidgetRef ref,
     CartSummary summary,
-    dynamic session,
+    DineInSession session,
   ) async {
     setState(() {
       _isProcessingCheckout = true;
@@ -380,6 +381,7 @@ class _CartPageState extends ConsumerState<CartPage> {
     try {
       final dineInItems = summary.items.map((cartItem) {
         return DineInOrderItem(
+          id: '',
           itemId: cartItem.menuItemId,
           name: cartItem.menuItemName,
           quantity: cartItem.quantity,
@@ -388,7 +390,8 @@ class _CartPageState extends ConsumerState<CartPage> {
           modifiers: cartItem.selectedCustomizations
               .map((c) => DineInModifier(name: c.name, price: c.price))
               .toList(),
-          specialInstructions: null, // Add if needed in cart
+          specialInstructions:
+              null, // TODO Add special instructions to cart from user input
         );
       }).toList();
 

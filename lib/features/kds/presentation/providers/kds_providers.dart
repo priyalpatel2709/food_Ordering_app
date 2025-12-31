@@ -28,6 +28,6 @@ final kdsPollingProvider = StreamProvider<List<KdsOrder>>((ref) async* {
     } catch (e) {
       log('Error polling orders: $e');
     }
-    await Future.delayed(const Duration(minutes: 20));
+    await Future.delayed(const Duration(seconds: 10));
   }
 });

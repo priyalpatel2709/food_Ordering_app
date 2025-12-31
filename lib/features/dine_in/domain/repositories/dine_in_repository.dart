@@ -16,4 +16,9 @@ abstract class DineInRepository {
     Map<String, dynamic> paymentDetails,
   );
   Future<DineInOrderEntity> getOrderDetails(String orderId);
+  Future<void> deleteDineInOrder(String orderId);
+  Future<DineInOrderEntity> deleteDineInOrderItem(
+    String orderId,
+    String itemId,
+  );
 }
