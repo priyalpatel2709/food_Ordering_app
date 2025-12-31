@@ -52,16 +52,10 @@ class CustomBottomNavigationBar extends StatelessWidget {
                 isSelected: currentIndex == 2,
               ),
               _buildNavItem(
-                icon: Icons.table_restaurant,
-                label: 'Tables',
-                index: 3,
-                isSelected: currentIndex == 3,
-              ),
-              _buildNavItem(
                 icon: Icons.person,
                 label: 'Profile',
-                index: 4,
-                isSelected: currentIndex == 4,
+                index: 3,
+                isSelected: currentIndex == 3,
               ),
             ],
           ),

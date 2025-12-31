@@ -8,6 +8,7 @@ import '../../domain/entities/dine_in_session.dart';
 import '../../../../shared/navigation/navigation_provider.dart';
 import '../../../../core/constants/route_constants.dart';
 import '../../../../shared/theme/app_colors.dart';
+import '../../../../core/services/storage_service.dart';
 
 class TableDetailsPage extends ConsumerStatefulWidget {
   final TableEntity table;
@@ -67,8 +68,18 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
                 ref.read(dineInSessionProvider.notifier).state = DineInSession(
                   tableNumber: widget.table.tableNumber,
                 );
-                ref.read(bottomNavIndexProvider.notifier).state = 0; // Menu Tab
-                context.go(RouteConstants.home);
+
+                // Get user role
+                final storageService = StorageService();
+                final user = storageService.getUser();
+
+                if (user?.role == 'staff') {
+                  context.push(RouteConstants.menu);
+                } else {
+                  ref.read(bottomNavIndexProvider.notifier).state =
+                      0; // Menu Tab
+                  context.go(RouteConstants.home);
+                }
               },
               icon: const Icon(Icons.restaurant_menu),
               label: const Text("Open Table & Start Order"),
@@ -207,9 +218,20 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
                                 tableNumber: widget.table.tableNumber,
                                 orderId: order.id,
                               );
-                              ref.read(bottomNavIndexProvider.notifier).state =
-                                  0; // Menu Tab
-                              context.go(RouteConstants.home);
+
+                              // Get user role
+                              final storageService = StorageService();
+                              final user = storageService.getUser();
+
+                              if (user?.role == 'staff') {
+                                context.push(RouteConstants.menu);
+                              } else {
+                                ref
+                                        .read(bottomNavIndexProvider.notifier)
+                                        .state =
+                                    0; // Menu Tab
+                                context.go(RouteConstants.home);
+                              }
                             },
                       icon: const Icon(Icons.add),
                       label: const Text("Add Items"),

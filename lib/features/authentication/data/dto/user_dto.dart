@@ -7,6 +7,7 @@ class UserDto {
   final String name;
   final String email;
   final String token;
+  final String role;
   final String? restaurantsId;
 
   const UserDto({
@@ -14,6 +15,7 @@ class UserDto {
     required this.name,
     required this.email,
     required this.token,
+    required this.role,
     this.restaurantsId,
   });
 
@@ -24,6 +26,7 @@ class UserDto {
       name: json['name'] as String,
       email: json['email'] as String,
       token: json['token'] as String,
+      role: json['role'] as String? ?? 'customer',
       restaurantsId: json['restaurantsId'] as String?,
     );
   }
@@ -35,6 +38,7 @@ class UserDto {
       'name': name,
       'email': email,
       'token': token,
+      'role': role,
       if (restaurantsId != null) 'restaurantsId': restaurantsId,
     };
   }
@@ -46,6 +50,7 @@ class UserDto {
       name: name,
       email: email,
       token: token,
+      role: role,
       restaurantsId: restaurantsId,
     );
   }
@@ -57,6 +62,7 @@ class UserDto {
       name: entity.name,
       email: entity.email,
       token: entity.token,
+      role: entity.role,
       restaurantsId: entity.restaurantsId,
     );
   }

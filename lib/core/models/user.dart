@@ -19,11 +19,15 @@ class User extends HiveObject {
   @HiveField(4)
   final String? restaurantsId;
 
+  @HiveField(5, defaultValue: 'customer')
+  final String role;
+
   User({
     required this.id,
     required this.name,
     required this.email,
     required this.token,
+    required this.role,
     this.restaurantsId,
   });
 
@@ -33,6 +37,7 @@ class User extends HiveObject {
       name: json['name'] as String,
       email: json['email'] as String,
       token: json['token'] as String,
+      role: json['role'] as String? ?? 'customer',
       restaurantsId: json['restaurantId'] as String?,
     );
   }
@@ -43,6 +48,7 @@ class User extends HiveObject {
       'name': name,
       'email': email,
       'token': token,
+      'role': role,
       'restaurantId': restaurantsId,
     };
   }
@@ -53,6 +59,7 @@ class User extends HiveObject {
     String? name,
     String? email,
     String? token,
+    String? role,
     String? restaurantsId,
   }) {
     return User(
@@ -60,6 +67,7 @@ class User extends HiveObject {
       name: name ?? this.name,
       email: email ?? this.email,
       token: token ?? this.token,
+      role: role ?? this.role,
       restaurantsId: restaurantsId ?? this.restaurantsId,
     );
   }

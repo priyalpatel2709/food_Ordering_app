@@ -419,9 +419,17 @@ class _CartPageState extends ConsumerState<CartPage> {
             backgroundColor: AppColors.success,
           ),
         );
-        // Update navigation index to "Tables" tab (index 3) and go home
-        ref.read(bottomNavIndexProvider.notifier).state = 3;
-        context.go(RouteConstants.home);
+        // Get user role
+        final storageService = StorageService();
+        final user = storageService.getUser();
+
+        if (user?.role == 'staff') {
+          context.go(RouteConstants.staffHome);
+        } else {
+          // For customers, go back to order list or home
+          ref.read(bottomNavIndexProvider.notifier).state = 2; // Orders Tab
+          context.go(RouteConstants.home);
+        }
       }
     } catch (e) {
       if (context.mounted) {

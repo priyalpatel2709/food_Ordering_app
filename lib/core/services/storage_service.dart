@@ -43,8 +43,21 @@ class StorageService {
     }
 
     // Open boxes
-    await Hive.openBox<User>(_userBoxName);
-    await Hive.openBox(_settingsBoxName);
+    try {
+      await Hive.openBox<User>(_userBoxName);
+    } catch (e) {
+      log('Error opening user box, clearing data: $e');
+      await Hive.deleteBoxFromDisk(_userBoxName);
+      await Hive.openBox<User>(_userBoxName);
+    }
+
+    try {
+      await Hive.openBox(_settingsBoxName);
+    } catch (e) {
+      log('Error opening settings box, clearing data: $e');
+      await Hive.deleteBoxFromDisk(_settingsBoxName);
+      await Hive.openBox(_settingsBoxName);
+    }
   }
 
   /// Get user box

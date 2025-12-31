@@ -74,11 +74,16 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
 
         if (!mounted) return;
 
+        if (!mounted) return;
         _showSuccessSnackBar('Login successful!');
         await Future.delayed(const Duration(milliseconds: 500));
 
         if (!mounted) return;
-        context.go(RouteConstants.home);
+        if (result.user?.role == 'staff') {
+          context.go(RouteConstants.staffHome);
+        } else {
+          context.go(RouteConstants.home);
+        }
       } else {
         _showErrorSnackBar(result.error ?? 'Login failed');
       }

@@ -19,6 +19,7 @@ class RouteConstants {
   static const String settings = '/settings';
   static const String favorites = '/favorites';
   static const String search = '/search';
+  static const String staffHome = '/staff/home';
   static const String dineInTables = '/dine-in/tables';
   static const String dineInTableDetails = '/dine-in/table/:id';
   static const String kds = '/kds';
@@ -36,6 +37,7 @@ class RouteConstants {
   static const String settingsName = 'settings';
   static const String favoritesName = 'favorites';
   static const String searchName = 'search';
+  static const String staffHomeName = 'staffHome';
   static const String dineInTablesName = 'dineInTables';
   static const String dineInTableDetailsName = 'dineInTableDetails';
   static const String kdsName = 'kds';

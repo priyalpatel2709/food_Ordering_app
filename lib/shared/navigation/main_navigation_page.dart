@@ -4,7 +4,6 @@ import '../../features/menu/presentation/views/menu_page.dart';
 import '../../features/cart/presentation/pages/cart_page.dart';
 import '../../features/orders/presentation/pages/orders_page.dart';
 import '../../features/profile/presentation/pages/profile_page.dart';
-import '../../features/dine_in/presentation/pages/dine_in_tables_page.dart';
 import '../../features/menu/presentation/widgets/custom_bottom_navigation_bar.dart';
 import '../../features/cart/presentation/providers/cart_provider.dart';
 
@@ -19,7 +18,6 @@ class MainNavigationPage extends ConsumerWidget {
     MenuPage(),
     CartPage(),
     OrdersPage(),
-    DineInTablesPage(),
     ProfilePage(),
   ];
 

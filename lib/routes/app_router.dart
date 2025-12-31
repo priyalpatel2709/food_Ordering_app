@@ -9,6 +9,10 @@ import '../features/dine_in/presentation/pages/table_details_page.dart';
 import '../features/dine_in/domain/entities/table_entity.dart';
 import '../shared/navigation/main_navigation_page.dart';
 import '../features/kds/presentation/pages/kds_page.dart';
+import '../features/restaurant/presentation/pages/staff_home_page.dart';
+import '../features/menu/presentation/views/menu_page.dart';
+import '../features/cart/presentation/pages/cart_page.dart';
+import '../features/orders/presentation/pages/orders_page.dart';
 
 class AppRouter {
   // Route paths and names are now centralized in RouteConstants
@@ -82,6 +86,17 @@ class AppRouter {
         ),
       ),
       GoRoute(
+        path: RouteConstants.staffHome,
+        name: RouteConstants.staffHomeName,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const StaffHomePage(),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return FadeTransition(opacity: animation, child: child);
+          },
+        ),
+      ),
+      GoRoute(
         path: RouteConstants.dineInTables,
         name: RouteConstants.dineInTablesName,
         pageBuilder: (context, state) => CustomTransitionPage(
@@ -122,6 +137,21 @@ class AppRouter {
         path: RouteConstants.kds,
         name: RouteConstants.kdsName,
         builder: (context, state) => const KdsPage(),
+      ),
+      GoRoute(
+        path: RouteConstants.menu,
+        name: RouteConstants.menuName,
+        builder: (context, state) => const MenuPage(),
+      ),
+      GoRoute(
+        path: RouteConstants.cart,
+        name: RouteConstants.cartName,
+        builder: (context, state) => const CartPage(),
+      ),
+      GoRoute(
+        path: RouteConstants.orders,
+        name: RouteConstants.ordersName,
+        builder: (context, state) => const OrdersPage(),
       ),
     ],
   );

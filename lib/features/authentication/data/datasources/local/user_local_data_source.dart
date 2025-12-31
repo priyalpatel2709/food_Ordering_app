@@ -26,6 +26,7 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
       name: userData['name'] as String,
       email: userData['email'] as String,
       token: userData['token'] as String,
+      role: userData['role'] as String? ?? 'customer',
       restaurantsId: userData['restaurantsId'] as String?,
     );
   }
@@ -37,6 +38,7 @@ class UserLocalDataSourceImpl implements UserLocalDataSource {
       'name': user.name,
       'email': user.email,
       'token': user.token,
+      'role': user.role,
       'restaurantsId': user.restaurantsId,
     });
   }

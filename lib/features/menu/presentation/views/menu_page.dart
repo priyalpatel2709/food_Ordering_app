@@ -137,8 +137,32 @@ class _MenuPageState extends ConsumerState<MenuPage> {
     }
 
     final menuState = ref.watch(menuNotifierProvider);
+    final canPop = ModalRoute.of(context)?.canPop ?? false;
 
     return Scaffold(
+      appBar: canPop
+          ? AppBar(
+              title: const Text('Select Items'),
+              backgroundColor: AppColors.white,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: AppColors.textPrimary,
+                ),
+                onPressed: () => context.pop(),
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(
+                    Icons.shopping_cart,
+                    color: AppColors.primary,
+                  ),
+                  onPressed: () => context.push(RouteConstants.cart),
+                ),
+              ],
+            )
+          : null,
       body: Container(
         decoration: const BoxDecoration(
           gradient: LinearGradient(
@@ -154,7 +178,8 @@ class _MenuPageState extends ConsumerState<MenuPage> {
         child: SafeArea(
           child: Column(
             children: [
-              UserHeaderCard(user: _currentUser, onLogout: _handleLogout),
+              if (!canPop)
+                UserHeaderCard(user: _currentUser, onLogout: _handleLogout),
               _buildDineInBanner(),
               Expanded(child: _buildContent(menuState)),
             ],

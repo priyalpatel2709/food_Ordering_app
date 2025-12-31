@@ -58,7 +58,13 @@ class _SplashPageState extends State<SplashPage>
     if (!mounted) return;
 
     if (isLoggedIn) {
-      context.go(RouteConstants.home);
+      final user = _storageService.getUser();
+      log('User logged in with role: ${user?.role}');
+      if (user?.role == 'staff') {
+        context.go(RouteConstants.staffHome);
+      } else {
+        context.go(RouteConstants.home);
+      }
     } else {
       context.go(RouteConstants.login);
     }
