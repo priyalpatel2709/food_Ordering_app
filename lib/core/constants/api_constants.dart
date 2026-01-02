@@ -1,5 +1,9 @@
+import 'package:flutter/foundation.dart';
+
 class ApiConstants {
-  static const String baseUrl = 'http://localhost:2580/api';
+  static const String baseUrl = kIsWeb
+      ? 'http://localhost:2580/api'
+      : 'http://localhost:2580/api';
 
   //version
   static const String v1 = '/v1/';

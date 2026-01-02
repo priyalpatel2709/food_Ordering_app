@@ -1,3 +1,4 @@
+import '../../../discount/domain/entities/discount_entity.dart';
 import '../../domain/entities/menu_entity.dart';
 import '../../../../core/domain/entities/paginated_data.dart';
 
@@ -48,6 +49,7 @@ class MenuDto {
   final bool isActive;
   final List<MenuAvailabilityDto> availableDays;
   final List<TaxRateDto> taxes;
+  final List<DiscountEntity> discounts;
   final List<MetaDataDto> metaData;
 
   const MenuDto({
@@ -59,6 +61,7 @@ class MenuDto {
     required this.isActive,
     required this.availableDays,
     required this.taxes,
+    required this.discounts,
     required this.metaData,
   });
 
@@ -93,6 +96,11 @@ class MenuDto {
                 .map((e) => TaxRateDto.fromJson(e as Map<String, dynamic>))
                 .toList()
           : [],
+      discounts: json['discounts'] is List
+          ? (json['discounts'] as List<dynamic>)
+                .map((e) => DiscountEntity.fromJson(e as Map<String, dynamic>))
+                .toList()
+          : [],
       metaData: json['metaData'] is List
           ? (json['metaData'] as List<dynamic>)
                 .map((e) => MetaDataDto.fromJson(e as Map<String, dynamic>))
@@ -111,6 +119,9 @@ class MenuDto {
       'isActive': isActive,
       'availableDays': availableDays.map((e) => e.toJson()).toList(),
       'taxes': taxes.map((e) => e.toJson()).toList(),
+      // 'discounts': discounts.map((e) => e.toJson()).toList(), // DTO doesn't usually hold Entities directly but for simplicity/speed here since DiscountDto might be elsewhere
+      'discounts':
+          [], // Sending IDs usually happens in request, this is response DTO mostly. For create/update we send IDs.
       'metaData': metaData.map((e) => e.toJson()).toList(),
     };
   }
@@ -126,6 +137,7 @@ class MenuDto {
       isActive: isActive,
       availableDays: availableDays.map((e) => e.toEntity()).toList(),
       taxes: taxes.map((e) => e.toEntity()).toList(),
+      discounts: discounts,
       metaData: metaData.map((e) => e.toEntity()).toList(),
     );
   }

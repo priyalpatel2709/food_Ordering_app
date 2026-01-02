@@ -296,6 +296,18 @@ class MenuNotifier extends StateNotifier<MenuState> {
       failure: (_) => false,
     );
   }
+
+  /// Delete menu
+  Future<bool> deleteMenu(String id) async {
+    final result = await ref.read(deleteMenuUseCaseProvider).call(id);
+    return result.when(
+      success: (_) async {
+        await loadMenus();
+        return true;
+      },
+      failure: (_) => false,
+    );
+  }
 }
 
 /// Menu Provider

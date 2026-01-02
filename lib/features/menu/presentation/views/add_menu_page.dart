@@ -7,6 +7,7 @@ import '../../presentation/viewmodels/menu_view_model.dart';
 import '../../presentation/viewmodels/categories_view_model.dart';
 import '../../presentation/viewmodels/items_view_model.dart';
 import '../../../tax/presentation/providers/tax_provider.dart';
+import '../../../discount/presentation/providers/discount_provider.dart';
 
 class AddMenuPage extends ConsumerStatefulWidget {
   final MenuEntity? menu;
@@ -26,6 +27,7 @@ class _AddMenuPageState extends ConsumerState<AddMenuPage> {
   final List<String> _selectedCategoryIds = [];
   final List<String> _selectedItemIds = [];
   final List<String> _selectedTaxIds = [];
+  final List<String> _selectedDiscountIds = [];
 
   // Advanced Rules
   final List<MenuAvailability> _availableDays = [];
@@ -40,6 +42,7 @@ class _AddMenuPageState extends ConsumerState<AddMenuPage> {
       ref.read(categoriesNotifierProvider.notifier).loadCategories(limit: 1000);
       ref.read(itemsNotifierProvider.notifier).loadItems(limit: 1000);
       ref.read(taxNotifierProvider.notifier).loadTaxes(limit: 1000);
+      ref.read(discountNotifierProvider.notifier).loadDiscounts(limit: 1000);
     });
 
     if (widget.menu != null) {
@@ -50,6 +53,7 @@ class _AddMenuPageState extends ConsumerState<AddMenuPage> {
       _selectedCategoryIds.addAll(menu.categories.map((c) => c.id));
       _selectedItemIds.addAll(menu.items.map((i) => i.id));
       _selectedTaxIds.addAll(menu.taxes.map((t) => t.id));
+      _selectedDiscountIds.addAll(menu.discounts.map((d) => d.id!));
       _availableDays.addAll(menu.availableDays);
       _metaData.addAll(menu.metaData);
     }
@@ -89,10 +93,10 @@ class _AddMenuPageState extends ConsumerState<AddMenuPage> {
       'items': itemsList,
       'availableDays': availableDaysMap,
       'taxes': _selectedTaxIds,
+      'discounts': _selectedDiscountIds,
       'metaData': _metaData
           .map((e) => {'key': e.key, 'value': e.value})
           .toList(),
-      // 'discounts': [] // Todo: Add discount selection
     };
 
     bool success;
@@ -179,6 +183,8 @@ class _AddMenuPageState extends ConsumerState<AddMenuPage> {
               _buildItemSelector(),
               const SizedBox(height: 16),
               _buildTaxSelector(),
+              const SizedBox(height: 16),
+              _buildDiscountSelector(),
 
               const SizedBox(height: 24),
               _buildSectionTitle('Availability'),
@@ -288,6 +294,26 @@ class _AddMenuPageState extends ConsumerState<AddMenuPage> {
     );
   }
 
+  Widget _buildDiscountSelector() {
+    final discountState = ref.watch(discountNotifierProvider);
+
+    if (discountState is! DiscountLoaded) {
+      return const SizedBox.shrink();
+    }
+
+    return _MultiSelectDialogField(
+      title: 'Discounts',
+      items: discountState.discounts,
+      selectedIds: _selectedDiscountIds,
+      labelBuilder: (d) =>
+          '${d.discountCode} (${d.type == 'percentage' ? '${d.value}%' : '\$${d.value}'})',
+      onSelectionChanged: (ids) => setState(() {
+        _selectedDiscountIds.clear();
+        _selectedDiscountIds.addAll(ids);
+      }),
+    );
+  }
+
   Widget _buildAvailabilityEditor() {
     return Column(
       children: [
@@ -343,15 +369,37 @@ class _AddMenuPageState extends ConsumerState<AddMenuPage> {
               ].map((d) => DropdownMenuItem(value: d, child: Text(d))).toList(),
               onChanged: (val) => selectedDay = val!,
             ),
-            TextField(
+            TextFormField(
               controller: openController,
               decoration: const InputDecoration(labelText: 'Open Time (HH:mm)'),
+              readOnly: true,
+              onTap: () async {
+                final time = await showTimePicker(
+                  context: context,
+                  initialTime: const TimeOfDay(hour: 9, minute: 0),
+                );
+                if (time != null) {
+                  openController.text =
+                      '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+                }
+              },
             ),
-            TextField(
+            TextFormField(
               controller: closeController,
               decoration: const InputDecoration(
                 labelText: 'Close Time (HH:mm)',
               ),
+              readOnly: true,
+              onTap: () async {
+                final time = await showTimePicker(
+                  context: context,
+                  initialTime: const TimeOfDay(hour: 17, minute: 0),
+                );
+                if (time != null) {
+                  closeController.text =
+                      '${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}';
+                }
+              },
             ),
           ],
         ),
@@ -364,6 +412,7 @@ class _AddMenuPageState extends ConsumerState<AddMenuPage> {
             onPressed: () {
               if (openController.text.isNotEmpty &&
                   closeController.text.isNotEmpty) {
+                // ... existing logic
                 setState(() {
                   _availableDays.add(
                     MenuAvailability(

@@ -35,6 +35,7 @@ abstract class MenuRemoteDataSource {
   });
   Future<PaginatedResponseDto<CustomizationOptionDto>>
   getAllCustomizationOptions({int page = 1, int limit = 10});
+  Future<void> deleteMenu(String id);
 }
 
 class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
@@ -247,6 +248,13 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
     return PaginatedResponseDto.fromJson(
       response.data as Map<String, dynamic>,
       (json) => CustomizationOptionDto.fromJson(json),
+    );
+  }
+
+  @override
+  Future<void> deleteMenu(String id) async {
+    await _dioClient.delete(
+      '${ApiConstants.v1}${ApiConstants.menuEndpoint}/$id',
     );
   }
 }

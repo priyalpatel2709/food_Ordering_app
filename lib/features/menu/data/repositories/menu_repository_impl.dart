@@ -381,4 +381,20 @@ class MenuRepositoryImpl implements MenuRepository {
       return Result.failure(Failure.unknown(e.toString()));
     }
   }
+
+  @override
+  Future<Result<void>> deleteMenu(String id) async {
+    try {
+      await _remoteDataSource.deleteMenu(id);
+      return Result.success(null);
+    } on NetworkException catch (e) {
+      return Result.failure(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(
+        Failure.server(e.message, statusCode: e.statusCode),
+      );
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
 }

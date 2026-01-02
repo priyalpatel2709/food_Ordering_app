@@ -151,11 +151,13 @@ class _DiscountsManagementPageState
                 decoration: const InputDecoration(labelText: 'Discount Code'),
                 textCapitalization: TextCapitalization.characters,
               ),
+              SizedBox(height: 16.0),
               TextField(
                 controller: valueController,
                 decoration: const InputDecoration(labelText: 'Value'),
                 keyboardType: TextInputType.number,
               ),
+
               DropdownButton<String>(
                 isExpanded: true,
                 value: type,
@@ -169,6 +171,18 @@ class _DiscountsManagementPageState
                 onChanged: (val) {
                   if (val != null) setDialogState(() => type = val);
                 },
+              ),
+              SizedBox(height: 16.0),
+              TextField(
+                controller: valueController,
+                decoration: const InputDecoration(labelText: 'Valid From'),
+                keyboardType: TextInputType.number,
+              ),
+              SizedBox(height: 16.0),
+              TextField(
+                controller: valueController,
+                decoration: const InputDecoration(labelText: 'Valid To'),
+                keyboardType: TextInputType.number,
               ),
             ],
           ),

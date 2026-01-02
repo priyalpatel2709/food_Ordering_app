@@ -127,7 +127,10 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
                 ),
               ],
             ),
-            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            trailing: IconButton(
+              icon: const Icon(Icons.delete, color: Colors.red),
+              onPressed: () => _confirmDelete(menu.id),
+            ),
             onTap: () => context.push(RouteConstants.addMenu, extra: menu),
           ),
         );
@@ -189,5 +192,41 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
     } catch (e) {
       return false;
     }
+  }
+
+  void _confirmDelete(String id) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Menu'),
+        content: const Text('Are you sure you want to delete this menu?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await ref
+                  .read(menuNotifierProvider.notifier)
+                  .deleteMenu(id);
+              if (mounted) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      success
+                          ? 'Menu deleted successfully'
+                          : 'Failed to delete menu',
+                    ),
+                  ),
+                );
+              }
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -42,6 +42,7 @@ import '../../features/menu/domain/usecases/get_all_items_use_case.dart';
 import '../../features/menu/domain/usecases/get_all_categories_use_case.dart';
 import '../../features/menu/domain/usecases/get_all_customizations_use_case.dart';
 import '../../features/menu/domain/usecases/get_all_menus_use_case.dart';
+import '../../features/menu/domain/usecases/delete_menu_use_case.dart';
 import '../../features/tax/domain/usecases/tax_use_cases.dart';
 
 /// Manual Provider Definitions
@@ -201,6 +202,11 @@ final createMenuUseCaseProvider = Provider<CreateMenuUseCase>((ref) {
 /// Add Item To Menu Use Case Provider
 final addItemToMenuUseCaseProvider = Provider<AddItemToMenuUseCase>((ref) {
   return AddItemToMenuUseCase(ref.watch(menuRepositoryProvider));
+});
+
+/// Delete Menu Use Case Provider
+final deleteMenuUseCaseProvider = Provider<DeleteMenuUseCase>((ref) {
+  return DeleteMenuUseCase(ref.watch(menuRepositoryProvider));
 });
 
 /// Get Dashboard Stats Use Case Provider

@@ -1,4 +1,5 @@
-/// Menu Entity
+import '../../../discount/domain/entities/discount_entity.dart';
+
 /// TODO: When build_runner is fixed, restore Freezed code generation
 class MenuEntity {
   final String id;
@@ -9,7 +10,7 @@ class MenuEntity {
   final bool isActive;
   final List<MenuAvailability> availableDays;
   final List<TaxRateEntity> taxes;
-  // final List<DiscountEntity> discounts; // TODO: Import DiscountEntity
+  final List<DiscountEntity> discounts;
   final List<MetaDataEntity> metaData;
 
   const MenuEntity({
@@ -21,6 +22,7 @@ class MenuEntity {
     required this.isActive,
     required this.availableDays,
     required this.taxes,
+    required this.discounts,
     required this.metaData,
   });
 
@@ -33,6 +35,7 @@ class MenuEntity {
     bool? isActive,
     List<MenuAvailability>? availableDays,
     List<TaxRateEntity>? taxes,
+    List<DiscountEntity>? discounts,
     List<MetaDataEntity>? metaData,
   }) {
     return MenuEntity(
@@ -44,6 +47,7 @@ class MenuEntity {
       isActive: isActive ?? this.isActive,
       availableDays: availableDays ?? this.availableDays,
       taxes: taxes ?? this.taxes,
+      discounts: discounts ?? this.discounts,
       metaData: metaData ?? this.metaData,
     );
   }

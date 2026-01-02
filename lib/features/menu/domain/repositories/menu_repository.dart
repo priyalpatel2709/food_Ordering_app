@@ -39,4 +39,5 @@ abstract class MenuRepository {
   });
   Future<Result<PaginatedData<CustomizationOptionEntity>>>
   getAllCustomizationOptions({int page = 1, int limit = 10});
+  Future<Result<void>> deleteMenu(String id);
 }
