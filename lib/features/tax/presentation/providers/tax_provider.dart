@@ -10,7 +10,34 @@ class TaxLoading extends TaxState {}
 
 class TaxLoaded extends TaxState {
   final List<TaxEntity> taxes;
-  TaxLoaded(this.taxes);
+  final int currentPage;
+  final int totalPages;
+  final int totalDocs;
+  final bool isLoadingMore;
+
+  TaxLoaded({
+    required this.taxes,
+    required this.currentPage,
+    required this.totalPages,
+    required this.totalDocs,
+    this.isLoadingMore = false,
+  });
+
+  TaxLoaded copyWith({
+    List<TaxEntity>? taxes,
+    int? currentPage,
+    int? totalPages,
+    int? totalDocs,
+    bool? isLoadingMore,
+  }) {
+    return TaxLoaded(
+      taxes: taxes ?? this.taxes,
+      currentPage: currentPage ?? this.currentPage,
+      totalPages: totalPages ?? this.totalPages,
+      totalDocs: totalDocs ?? this.totalDocs,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
 }
 
 class TaxError extends TaxState {
@@ -23,13 +50,52 @@ class TaxNotifier extends StateNotifier<TaxState> {
 
   TaxNotifier(this._ref) : super(TaxInitial());
 
-  Future<void> loadTaxes() async {
-    state = TaxLoading();
-    final result = await _ref.read(getAllTaxesUseCaseProvider).call();
+  Future<void> loadTaxes({int page = 1, int limit = 10}) async {
+    if (page == 1) {
+      state = TaxLoading();
+    } else {
+      final currentState = state;
+      if (currentState is TaxLoaded) {
+        state = currentState.copyWith(isLoadingMore: true);
+      }
+    }
+
+    final result = await _ref
+        .read(getAllTaxesUseCaseProvider)
+        .call(page: page, limit: limit);
+
     result.when(
-      success: (taxes) => state = TaxLoaded(taxes),
+      success: (paginatedData) {
+        if (page == 1) {
+          state = TaxLoaded(
+            taxes: paginatedData.items,
+            currentPage: paginatedData.page,
+            totalPages: paginatedData.totalPages,
+            totalDocs: paginatedData.totalDocs,
+          );
+        } else {
+          final currentState = state;
+          if (currentState is TaxLoaded) {
+            state = TaxLoaded(
+              taxes: [...currentState.taxes, ...paginatedData.items],
+              currentPage: paginatedData.page,
+              totalPages: paginatedData.totalPages,
+              totalDocs: paginatedData.totalDocs,
+            );
+          }
+        }
+      },
       failure: (failure) => state = TaxError(failure.message),
     );
+  }
+
+  Future<void> loadMore() async {
+    final currentState = state;
+    if (currentState is TaxLoaded &&
+        !currentState.isLoadingMore &&
+        currentState.currentPage < currentState.totalPages) {
+      await loadTaxes(page: currentState.currentPage + 1);
+    }
   }
 
   Future<bool> createTax(Map<String, dynamic> data) async {

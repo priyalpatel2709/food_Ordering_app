@@ -41,6 +41,7 @@ import '../../features/menu/domain/usecases/delete_item_use_case.dart';
 import '../../features/menu/domain/usecases/get_all_items_use_case.dart';
 import '../../features/menu/domain/usecases/get_all_categories_use_case.dart';
 import '../../features/menu/domain/usecases/get_all_customizations_use_case.dart';
+import '../../features/menu/domain/usecases/get_all_menus_use_case.dart';
 import '../../features/tax/domain/usecases/tax_use_cases.dart';
 
 /// Manual Provider Definitions
@@ -185,6 +186,11 @@ final updateMenuAdvancedUseCaseProvider = Provider<UpdateMenuAdvancedUseCase>((
 /// Get Menu By Id Use Case Provider
 final getMenuByIdUseCaseProvider = Provider<GetMenuByIdUseCase>((ref) {
   return GetMenuByIdUseCase(ref.watch(menuRepositoryProvider));
+});
+
+/// Get All Menus Use Case Provider
+final getAllMenusUseCaseProvider = Provider<GetAllMenusUseCase>((ref) {
+  return GetAllMenusUseCase(ref.watch(menuRepositoryProvider));
 });
 
 /// Create Menu Use Case Provider

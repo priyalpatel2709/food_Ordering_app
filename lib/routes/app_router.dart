@@ -177,8 +177,8 @@ class AppRouter {
         path: RouteConstants.addItem,
         name: RouteConstants.addItemName,
         builder: (context, state) {
-          final menus = state.extra as List<MenuEntity>? ?? [];
-          return AddItemPage(menus: menus);
+          final category = state.extra as List<CategoryEntity>? ?? [];
+          return AddItemPage(category: category);
         },
       ),
       GoRoute(

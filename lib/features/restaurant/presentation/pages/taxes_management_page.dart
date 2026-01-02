@@ -14,10 +14,26 @@ class TaxesManagementPage extends ConsumerStatefulWidget {
 }
 
 class _TaxesManagementPageState extends ConsumerState<TaxesManagementPage> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     Future.microtask(() => ref.read(taxNotifierProvider.notifier).loadTaxes());
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref.read(taxNotifierProvider.notifier).loadMore();
+    }
   }
 
   @override
@@ -35,7 +51,13 @@ class _TaxesManagementPageState extends ConsumerState<TaxesManagementPage> {
         TaxInitial() ||
         TaxLoading() => const Center(child: CircularProgressIndicator()),
         TaxError(:final message) => Center(child: Text('Error: $message')),
-        TaxLoaded(:final taxes) => _buildTaxList(taxes),
+        TaxLoaded(
+          :final taxes,
+          :final isLoadingMore,
+          :final currentPage,
+          :final totalPages,
+        ) =>
+          _buildTaxList(taxes, isLoadingMore, currentPage < totalPages),
       },
       floatingActionButton: FloatingActionButton(
         // heroTag: 'taxes_management_fab',
@@ -45,15 +67,26 @@ class _TaxesManagementPageState extends ConsumerState<TaxesManagementPage> {
     );
   }
 
-  Widget _buildTaxList(List<TaxEntity> taxes) {
+  Widget _buildTaxList(
+    List<TaxEntity> taxes,
+    bool isLoadingMore,
+    bool hasMore,
+  ) {
     if (taxes.isEmpty) {
       return const Center(child: Text('No taxes found.'));
     }
 
     return ListView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.all(16),
-      itemCount: taxes.length,
+      itemCount: taxes.length + (hasMore ? 1 : 0),
       itemBuilder: (context, index) {
+        if (index == taxes.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 32),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
         final tax = taxes[index];
         return Card(
           margin: const EdgeInsets.only(bottom: 12),

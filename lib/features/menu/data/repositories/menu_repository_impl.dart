@@ -3,6 +3,7 @@ import 'dart:developer';
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/error/result.dart';
+import '../../../../core/domain/entities/paginated_data.dart';
 import '../../domain/entities/menu_entity.dart';
 import '../../domain/repositories/menu_repository.dart';
 import '../datasources/menu_local_data_source.dart';
@@ -81,6 +82,28 @@ class MenuRepositoryImpl implements MenuRepository {
     try {
       await _remoteDataSource.updateMenuAdvanced(id, data);
       return Result.success(null);
+    } on NetworkException catch (e) {
+      return Result.failure(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(
+        Failure.server(e.message, statusCode: e.statusCode),
+      );
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<PaginatedData<MenuEntity>>> getAllMenus({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    try {
+      final responseDto = await _remoteDataSource.getAllMenus(
+        page: page,
+        limit: limit,
+      );
+      return Result.success(responseDto.toPaginatedData((e) => e.toEntity()));
     } on NetworkException catch (e) {
       return Result.failure(Failure.network(e.message));
     } on ServerException catch (e) {
@@ -280,10 +303,16 @@ class MenuRepositoryImpl implements MenuRepository {
   }
 
   @override
-  Future<Result<List<MenuItemEntity>>> getAllItems() async {
+  Future<Result<PaginatedData<MenuItemEntity>>> getAllItems({
+    int page = 1,
+    int limit = 10,
+  }) async {
     try {
-      final dtos = await _remoteDataSource.getAllItems();
-      return Result.success(dtos.map((e) => e.toEntity()).toList());
+      final responseDto = await _remoteDataSource.getAllItems(
+        page: page,
+        limit: limit,
+      );
+      return Result.success(responseDto.toPaginatedData((e) => e.toEntity()));
     } on NetworkException catch (e) {
       return Result.failure(Failure.network(e.message));
     } on ServerException catch (e) {
@@ -296,10 +325,16 @@ class MenuRepositoryImpl implements MenuRepository {
   }
 
   @override
-  Future<Result<List<CategoryEntity>>> getAllCategories() async {
+  Future<Result<PaginatedData<CategoryEntity>>> getAllCategories({
+    int page = 1,
+    int limit = 10,
+  }) async {
     try {
-      final dtos = await _remoteDataSource.getAllCategories();
-      return Result.success(dtos.map((e) => e.toEntity()).toList());
+      final responseDto = await _remoteDataSource.getAllCategories(
+        page: page,
+        limit: limit,
+      );
+      return Result.success(responseDto.toPaginatedData((e) => e.toEntity()));
     } on NetworkException catch (e) {
       return Result.failure(Failure.network(e.message));
     } on ServerException catch (e) {
@@ -312,11 +347,14 @@ class MenuRepositoryImpl implements MenuRepository {
   }
 
   @override
-  Future<Result<List<CustomizationOptionEntity>>>
-  getAllCustomizationOptions() async {
+  Future<Result<PaginatedData<CustomizationOptionEntity>>>
+  getAllCustomizationOptions({int page = 1, int limit = 10}) async {
     try {
-      final dtos = await _remoteDataSource.getAllCustomizationOptions();
-      return Result.success(dtos.map((e) => e.toEntity()).toList());
+      final responseDto = await _remoteDataSource.getAllCustomizationOptions(
+        page: page,
+        limit: limit,
+      );
+      return Result.success(responseDto.toPaginatedData((e) => e.toEntity()));
     } on NetworkException catch (e) {
       return Result.failure(Failure.network(e.message));
     } on ServerException catch (e) {

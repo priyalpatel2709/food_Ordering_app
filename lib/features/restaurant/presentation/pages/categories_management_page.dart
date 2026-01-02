@@ -14,12 +14,28 @@ class CategoriesManagementPage extends ConsumerStatefulWidget {
 
 class _CategoriesManagementPageState
     extends ConsumerState<CategoriesManagementPage> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     Future.microtask(
       () => ref.read(categoriesNotifierProvider.notifier).loadCategories(),
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref.read(categoriesNotifierProvider.notifier).loadMore();
+    }
   }
 
   @override
@@ -39,7 +55,17 @@ class _CategoriesManagementPageState
         CategoriesError(:final message) => Center(
           child: Text('Error: $message'),
         ),
-        CategoriesLoaded(:final categories) => _buildCategoryList(categories),
+        CategoriesLoaded(
+          :final categories,
+          :final isLoadingMore,
+          :final currentPage,
+          :final totalPages,
+        ) =>
+          _buildCategoryList(
+            categories,
+            isLoadingMore,
+            currentPage < totalPages,
+          ),
       },
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddCategoryDialog(),
@@ -48,15 +74,26 @@ class _CategoriesManagementPageState
     );
   }
 
-  Widget _buildCategoryList(List<CategoryEntity> categories) {
+  Widget _buildCategoryList(
+    List<CategoryEntity> categories,
+    bool isLoadingMore,
+    bool hasMore,
+  ) {
     if (categories.isEmpty) {
       return const Center(child: Text('No categories found.'));
     }
 
     return ListView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.all(16),
-      itemCount: categories.length,
+      itemCount: categories.length + (hasMore ? 1 : 0),
       itemBuilder: (context, index) {
+        if (index == categories.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 32),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
         final category = categories[index];
         return Card(
           margin: const EdgeInsets.only(bottom: 12),

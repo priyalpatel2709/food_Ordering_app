@@ -17,9 +17,7 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => ref.read(menuNotifierProvider.notifier).loadCurrentMenu(),
-    );
+    Future.microtask(() => ref.read(menuNotifierProvider.notifier).loadMenus());
   }
 
   @override
@@ -145,7 +143,7 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
               result.when(
                 success: (_) {
                   navigator.pop();
-                  ref.read(menuNotifierProvider.notifier).refresh();
+                  ref.read(menuNotifierProvider.notifier).loadMenus();
                   ScaffoldMessenger.of(this.context).showSnackBar(
                     const SnackBar(content: Text('Menu updated successfully!')),
                   );
@@ -220,7 +218,7 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
               result.when(
                 success: (_) {
                   navigator.pop();
-                  ref.read(menuNotifierProvider.notifier).refresh();
+                  ref.read(menuNotifierProvider.notifier).loadMenus();
                   ScaffoldMessenger.of(this.context).showSnackBar(
                     const SnackBar(content: Text('Advanced rules updated!')),
                   );

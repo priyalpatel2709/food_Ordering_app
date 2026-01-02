@@ -16,7 +16,34 @@ class CategoriesLoading extends CategoriesState {
 
 class CategoriesLoaded extends CategoriesState {
   final List<CategoryEntity> categories;
-  const CategoriesLoaded(this.categories);
+  final int currentPage;
+  final int totalPages;
+  final int totalDocs;
+  final bool isLoadingMore;
+
+  const CategoriesLoaded({
+    required this.categories,
+    required this.currentPage,
+    required this.totalPages,
+    required this.totalDocs,
+    this.isLoadingMore = false,
+  });
+
+  CategoriesLoaded copyWith({
+    List<CategoryEntity>? categories,
+    int? currentPage,
+    int? totalPages,
+    int? totalDocs,
+    bool? isLoadingMore,
+  }) {
+    return CategoriesLoaded(
+      categories: categories ?? this.categories,
+      currentPage: currentPage ?? this.currentPage,
+      totalPages: totalPages ?? this.totalPages,
+      totalDocs: totalDocs ?? this.totalDocs,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
 }
 
 class CategoriesError extends CategoriesState {
@@ -31,13 +58,52 @@ class CategoriesNotifier extends StateNotifier<CategoriesState> {
     loadCategories();
   }
 
-  Future<void> loadCategories() async {
-    state = const CategoriesLoading();
-    final result = await ref.read(getAllCategoriesUseCaseProvider).call();
+  Future<void> loadCategories({int page = 1, int limit = 10}) async {
+    if (page == 1) {
+      state = const CategoriesLoading();
+    } else {
+      final currentState = state;
+      if (currentState is CategoriesLoaded) {
+        state = currentState.copyWith(isLoadingMore: true);
+      }
+    }
+
+    final result = await ref
+        .read(getAllCategoriesUseCaseProvider)
+        .call(page: page, limit: limit);
+
     result.when(
-      success: (categories) => state = CategoriesLoaded(categories),
+      success: (paginatedData) {
+        if (page == 1) {
+          state = CategoriesLoaded(
+            categories: paginatedData.items,
+            currentPage: paginatedData.page,
+            totalPages: paginatedData.totalPages,
+            totalDocs: paginatedData.totalDocs,
+          );
+        } else {
+          final currentState = state;
+          if (currentState is CategoriesLoaded) {
+            state = CategoriesLoaded(
+              categories: [...currentState.categories, ...paginatedData.items],
+              currentPage: paginatedData.page,
+              totalPages: paginatedData.totalPages,
+              totalDocs: paginatedData.totalDocs,
+            );
+          }
+        }
+      },
       failure: (failure) => state = CategoriesError(failure.toString()),
     );
+  }
+
+  Future<void> loadMore() async {
+    final currentState = state;
+    if (currentState is CategoriesLoaded &&
+        !currentState.isLoadingMore &&
+        currentState.currentPage < currentState.totalPages) {
+      await loadCategories(page: currentState.currentPage + 1);
+    }
   }
 
   Future<bool> createCategory(Map<String, dynamic> data) async {

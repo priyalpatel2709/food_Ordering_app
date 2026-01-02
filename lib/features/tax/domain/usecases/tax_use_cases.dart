@@ -1,3 +1,4 @@
+import '../../../../core/domain/entities/paginated_data.dart';
 import '../../../../core/error/result.dart';
 import '../entities/tax_entity.dart';
 import '../repositories/tax_repository.dart';
@@ -7,8 +8,11 @@ class GetAllTaxesUseCase {
 
   GetAllTaxesUseCase(this._repository);
 
-  Future<Result<List<TaxEntity>>> call() {
-    return _repository.getAllTaxes();
+  Future<Result<PaginatedData<TaxEntity>>> call({
+    int page = 1,
+    int limit = 10,
+  }) {
+    return _repository.getAllTaxes(page: page, limit: limit);
   }
 }
 

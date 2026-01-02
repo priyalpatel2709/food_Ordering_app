@@ -1,10 +1,14 @@
+import '../../../menu/data/dto/menu_dto.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../domain/entities/discount_entity.dart';
 
 /// Remote data source for discounts
 abstract class DiscountRemoteDataSource {
-  Future<List<DiscountEntity>> getAllDiscounts();
+  Future<PaginatedResponseDto<DiscountEntity>> getAllDiscounts({
+    int page = 1,
+    int limit = 10,
+  });
   Future<void> createDiscount(Map<String, dynamic> data);
   Future<void> updateDiscount(String id, Map<String, dynamic> data);
   Future<void> deleteDiscount(String id);
@@ -16,23 +20,19 @@ class DiscountRemoteDataSourceImpl implements DiscountRemoteDataSource {
   DiscountRemoteDataSourceImpl(this._dioClient);
 
   @override
-  Future<List<DiscountEntity>> getAllDiscounts() async {
+  Future<PaginatedResponseDto<DiscountEntity>> getAllDiscounts({
+    int page = 1,
+    int limit = 10,
+  }) async {
     final response = await _dioClient.get(
       '${ApiConstants.v1}${ApiConstants.discount}',
+      queryParameters: {'page': page, 'limit': limit},
     );
 
-    final data = response.data as Map<String, dynamic>;
-    if (data['status'] == 'success') {
-      final discounts = (data['data'] as List)
-          .map(
-            (discount) =>
-                DiscountEntity.fromJson(discount as Map<String, dynamic>),
-          )
-          .toList();
-      return discounts;
-    } else {
-      throw Exception(data['message'] ?? 'Failed to get discounts');
-    }
+    return PaginatedResponseDto.fromJson(
+      response.data as Map<String, dynamic>,
+      (json) => DiscountEntity.fromJson(json),
+    );
   }
 
   @override

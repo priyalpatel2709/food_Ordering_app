@@ -3,15 +3,15 @@ import '../../../../core/error/result.dart';
 import '../entities/menu_entity.dart';
 import '../repositories/menu_repository.dart';
 
-class GetAllCategoriesUseCase {
-  final MenuRepository _repository;
+class GetAllMenusUseCase {
+  final MenuRepository repository;
 
-  GetAllCategoriesUseCase(this._repository);
+  GetAllMenusUseCase(this.repository);
 
-  Future<Result<PaginatedData<CategoryEntity>>> call({
+  Future<Result<PaginatedData<MenuEntity>>> call({
     int page = 1,
     int limit = 10,
   }) {
-    return _repository.getAllCategories(page: page, limit: limit);
+    return repository.getAllMenus(page: page, limit: limit);
   }
 }

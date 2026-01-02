@@ -7,8 +7,8 @@ import '../../../menu/domain/entities/menu_entity.dart';
 import '../../../menu/presentation/viewmodels/menu_view_model.dart';
 
 class AddItemPage extends ConsumerStatefulWidget {
-  final List<MenuEntity> menus;
-  const AddItemPage({super.key, required this.menus});
+  final List<CategoryEntity> category;
+  const AddItemPage({super.key, required this.category});
 
   @override
   ConsumerState<AddItemPage> createState() => _AddItemPageState();
@@ -35,8 +35,8 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
   @override
   void initState() {
     super.initState();
-    if (widget.menus.isNotEmpty) {
-      _selectedMenuId = widget.menus.first.id;
+    if (widget.category.isNotEmpty) {
+      _selectedMenuId = widget.category.first.id;
     }
   }
 
@@ -52,11 +52,11 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
     super.dispose();
   }
 
-  List<CategoryEntity> get _availableCategories {
-    if (_selectedMenuId == null) return [];
-    final menu = widget.menus.firstWhere((m) => m.id == _selectedMenuId);
-    return menu.categories;
-  }
+  // List<CategoryEntity> get _availableCategories {
+  //   if (_selectedMenuId == null) return [];
+  //   final menu = widget.menus.firstWhere((m) => m.id == _selectedMenuId);
+  //   return menu.categories;
+  // }
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
@@ -131,7 +131,7 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
                 border: OutlineInputBorder(),
                 hintText: 'Choose category',
               ),
-              items: _availableCategories.map((cat) {
+              items: widget.category.map((cat) {
                 return DropdownMenuItem(value: cat.id, child: Text(cat.name));
               }).toList(),
               onChanged: (val) => setState(() => _selectedCategoryId = val),

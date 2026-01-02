@@ -14,12 +14,28 @@ class DiscountsManagementPage extends ConsumerStatefulWidget {
 
 class _DiscountsManagementPageState
     extends ConsumerState<DiscountsManagementPage> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     Future.microtask(
-      () => ref.read(discountNotifierProvider.notifier).getValidDiscounts(),
+      () => ref.read(discountNotifierProvider.notifier).loadDiscounts(),
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref.read(discountNotifierProvider.notifier).loadMore();
+    }
   }
 
   @override
@@ -37,7 +53,17 @@ class _DiscountsManagementPageState
         DiscountInitial() ||
         DiscountLoading() => const Center(child: CircularProgressIndicator()),
         DiscountError(:final message) => Center(child: Text('Error: $message')),
-        DiscountLoaded(:final discounts) => _buildDiscountList(discounts),
+        DiscountLoaded(
+          :final discounts,
+          :final isLoadingMore,
+          :final currentPage,
+          :final totalPages,
+        ) =>
+          _buildDiscountList(
+            discounts,
+            isLoadingMore,
+            currentPage < totalPages,
+          ),
       },
       floatingActionButton: FloatingActionButton(
         // heroTag: 'discounts_management_fab',
@@ -47,15 +73,26 @@ class _DiscountsManagementPageState
     );
   }
 
-  Widget _buildDiscountList(List<DiscountEntity> discounts) {
+  Widget _buildDiscountList(
+    List<DiscountEntity> discounts,
+    bool isLoadingMore,
+    bool hasMore,
+  ) {
     if (discounts.isEmpty) {
       return const Center(child: Text('No discounts found.'));
     }
 
     return ListView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.all(16),
-      itemCount: discounts.length,
+      itemCount: discounts.length + (hasMore ? 1 : 0),
       itemBuilder: (context, index) {
+        if (index == discounts.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 32),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
         final discount = discounts[index];
         return Card(
           margin: const EdgeInsets.only(bottom: 12),

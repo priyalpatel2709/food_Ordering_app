@@ -29,7 +29,34 @@ class DiscountLoading extends DiscountState {}
 
 class DiscountLoaded extends DiscountState {
   final List<DiscountEntity> discounts;
-  DiscountLoaded(this.discounts);
+  final int currentPage;
+  final int totalPages;
+  final int totalDocs;
+  final bool isLoadingMore;
+
+  DiscountLoaded({
+    required this.discounts,
+    required this.currentPage,
+    required this.totalPages,
+    required this.totalDocs,
+    this.isLoadingMore = false,
+  });
+
+  DiscountLoaded copyWith({
+    List<DiscountEntity>? discounts,
+    int? currentPage,
+    int? totalPages,
+    int? totalDocs,
+    bool? isLoadingMore,
+  }) {
+    return DiscountLoaded(
+      discounts: discounts ?? this.discounts,
+      currentPage: currentPage ?? this.currentPage,
+      totalPages: totalPages ?? this.totalPages,
+      totalDocs: totalDocs ?? this.totalDocs,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
 }
 
 class DiscountError extends DiscountState {
@@ -43,15 +70,56 @@ class DiscountNotifier extends StateNotifier<DiscountState> {
 
   DiscountNotifier(this._repository) : super(DiscountInitial());
 
-  /// Get all valid discounts
-  Future<void> getValidDiscounts() async {
-    state = DiscountLoading();
+  /// Get discounts with pagination
+  Future<void> loadDiscounts({int page = 1, int limit = 10}) async {
+    if (page == 1) {
+      state = DiscountLoading();
+    } else {
+      final currentState = state;
+      if (currentState is DiscountLoaded) {
+        state = currentState.copyWith(isLoadingMore: true);
+      }
+    }
+
     try {
-      final discounts = await _repository.getValidDiscounts();
-      state = DiscountLoaded(discounts);
+      final paginatedData = await _repository.getAllDiscounts(
+        page: page,
+        limit: limit,
+      );
+
+      if (page == 1) {
+        state = DiscountLoaded(
+          discounts: paginatedData.items,
+          currentPage: paginatedData.page,
+          totalPages: paginatedData.totalPages,
+          totalDocs: paginatedData.totalDocs,
+        );
+      } else {
+        final currentState = state;
+        if (currentState is DiscountLoaded) {
+          state = DiscountLoaded(
+            discounts: [...currentState.discounts, ...paginatedData.items],
+            currentPage: paginatedData.page,
+            totalPages: paginatedData.totalPages,
+            totalDocs: paginatedData.totalDocs,
+          );
+        }
+      }
     } catch (e, st) {
       log('get discounts error: $e $st');
       state = DiscountError(e.toString());
+    }
+  }
+
+  /// Alias for compatibility
+  Future<void> getValidDiscounts() async => loadDiscounts();
+
+  Future<void> loadMore() async {
+    final currentState = state;
+    if (currentState is DiscountLoaded &&
+        !currentState.isLoadingMore &&
+        currentState.currentPage < currentState.totalPages) {
+      await loadDiscounts(page: currentState.currentPage + 1);
     }
   }
 

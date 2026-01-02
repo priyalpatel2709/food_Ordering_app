@@ -1,3 +1,4 @@
+import '../../../../core/domain/entities/paginated_data.dart';
 import '../../../../core/error/result.dart';
 import '../entities/menu_entity.dart';
 import '../repositories/menu_repository.dart';
@@ -7,7 +8,10 @@ class GetAllCustomizationsUseCase {
 
   GetAllCustomizationsUseCase(this._repository);
 
-  Future<Result<List<CustomizationOptionEntity>>> call() {
-    return _repository.getAllCustomizationOptions();
+  Future<Result<PaginatedData<CustomizationOptionEntity>>> call({
+    int page = 1,
+    int limit = 10,
+  }) {
+    return _repository.getAllCustomizationOptions(page: page, limit: limit);
   }
 }

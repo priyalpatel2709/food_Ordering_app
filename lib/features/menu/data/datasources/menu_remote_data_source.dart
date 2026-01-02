@@ -12,6 +12,10 @@ abstract class MenuRemoteDataSource {
   Future<void> updateMenu(String id, Map<String, dynamic> data);
   Future<void> addItemToMenu(String menuId, Map<String, dynamic> itemData);
   Future<void> updateMenuAdvanced(String id, Map<String, dynamic> data);
+  Future<PaginatedResponseDto<MenuDto>> getAllMenus({
+    int page = 1,
+    int limit = 10,
+  });
   Future<void> createCategory(Map<String, dynamic> data);
   Future<void> updateCategory(String id, Map<String, dynamic> data);
   Future<void> deleteCategory(String id);
@@ -20,9 +24,16 @@ abstract class MenuRemoteDataSource {
   Future<void> deleteCustomizationOption(String id);
   Future<void> updateItem(String id, Map<String, dynamic> data);
   Future<void> deleteItem(String id);
-  Future<List<MenuItemDto>> getAllItems();
-  Future<List<CategoryDto>> getAllCategories();
-  Future<List<CustomizationOptionDto>> getAllCustomizationOptions();
+  Future<PaginatedResponseDto<MenuItemDto>> getAllItems({
+    int page = 1,
+    int limit = 10,
+  });
+  Future<PaginatedResponseDto<CategoryDto>> getAllCategories({
+    int page = 1,
+    int limit = 10,
+  });
+  Future<PaginatedResponseDto<CustomizationOptionDto>>
+  getAllCustomizationOptions({int page = 1, int limit = 10});
 }
 
 class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
@@ -105,6 +116,21 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
   }
 
   @override
+  Future<PaginatedResponseDto<MenuDto>> getAllMenus({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final response = await _dioClient.get(
+      '${ApiConstants.v1}${ApiConstants.menuEndpoint}',
+      queryParameters: {'page': page, 'limit': limit},
+    );
+    return PaginatedResponseDto.fromJson(
+      response.data as Map<String, dynamic>,
+      (json) => MenuDto.fromJson(json),
+    );
+  }
+
+  @override
   Future<void> createCategory(Map<String, dynamic> data) async {
     await _dioClient.post(
       '${ApiConstants.v1}${ApiConstants.categoryEndpoint}',
@@ -169,38 +195,45 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
   }
 
   @override
-  Future<List<MenuItemDto>> getAllItems() async {
+  Future<PaginatedResponseDto<MenuItemDto>> getAllItems({
+    int page = 1,
+    int limit = 10,
+  }) async {
     final response = await _dioClient.get(
       '${ApiConstants.v1}${ApiConstants.itemEndpoint}',
+      queryParameters: {'page': page, 'limit': limit},
     );
-    final data = response.data['data'];
-    if (data is List) {
-      return data.map((e) => MenuItemDto.fromJson(e)).toList();
-    }
-    return [];
+    return PaginatedResponseDto.fromJson(
+      response.data as Map<String, dynamic>,
+      (json) => MenuItemDto.fromJson(json),
+    );
   }
 
   @override
-  Future<List<CategoryDto>> getAllCategories() async {
+  Future<PaginatedResponseDto<CategoryDto>> getAllCategories({
+    int page = 1,
+    int limit = 10,
+  }) async {
     final response = await _dioClient.get(
       '${ApiConstants.v1}${ApiConstants.categoryEndpoint}',
+      queryParameters: {'page': page, 'limit': limit},
     );
-    final data = response.data['data'];
-    if (data is List) {
-      return data.map((e) => CategoryDto.fromJson(e)).toList();
-    }
-    return [];
+    return PaginatedResponseDto.fromJson(
+      response.data as Map<String, dynamic>,
+      (json) => CategoryDto.fromJson(json),
+    );
   }
 
   @override
-  Future<List<CustomizationOptionDto>> getAllCustomizationOptions() async {
+  Future<PaginatedResponseDto<CustomizationOptionDto>>
+  getAllCustomizationOptions({int page = 1, int limit = 10}) async {
     final response = await _dioClient.get(
       '${ApiConstants.v1}${ApiConstants.customizationOptionEndpoint}',
+      queryParameters: {'page': page, 'limit': limit},
     );
-    final data = response.data['data'];
-    if (data is List) {
-      return data.map((e) => CustomizationOptionDto.fromJson(e)).toList();
-    }
-    return [];
+    return PaginatedResponseDto.fromJson(
+      response.data as Map<String, dynamic>,
+      (json) => CustomizationOptionDto.fromJson(json),
+    );
   }
 }

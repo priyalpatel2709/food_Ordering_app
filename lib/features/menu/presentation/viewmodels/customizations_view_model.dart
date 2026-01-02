@@ -16,7 +16,34 @@ class CustomizationsLoading extends CustomizationsState {
 
 class CustomizationsLoaded extends CustomizationsState {
   final List<CustomizationOptionEntity> options;
-  const CustomizationsLoaded(this.options);
+  final int currentPage;
+  final int totalPages;
+  final int totalDocs;
+  final bool isLoadingMore;
+
+  const CustomizationsLoaded({
+    required this.options,
+    required this.currentPage,
+    required this.totalPages,
+    required this.totalDocs,
+    this.isLoadingMore = false,
+  });
+
+  CustomizationsLoaded copyWith({
+    List<CustomizationOptionEntity>? options,
+    int? currentPage,
+    int? totalPages,
+    int? totalDocs,
+    bool? isLoadingMore,
+  }) {
+    return CustomizationsLoaded(
+      options: options ?? this.options,
+      currentPage: currentPage ?? this.currentPage,
+      totalPages: totalPages ?? this.totalPages,
+      totalDocs: totalDocs ?? this.totalDocs,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
 }
 
 class CustomizationsError extends CustomizationsState {
@@ -31,13 +58,52 @@ class CustomizationsNotifier extends StateNotifier<CustomizationsState> {
     loadOptions();
   }
 
-  Future<void> loadOptions() async {
-    state = const CustomizationsLoading();
-    final result = await ref.read(getAllCustomizationsUseCaseProvider).call();
+  Future<void> loadOptions({int page = 1, int limit = 10}) async {
+    if (page == 1) {
+      state = const CustomizationsLoading();
+    } else {
+      final currentState = state;
+      if (currentState is CustomizationsLoaded) {
+        state = currentState.copyWith(isLoadingMore: true);
+      }
+    }
+
+    final result = await ref
+        .read(getAllCustomizationsUseCaseProvider)
+        .call(page: page, limit: limit);
+
     result.when(
-      success: (options) => state = CustomizationsLoaded(options),
+      success: (paginatedData) {
+        if (page == 1) {
+          state = CustomizationsLoaded(
+            options: paginatedData.items,
+            currentPage: paginatedData.page,
+            totalPages: paginatedData.totalPages,
+            totalDocs: paginatedData.totalDocs,
+          );
+        } else {
+          final currentState = state;
+          if (currentState is CustomizationsLoaded) {
+            state = CustomizationsLoaded(
+              options: [...currentState.options, ...paginatedData.items],
+              currentPage: paginatedData.page,
+              totalPages: paginatedData.totalPages,
+              totalDocs: paginatedData.totalDocs,
+            );
+          }
+        }
+      },
       failure: (failure) => state = CustomizationsError(failure.toString()),
     );
+  }
+
+  Future<void> loadMore() async {
+    final currentState = state;
+    if (currentState is CustomizationsLoaded &&
+        !currentState.isLoadingMore &&
+        currentState.currentPage < currentState.totalPages) {
+      await loadOptions(page: currentState.currentPage + 1);
+    }
   }
 
   Future<bool> createOption(Map<String, dynamic> data) async {

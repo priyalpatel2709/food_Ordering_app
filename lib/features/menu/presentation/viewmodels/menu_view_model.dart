@@ -18,7 +18,34 @@ class MenuLoading extends MenuState {
 
 class MenuLoaded extends MenuState {
   final List<MenuEntity> menus;
-  const MenuLoaded(this.menus);
+  final bool isLoadingMore;
+  final int currentPage;
+  final int totalPages;
+  final int totalDocs;
+
+  const MenuLoaded(
+    this.menus, {
+    this.isLoadingMore = false,
+    this.currentPage = 1,
+    this.totalPages = 1,
+    this.totalDocs = 0,
+  });
+
+  MenuLoaded copyWith({
+    List<MenuEntity>? menus,
+    bool? isLoadingMore,
+    int? currentPage,
+    int? totalPages,
+    int? totalDocs,
+  }) {
+    return MenuLoaded(
+      menus ?? this.menus,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      currentPage: currentPage ?? this.currentPage,
+      totalPages: totalPages ?? this.totalPages,
+      totalDocs: totalDocs ?? this.totalDocs,
+    );
+  }
 }
 
 class MenuError extends MenuState {
@@ -33,7 +60,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
 
   MenuNotifier(this.ref) : super(const MenuInitial());
 
-  /// Load current menu
+  /// Load current menu (Customer view)
   Future<void> loadCurrentMenu() async {
     state = const MenuLoading();
 
@@ -41,7 +68,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
 
     result.when(
       success: (menus) {
-        state = MenuLoaded(menus);
+        state = MenuLoaded(menus, totalDocs: menus.length);
       },
       failure: (failure) {
         state = MenuError(
@@ -59,8 +86,66 @@ class MenuNotifier extends StateNotifier<MenuState> {
     );
   }
 
-  /// Refresh menu
-  Future<void> refresh() async {
+  /// Load all menus (Management view)
+  Future<void> loadMenus({int page = 1, int limit = 10}) async {
+    if (page == 1) {
+      state = const MenuLoading();
+    } else {
+      if (state is MenuLoaded) {
+        state = (state as MenuLoaded).copyWith(isLoadingMore: true);
+      }
+    }
+
+    final result = await ref
+        .read(getAllMenusUseCaseProvider)
+        .call(page: page, limit: limit);
+
+    result.when(
+      success: (data) {
+        if (page == 1) {
+          state = MenuLoaded(
+            data.items,
+            currentPage: data.page,
+            totalPages: data.totalPages,
+            totalDocs: data.totalDocs,
+          );
+        } else {
+          if (state is MenuLoaded) {
+            final oldState = state as MenuLoaded;
+            state = oldState.copyWith(
+              menus: [...oldState.menus, ...data.items],
+              isLoadingMore: false,
+              currentPage: data.page,
+              totalPages: data.totalPages,
+              totalDocs: data.totalDocs,
+            );
+          }
+        }
+      },
+      failure: (failure) {
+        if (state is MenuLoaded) {
+          state = (state as MenuLoaded).copyWith(isLoadingMore: false);
+        } else {
+          state = MenuError(failure.toString());
+        }
+      },
+    );
+  }
+
+  /// Load more menus
+  Future<void> loadMore() async {
+    if (state is MenuLoaded) {
+      final currentState = state as MenuLoaded;
+      if (currentState.isLoadingMore ||
+          currentState.currentPage >= currentState.totalPages) {
+        return;
+      }
+      await loadMenus(page: currentState.currentPage + 1);
+    }
+  }
+
+  /// Refresh current menu
+  Future<void> refreshCurrentMenu() async {
     await loadCurrentMenu();
   }
 
@@ -72,7 +157,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
 
     return result.when(
       success: (_) async {
-        await loadCurrentMenu(); // Reload to show new item
+        await loadMenus(); // Reload to show new item
         return true;
       },
       failure: (failure) {
@@ -86,7 +171,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
     final result = await ref.read(createCategoryUseCaseProvider).call(data);
     return result.when(
       success: (_) async {
-        await loadCurrentMenu();
+        await loadMenus();
         return true;
       },
       failure: (_) => false,
@@ -98,7 +183,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
     final result = await ref.read(updateCategoryUseCaseProvider).call(id, data);
     return result.when(
       success: (_) async {
-        await loadCurrentMenu();
+        await loadMenus();
         return true;
       },
       failure: (_) => false,
@@ -110,7 +195,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
     final result = await ref.read(deleteCategoryUseCaseProvider).call(id);
     return result.when(
       success: (_) async {
-        await loadCurrentMenu();
+        await loadMenus();
         return true;
       },
       failure: (_) => false,
@@ -124,7 +209,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
         .call(data);
     return result.when(
       success: (_) async {
-        await loadCurrentMenu();
+        await loadMenus();
         return true;
       },
       failure: (_) => false,
@@ -141,7 +226,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
         .call(id, data);
     return result.when(
       success: (_) async {
-        await loadCurrentMenu();
+        await loadMenus();
         return true;
       },
       failure: (_) => false,
@@ -153,7 +238,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
     final result = await ref.read(deleteCustomizationUseCaseProvider).call(id);
     return result.when(
       success: (_) async {
-        await loadCurrentMenu();
+        await loadMenus();
         return true;
       },
       failure: (_) => false,
@@ -165,7 +250,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
     final result = await ref.read(updateItemUseCaseProvider).call(id, data);
     return result.when(
       success: (_) async {
-        await loadCurrentMenu();
+        await loadMenus();
         return true;
       },
       failure: (_) => false,
@@ -177,7 +262,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
     final result = await ref.read(deleteItemUseCaseProvider).call(id);
     return result.when(
       success: (_) async {
-        await loadCurrentMenu();
+        await loadMenus();
         return true;
       },
       failure: (_) => false,

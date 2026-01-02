@@ -16,7 +16,34 @@ class ItemsLoading extends ItemsState {
 
 class ItemsLoaded extends ItemsState {
   final List<MenuItemEntity> items;
-  const ItemsLoaded(this.items);
+  final int currentPage;
+  final int totalPages;
+  final int totalDocs;
+  final bool isLoadingMore;
+
+  const ItemsLoaded({
+    required this.items,
+    required this.currentPage,
+    required this.totalPages,
+    required this.totalDocs,
+    this.isLoadingMore = false,
+  });
+
+  ItemsLoaded copyWith({
+    List<MenuItemEntity>? items,
+    int? currentPage,
+    int? totalPages,
+    int? totalDocs,
+    bool? isLoadingMore,
+  }) {
+    return ItemsLoaded(
+      items: items ?? this.items,
+      currentPage: currentPage ?? this.currentPage,
+      totalPages: totalPages ?? this.totalPages,
+      totalDocs: totalDocs ?? this.totalDocs,
+      isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+    );
+  }
 }
 
 class ItemsError extends ItemsState {
@@ -31,13 +58,52 @@ class ItemsNotifier extends StateNotifier<ItemsState> {
     loadItems();
   }
 
-  Future<void> loadItems() async {
-    state = const ItemsLoading();
-    final result = await ref.read(getAllItemsUseCaseProvider).call();
+  Future<void> loadItems({int page = 1, int limit = 10}) async {
+    if (page == 1) {
+      state = const ItemsLoading();
+    } else {
+      final currentState = state;
+      if (currentState is ItemsLoaded) {
+        state = currentState.copyWith(isLoadingMore: true);
+      }
+    }
+
+    final result = await ref
+        .read(getAllItemsUseCaseProvider)
+        .call(page: page, limit: limit);
+
     result.when(
-      success: (items) => state = ItemsLoaded(items),
+      success: (paginatedData) {
+        if (page == 1) {
+          state = ItemsLoaded(
+            items: paginatedData.items,
+            currentPage: paginatedData.page,
+            totalPages: paginatedData.totalPages,
+            totalDocs: paginatedData.totalDocs,
+          );
+        } else {
+          final currentState = state;
+          if (currentState is ItemsLoaded) {
+            state = ItemsLoaded(
+              items: [...currentState.items, ...paginatedData.items],
+              currentPage: paginatedData.page,
+              totalPages: paginatedData.totalPages,
+              totalDocs: paginatedData.totalDocs,
+            );
+          }
+        }
+      },
       failure: (failure) => state = ItemsError(failure.toString()),
     );
+  }
+
+  Future<void> loadMore() async {
+    final currentState = state;
+    if (currentState is ItemsLoaded &&
+        !currentState.isLoadingMore &&
+        currentState.currentPage < currentState.totalPages) {
+      await loadItems(page: currentState.currentPage + 1);
+    }
   }
 
   Future<bool> updateItem(String id, Map<String, dynamic> data) async {

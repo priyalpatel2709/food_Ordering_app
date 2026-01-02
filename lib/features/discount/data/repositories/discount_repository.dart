@@ -1,3 +1,4 @@
+import '../../../../core/domain/entities/paginated_data.dart';
 import '../../domain/entities/discount_entity.dart';
 import '../datasources/discount_remote_data_source.dart';
 
@@ -7,14 +8,15 @@ class DiscountRepository {
 
   DiscountRepository(this._remoteDataSource);
 
-  Future<List<DiscountEntity>> getAllDiscounts() async {
-    return await _remoteDataSource.getAllDiscounts();
-  }
-
-  /// Get only valid discounts (active and within date range)
-  Future<List<DiscountEntity>> getValidDiscounts() async {
-    final allDiscounts = await getAllDiscounts();
-    return allDiscounts.where((discount) => discount.isValidNow()).toList();
+  Future<PaginatedData<DiscountEntity>> getAllDiscounts({
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final responseDto = await _remoteDataSource.getAllDiscounts(
+      page: page,
+      limit: limit,
+    );
+    return responseDto.toPaginatedData((e) => e);
   }
 
   Future<void> createDiscount(Map<String, dynamic> data) async {

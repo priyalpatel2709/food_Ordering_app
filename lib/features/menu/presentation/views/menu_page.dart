@@ -219,7 +219,7 @@ class _MenuPageState extends ConsumerState<MenuPage> {
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () =>
-                  ref.read(menuNotifierProvider.notifier).refresh(),
+                  ref.read(menuNotifierProvider.notifier).refreshCurrentMenu(),
               icon: const Icon(Icons.refresh),
               label: const Text('Retry'),
               style: ElevatedButton.styleFrom(
@@ -245,8 +245,9 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                 ),
               )
             : RefreshIndicator(
-                onRefresh: () =>
-                    ref.read(menuNotifierProvider.notifier).refresh(),
+                onRefresh: () => ref
+                    .read(menuNotifierProvider.notifier)
+                    .refreshCurrentMenu(),
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   padding: const EdgeInsets.all(20),

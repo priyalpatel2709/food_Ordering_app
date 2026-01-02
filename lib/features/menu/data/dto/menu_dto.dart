@@ -1,4 +1,5 @@
 import '../../domain/entities/menu_entity.dart';
+import '../../../../core/domain/entities/paginated_data.dart';
 
 /// Menu Response DTO
 class MenuResponseDto {
@@ -445,6 +446,49 @@ class CustomizationOptionDto {
       name: name,
       price: price,
       isActive: isActive,
+    );
+  }
+}
+
+class PaginatedResponseDto<T> {
+  final int page;
+  final int limit;
+  final int totalDocs;
+  final int totalPages;
+  final List<T> data;
+
+  PaginatedResponseDto({
+    required this.page,
+    required this.limit,
+    required this.totalDocs,
+    required this.totalPages,
+    required this.data,
+  });
+
+  factory PaginatedResponseDto.fromJson(
+    Map<String, dynamic> json,
+    T Function(Map<String, dynamic>) fromJsonT,
+  ) {
+    return PaginatedResponseDto(
+      page: json['page'] as int? ?? 1,
+      limit: json['limit'] as int? ?? 10,
+      totalDocs: json['totalDocs'] as int? ?? 0,
+      totalPages: json['totalPages'] as int? ?? 0,
+      data:
+          (json['data'] as List<dynamic>?)
+              ?.map((e) => fromJsonT(e as Map<String, dynamic>))
+              .toList() ??
+          [],
+    );
+  }
+
+  PaginatedData<E> toPaginatedData<E>(E Function(T) toEntity) {
+    return PaginatedData<E>(
+      items: data.map(toEntity).toList(),
+      page: page,
+      limit: limit,
+      totalDocs: totalDocs,
+      totalPages: totalPages,
     );
   }
 }

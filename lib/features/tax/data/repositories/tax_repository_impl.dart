@@ -1,3 +1,4 @@
+import '../../../../core/domain/entities/paginated_data.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/error/result.dart';
 import '../../../../core/error/exceptions.dart';
@@ -11,10 +12,16 @@ class TaxRepositoryImpl implements TaxRepository {
   TaxRepositoryImpl(this._remoteDataSource);
 
   @override
-  Future<Result<List<TaxEntity>>> getAllTaxes() async {
+  Future<Result<PaginatedData<TaxEntity>>> getAllTaxes({
+    int page = 1,
+    int limit = 10,
+  }) async {
     try {
-      final taxes = await _remoteDataSource.getAllTaxes();
-      return Result.success(taxes);
+      final responseDto = await _remoteDataSource.getAllTaxes(
+        page: page,
+        limit: limit,
+      );
+      return Result.success(responseDto.toPaginatedData((e) => e));
     } on NetworkException catch (e) {
       return Result.failure(Failure.network(e.message));
     } on ServerException catch (e) {

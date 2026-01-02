@@ -14,12 +14,28 @@ class CustomizationsManagementPage extends ConsumerStatefulWidget {
 
 class _CustomizationsManagementPageState
     extends ConsumerState<CustomizationsManagementPage> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
+    _scrollController.addListener(_onScroll);
     Future.microtask(
       () => ref.read(customizationsNotifierProvider.notifier).loadOptions(),
     );
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >=
+        _scrollController.position.maxScrollExtent - 200) {
+      ref.read(customizationsNotifierProvider.notifier).loadMore();
+    }
   }
 
   @override
@@ -40,9 +56,17 @@ class _CustomizationsManagementPageState
         CustomizationsError(:final message) => Center(
           child: Text('Error: $message'),
         ),
-        CustomizationsLoaded(:final options) => _buildCustomizationList(
-          options,
-        ),
+        CustomizationsLoaded(
+          :final options,
+          :final isLoadingMore,
+          :final currentPage,
+          :final totalPages,
+        ) =>
+          _buildCustomizationList(
+            options,
+            isLoadingMore,
+            currentPage < totalPages,
+          ),
       },
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddCustomizationDialog(),
@@ -51,15 +75,26 @@ class _CustomizationsManagementPageState
     );
   }
 
-  Widget _buildCustomizationList(List<CustomizationOptionEntity> options) {
+  Widget _buildCustomizationList(
+    List<CustomizationOptionEntity> options,
+    bool isLoadingMore,
+    bool hasMore,
+  ) {
     if (options.isEmpty) {
       return const Center(child: Text('No customization options found.'));
     }
 
     return ListView.builder(
+      controller: _scrollController,
       padding: const EdgeInsets.all(16),
-      itemCount: options.length,
+      itemCount: options.length + (hasMore ? 1 : 0),
       itemBuilder: (context, index) {
+        if (index == options.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 32),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
         final option = options[index];
         return Card(
           child: ListTile(
