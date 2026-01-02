@@ -5,6 +5,9 @@ import '../../domain/entities/discount_entity.dart';
 /// Remote data source for discounts
 abstract class DiscountRemoteDataSource {
   Future<List<DiscountEntity>> getAllDiscounts();
+  Future<void> createDiscount(Map<String, dynamic> data);
+  Future<void> updateDiscount(String id, Map<String, dynamic> data);
+  Future<void> deleteDiscount(String id);
 }
 
 class DiscountRemoteDataSourceImpl implements DiscountRemoteDataSource {
@@ -30,5 +33,26 @@ class DiscountRemoteDataSourceImpl implements DiscountRemoteDataSource {
     } else {
       throw Exception(data['message'] ?? 'Failed to get discounts');
     }
+  }
+
+  @override
+  Future<void> createDiscount(Map<String, dynamic> data) async {
+    await _dioClient.post(
+      '${ApiConstants.v1}${ApiConstants.discount}',
+      data: data,
+    );
+  }
+
+  @override
+  Future<void> updateDiscount(String id, Map<String, dynamic> data) async {
+    await _dioClient.patch(
+      '${ApiConstants.v1}${ApiConstants.discount}/$id',
+      data: data,
+    );
+  }
+
+  @override
+  Future<void> deleteDiscount(String id) async {
+    await _dioClient.delete('${ApiConstants.v1}${ApiConstants.discount}/$id');
   }
 }

@@ -63,6 +63,126 @@ class MenuNotifier extends StateNotifier<MenuState> {
   Future<void> refresh() async {
     await loadCurrentMenu();
   }
+
+  /// Add item to menu
+  Future<bool> addItem(String menuId, Map<String, dynamic> itemData) async {
+    final result = await ref
+        .read(addItemToMenuUseCaseProvider)
+        .call(menuId, itemData);
+
+    return result.when(
+      success: (_) async {
+        await loadCurrentMenu(); // Reload to show new item
+        return true;
+      },
+      failure: (failure) {
+        return false;
+      },
+    );
+  }
+
+  /// Create category
+  Future<bool> createCategory(Map<String, dynamic> data) async {
+    final result = await ref.read(createCategoryUseCaseProvider).call(data);
+    return result.when(
+      success: (_) async {
+        await loadCurrentMenu();
+        return true;
+      },
+      failure: (_) => false,
+    );
+  }
+
+  /// Update category
+  Future<bool> updateCategory(String id, Map<String, dynamic> data) async {
+    final result = await ref.read(updateCategoryUseCaseProvider).call(id, data);
+    return result.when(
+      success: (_) async {
+        await loadCurrentMenu();
+        return true;
+      },
+      failure: (_) => false,
+    );
+  }
+
+  /// Delete category
+  Future<bool> deleteCategory(String id) async {
+    final result = await ref.read(deleteCategoryUseCaseProvider).call(id);
+    return result.when(
+      success: (_) async {
+        await loadCurrentMenu();
+        return true;
+      },
+      failure: (_) => false,
+    );
+  }
+
+  /// Create customization option
+  Future<bool> createCustomizationOption(Map<String, dynamic> data) async {
+    final result = await ref
+        .read(createCustomizationUseCaseProvider)
+        .call(data);
+    return result.when(
+      success: (_) async {
+        await loadCurrentMenu();
+        return true;
+      },
+      failure: (_) => false,
+    );
+  }
+
+  /// Update customization option
+  Future<bool> updateCustomizationOption(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
+    final result = await ref
+        .read(updateCustomizationUseCaseProvider)
+        .call(id, data);
+    return result.when(
+      success: (_) async {
+        await loadCurrentMenu();
+        return true;
+      },
+      failure: (_) => false,
+    );
+  }
+
+  /// Delete customization option
+  Future<bool> deleteCustomizationOption(String id) async {
+    final result = await ref.read(deleteCustomizationUseCaseProvider).call(id);
+    return result.when(
+      success: (_) async {
+        await loadCurrentMenu();
+        return true;
+      },
+      failure: (_) => false,
+    );
+  }
+
+  /// Update menu item
+  Future<bool> updateItem(String id, Map<String, dynamic> data) async {
+    final result = await ref.read(updateItemUseCaseProvider).call(id, data);
+    return result.when(
+      success: (_) async {
+        await loadCurrentMenu();
+        return true;
+      },
+      failure: (_) => false,
+    );
+  }
+
+  /// Delete menu item
+  Future<bool> deleteItem(String id) async {
+    final result = await ref.read(deleteItemUseCaseProvider).call(id);
+    return result.when(
+      success: (_) async {
+        await loadCurrentMenu();
+        return true;
+      },
+      failure: (_) => false,
+    );
+  }
 }
 
 /// Menu Provider

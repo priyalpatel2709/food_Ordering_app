@@ -142,4 +142,189 @@ class MenuRepositoryImpl implements MenuRepository {
       return Result.failure(Failure.unknown(e.toString()));
     }
   }
+
+  @override
+  Future<Result<void>> createCategory(Map<String, dynamic> data) async {
+    try {
+      await _remoteDataSource.createCategory(data);
+      return Result.success(null);
+    } on NetworkException catch (e) {
+      return Result.failure(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(
+        Failure.server(e.message, statusCode: e.statusCode),
+      );
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> updateCategory(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      await _remoteDataSource.updateCategory(id, data);
+      return Result.success(null);
+    } on NetworkException catch (e) {
+      return Result.failure(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(
+        Failure.server(e.message, statusCode: e.statusCode),
+      );
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> deleteCategory(String id) async {
+    try {
+      await _remoteDataSource.deleteCategory(id);
+      return Result.success(null);
+    } on NetworkException catch (e) {
+      return Result.failure(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(
+        Failure.server(e.message, statusCode: e.statusCode),
+      );
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> createCustomizationOption(
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      await _remoteDataSource.createCustomizationOption(data);
+      return Result.success(null);
+    } on NetworkException catch (e) {
+      return Result.failure(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(
+        Failure.server(e.message, statusCode: e.statusCode),
+      );
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> updateCustomizationOption(
+    String id,
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      await _remoteDataSource.updateCustomizationOption(id, data);
+      return Result.success(null);
+    } on NetworkException catch (e) {
+      return Result.failure(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(
+        Failure.server(e.message, statusCode: e.statusCode),
+      );
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> deleteCustomizationOption(String id) async {
+    try {
+      await _remoteDataSource.deleteCustomizationOption(id);
+      return Result.success(null);
+    } on NetworkException catch (e) {
+      return Result.failure(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(
+        Failure.server(e.message, statusCode: e.statusCode),
+      );
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> updateItem(String id, Map<String, dynamic> data) async {
+    try {
+      await _remoteDataSource.updateItem(id, data);
+      return Result.success(null);
+    } on NetworkException catch (e) {
+      return Result.failure(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(
+        Failure.server(e.message, statusCode: e.statusCode),
+      );
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> deleteItem(String id) async {
+    try {
+      await _remoteDataSource.deleteItem(id);
+      return Result.success(null);
+    } on NetworkException catch (e) {
+      return Result.failure(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(
+        Failure.server(e.message, statusCode: e.statusCode),
+      );
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<List<MenuItemEntity>>> getAllItems() async {
+    try {
+      final dtos = await _remoteDataSource.getAllItems();
+      return Result.success(dtos.map((e) => e.toEntity()).toList());
+    } on NetworkException catch (e) {
+      return Result.failure(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(
+        Failure.server(e.message, statusCode: e.statusCode),
+      );
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<List<CategoryEntity>>> getAllCategories() async {
+    try {
+      final dtos = await _remoteDataSource.getAllCategories();
+      return Result.success(dtos.map((e) => e.toEntity()).toList());
+    } on NetworkException catch (e) {
+      return Result.failure(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(
+        Failure.server(e.message, statusCode: e.statusCode),
+      );
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<List<CustomizationOptionEntity>>>
+  getAllCustomizationOptions() async {
+    try {
+      final dtos = await _remoteDataSource.getAllCustomizationOptions();
+      return Result.success(dtos.map((e) => e.toEntity()).toList());
+    } on NetworkException catch (e) {
+      return Result.failure(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(
+        Failure.server(e.message, statusCode: e.statusCode),
+      );
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
 }

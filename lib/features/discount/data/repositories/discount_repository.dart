@@ -16,4 +16,16 @@ class DiscountRepository {
     final allDiscounts = await getAllDiscounts();
     return allDiscounts.where((discount) => discount.isValidNow()).toList();
   }
+
+  Future<void> createDiscount(Map<String, dynamic> data) async {
+    await _remoteDataSource.createDiscount(data);
+  }
+
+  Future<void> updateDiscount(String id, Map<String, dynamic> data) async {
+    await _remoteDataSource.updateDiscount(id, data);
+  }
+
+  Future<void> deleteDiscount(String id) async {
+    await _remoteDataSource.deleteDiscount(id);
+  }
 }
