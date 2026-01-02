@@ -19,6 +19,9 @@ import '../../features/authentication/domain/usecases/logout_use_case.dart';
 import '../../features/authentication/domain/usecases/sign_up_use_case.dart';
 import '../../features/menu/domain/usecases/update_menu_use_case.dart';
 import '../../features/menu/domain/usecases/update_menu_advanced_use_case.dart';
+import '../../features/menu/domain/usecases/get_menu_by_id_use_case.dart';
+import '../../features/menu/domain/usecases/create_menu_use_case.dart';
+import '../../features/menu/domain/usecases/add_item_to_menu_use_case.dart';
 
 /// Manual Provider Definitions
 /// TODO: When build_runner is fixed, restore @riverpod code generation
@@ -140,4 +143,19 @@ final updateMenuAdvancedUseCaseProvider = Provider<UpdateMenuAdvancedUseCase>((
   ref,
 ) {
   return UpdateMenuAdvancedUseCase(ref.watch(menuRepositoryProvider));
+});
+
+/// Get Menu By Id Use Case Provider
+final getMenuByIdUseCaseProvider = Provider<GetMenuByIdUseCase>((ref) {
+  return GetMenuByIdUseCase(ref.watch(menuRepositoryProvider));
+});
+
+/// Create Menu Use Case Provider
+final createMenuUseCaseProvider = Provider<CreateMenuUseCase>((ref) {
+  return CreateMenuUseCase(ref.watch(menuRepositoryProvider));
+});
+
+/// Add Item To Menu Use Case Provider
+final addItemToMenuUseCaseProvider = Provider<AddItemToMenuUseCase>((ref) {
+  return AddItemToMenuUseCase(ref.watch(menuRepositoryProvider));
 });

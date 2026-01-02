@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/dio_client.dart';
 import '../dto/menu_dto.dart';
@@ -19,11 +21,33 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
 
   @override
   Future<MenuResponseDto> getCurrentMenu() async {
-    final response = await _dioClient.get(
-      '${ApiConstants.v1}${ApiConstants.menuEndpoint}${ApiConstants.menuCurrentEndpoint}',
-    );
+    try {
+      final response = await _dioClient.get(
+        '${ApiConstants.v1}${ApiConstants.menuEndpoint}${ApiConstants.menuCurrentEndpoint}',
+      );
 
-    return MenuResponseDto.fromJson(response.data as Map<String, dynamic>);
+      final responseData = response.data;
+      if (responseData is List) {
+        return MenuResponseDto(
+          success: true,
+          currentDay: '',
+          currentTime: '',
+          menus: responseData
+              .map((e) => MenuDto.fromJson(e as Map<String, dynamic>))
+              .toList(),
+        );
+      }
+
+      return MenuResponseDto.fromJson(responseData as Map<String, dynamic>);
+    } catch (e, st) {
+      log('Error fetching menu: $e, $st');
+      return MenuResponseDto(
+        menus: [],
+        success: false,
+        currentDay: '',
+        currentTime: '',
+      );
+    }
   }
 
   @override

@@ -16,12 +16,14 @@ class MenuResponseDto {
 
   factory MenuResponseDto.fromJson(Map<String, dynamic> json) {
     return MenuResponseDto(
-      success: json['success'] as bool,
-      currentDay: json['currentDay'] as String,
-      currentTime: json['currentTime'] as String,
-      menus: (json['menus'] as List<dynamic>)
-          .map((e) => MenuDto.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      success: (json['success'] as bool?) ?? true,
+      currentDay: (json['currentDay'] as String?) ?? '',
+      currentTime: (json['currentTime'] as String?) ?? '',
+      menus: json['menus'] is List
+          ? (json['menus'] as List<dynamic>)
+                .map((e) => MenuDto.fromJson(e as Map<String, dynamic>))
+                .toList()
+          : [],
     );
   }
 
@@ -53,15 +55,21 @@ class MenuDto {
 
   factory MenuDto.fromJson(Map<String, dynamic> json) {
     return MenuDto(
-      id: json['_id'] as String? ?? json['id'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      categories: (json['categories'] as List<dynamic>)
-          .map((e) => CategoryDto.fromJson(e as Map<String, dynamic>))
-          .toList(),
-      items: (json['items'] as List<dynamic>)
-          .map((e) => MenuItemWrapperDto.fromJson(e as Map<String, dynamic>))
-          .toList(),
+      id: json['_id'] as String? ?? json['id'] as String? ?? '',
+      name: (json['name'] as String?) ?? '',
+      description: (json['description'] as String?) ?? '',
+      categories: json['categories'] is List
+          ? (json['categories'] as List<dynamic>)
+                .map((e) => CategoryDto.fromJson(e as Map<String, dynamic>))
+                .toList()
+          : [],
+      items: json['items'] is List
+          ? (json['items'] as List<dynamic>)
+                .map(
+                  (e) => MenuItemWrapperDto.fromJson(e as Map<String, dynamic>),
+                )
+                .toList()
+          : [],
     );
   }
 
@@ -107,12 +115,12 @@ class CategoryDto {
 
   factory CategoryDto.fromJson(Map<String, dynamic> json) {
     return CategoryDto(
-      id: json['_id'] as String? ?? json['id'] as String,
-      restaurantId: json['restaurantId'] as String,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      isActive: json['isActive'] as bool,
-      displayOrder: json['displayOrder'] as int,
+      id: json['_id'] as String? ?? json['id'] as String? ?? '',
+      restaurantId: (json['restaurantId'] as String?) ?? '',
+      name: (json['name'] as String?) ?? '',
+      description: (json['description'] as String?) ?? '',
+      isActive: (json['isActive'] as bool?) ?? true,
+      displayOrder: (json['displayOrder'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -153,9 +161,9 @@ class MenuItemWrapperDto {
 
   factory MenuItemWrapperDto.fromJson(Map<String, dynamic> json) {
     return MenuItemWrapperDto(
-      item: MenuItemDto.fromJson(json['item'] as Map<String, dynamic>),
-      defaultPrice: (json['defaultPrice'] as num).toDouble(),
-      id: json['_id'] as String? ?? json['id'] as String,
+      item: MenuItemDto.fromJson((json['item'] as Map<String, dynamic>?) ?? {}),
+      defaultPrice: (json['defaultPrice'] as num?)?.toDouble() ?? 0.0,
+      id: json['_id'] as String? ?? json['id'] as String? ?? '',
     );
   }
 
@@ -208,30 +216,38 @@ class MenuItemDto {
 
   factory MenuItemDto.fromJson(Map<String, dynamic> json) {
     return MenuItemDto(
-      id: json['_id'] as String? ?? json['id'] as String,
+      id: json['_id'] as String? ?? json['id'] as String? ?? '',
       restaurantId: json['restaurantId'] as String? ?? '',
-      category: CategoryDto.fromJson(json['category'] as Map<String, dynamic>),
-      name: json['name'] as String,
-      description: json['description'] as String,
-      price: (json['price'] as num).toDouble(),
-      image: json['image'] as String,
-      isAvailable: json['isAvailable'] as bool,
-      preparationTime: json['preparationTime'] as int,
-      allergens: (json['allergens'] as List<dynamic>).cast<String>(),
-      customizationOptions: (json['customizationOptions'] as List<dynamic>)
-          .map(
-            (e) => CustomizationOptionDto.fromJson(e as Map<String, dynamic>),
-          )
-          .toList(),
-      popularityScore: json['popularityScore'] as int,
-      averageRating: (json['averageRating'] as num).toDouble(),
-      taxable: json['taxable'] as bool? ?? false,
-      taxRate: json['taxRate'] != null
+      category: CategoryDto.fromJson(
+        (json['category'] as Map<String, dynamic>?) ?? {},
+      ),
+      name: (json['name'] as String?) ?? '',
+      description: (json['description'] as String?) ?? '',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      image: (json['image'] as String?) ?? '',
+      isAvailable: (json['isAvailable'] as bool?) ?? true,
+      preparationTime: (json['preparationTime'] as num?)?.toInt() ?? 0,
+      allergens: json['allergens'] is List
+          ? (json['allergens'] as List<dynamic>).cast<String>()
+          : [],
+      customizationOptions: json['customizationOptions'] is List
+          ? (json['customizationOptions'] as List<dynamic>)
+                .map(
+                  (e) => CustomizationOptionDto.fromJson(
+                    e as Map<String, dynamic>,
+                  ),
+                )
+                .toList()
+          : [],
+      popularityScore: (json['popularityScore'] as num?)?.toInt() ?? 0,
+      averageRating: (json['averageRating'] as num?)?.toDouble() ?? 0.0,
+      taxable: (json['taxable'] as bool?) ?? false,
+      taxRate: json['taxRate'] != null && json['taxRate'] is Map
           ? TaxRateDto.fromJson(json['taxRate'] as Map<String, dynamic>)
           : null,
-      minOrderQuantity: json['minOrderQuantity'] as int? ?? 1,
-      maxOrderQuantity: json['maxOrderQuantity'] as int? ?? 99,
-      metaData: json['metaData'] as List<dynamic>? ?? [],
+      minOrderQuantity: (json['minOrderQuantity'] as num?)?.toInt() ?? 1,
+      maxOrderQuantity: (json['maxOrderQuantity'] as num?)?.toInt() ?? 99,
+      metaData: (json['metaData'] as List<dynamic>?) ?? [],
     );
   }
 
@@ -311,17 +327,25 @@ class TaxRateDto {
 
   factory TaxRateDto.fromJson(Map<String, dynamic> json) {
     return TaxRateDto(
-      id: json['_id'] as String,
-      restaurantId: json['restaurantId'] as String,
-      name: json['name'] as String,
-      percentage: (json['percentage'] as num).toDouble(),
-      isActive: json['isActive'] as bool,
-      metaData: (json['metaData'] as List<dynamic>)
-          .map((item) => MetaDataDto.fromJson(item as Map<String, dynamic>))
-          .toList(),
-      version: json['__v'] as int,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      id: json['_id'] as String? ?? '',
+      restaurantId: (json['restaurantId'] as String?) ?? '',
+      name: (json['name'] as String?) ?? '',
+      percentage: (json['percentage'] as num?)?.toDouble() ?? 0.0,
+      isActive: (json['isActive'] as bool?) ?? true,
+      metaData: json['metaData'] is List
+          ? (json['metaData'] as List<dynamic>)
+                .map(
+                  (item) => MetaDataDto.fromJson(item as Map<String, dynamic>),
+                )
+                .toList()
+          : [],
+      version: (json['__v'] as num?)?.toInt() ?? 0,
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'] as String) ?? DateTime.now()
+          : DateTime.now(),
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'] as String) ?? DateTime.now()
+          : DateTime.now(),
     );
   }
 
@@ -363,8 +387,8 @@ class MetaDataDto {
 
   factory MetaDataDto.fromJson(Map<String, dynamic> json) {
     return MetaDataDto(
-      id: json['_id'] as String,
-      key: json['key'] as String,
+      id: (json['_id'] as String?) ?? '',
+      key: (json['key'] as String?) ?? '',
       value: json['value'],
     );
   }
@@ -396,11 +420,11 @@ class CustomizationOptionDto {
 
   factory CustomizationOptionDto.fromJson(Map<String, dynamic> json) {
     return CustomizationOptionDto(
-      id: json['_id'] as String? ?? json['id'] as String,
-      restaurantId: json['restaurantId'] as String,
-      name: json['name'] as String,
-      price: (json['price'] as num).toDouble(),
-      isActive: json['isActive'] as bool,
+      id: json['_id'] as String? ?? json['id'] as String? ?? '',
+      restaurantId: (json['restaurantId'] as String?) ?? '',
+      name: (json['name'] as String?) ?? '',
+      price: (json['price'] as num?)?.toDouble() ?? 0.0,
+      isActive: (json['isActive'] as bool?) ?? true,
     );
   }
 

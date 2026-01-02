@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/error/result.dart';
@@ -28,7 +30,8 @@ class MenuRepositoryImpl implements MenuRepository {
       }
 
       return Result.success(menus);
-    } on NetworkException catch (e) {
+    } on NetworkException catch (e, stackTrace) {
+      log('stackTrace $stackTrace');
       // Try to get from cache if network fails
       try {
         final cachedMenu = await _localDataSource.getCachedMenu();
@@ -40,13 +43,16 @@ class MenuRepositoryImpl implements MenuRepository {
         // Ignore cache errors
       }
       return Result.failure(Failure.network(e.message));
-    } on ServerException catch (e) {
+    } on ServerException catch (e, stackTrace) {
+      log('stackTrace $stackTrace');
       return Result.failure(
         Failure.server(e.message, statusCode: e.statusCode),
       );
-    } on CacheException catch (e) {
+    } on CacheException catch (e, stackTrace) {
+      log('stackTrace $stackTrace');
       return Result.failure(Failure.cache(e.message));
-    } catch (e) {
+    } catch (e, stackTrace) {
+      log('stackTrace $stackTrace');
       return Result.failure(Failure.unknown(e.toString()));
     }
   }
@@ -74,6 +80,57 @@ class MenuRepositoryImpl implements MenuRepository {
   ) async {
     try {
       await _remoteDataSource.updateMenuAdvanced(id, data);
+      return Result.success(null);
+    } on NetworkException catch (e) {
+      return Result.failure(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(
+        Failure.server(e.message, statusCode: e.statusCode),
+      );
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<MenuEntity>> getMenuById(String id) async {
+    try {
+      final menuDto = await _remoteDataSource.getMenuById(id);
+      return Result.success(menuDto.toEntity());
+    } on NetworkException catch (e) {
+      return Result.failure(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(
+        Failure.server(e.message, statusCode: e.statusCode),
+      );
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> createMenu(Map<String, dynamic> data) async {
+    try {
+      await _remoteDataSource.createMenu(data);
+      return Result.success(null);
+    } on NetworkException catch (e) {
+      return Result.failure(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(
+        Failure.server(e.message, statusCode: e.statusCode),
+      );
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> addItemToMenu(
+    String menuId,
+    Map<String, dynamic> itemData,
+  ) async {
+    try {
+      await _remoteDataSource.addItemToMenu(menuId, itemData);
       return Result.success(null);
     } on NetworkException catch (e) {
       return Result.failure(Failure.network(e.message));
