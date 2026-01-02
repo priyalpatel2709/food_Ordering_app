@@ -6,7 +6,9 @@ import '../../../../shared/theme/app_colors.dart';
 import '../../../menu/domain/entities/menu_entity.dart';
 import '../../../menu/presentation/viewmodels/categories_view_model.dart';
 import '../../../menu/presentation/viewmodels/items_view_model.dart';
+import '../../../menu/presentation/viewmodels/customizations_view_model.dart';
 import '../../../menu/presentation/viewmodels/menu_view_model.dart';
+import '../../../../features/tax/presentation/providers/tax_provider.dart';
 
 class ItemsManagementPage extends ConsumerStatefulWidget {
   const ItemsManagementPage({super.key});
@@ -26,6 +28,10 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
     Future.microtask(() {
       ref.read(itemsNotifierProvider.notifier).loadItems();
       ref.read(categoriesNotifierProvider.notifier).loadCategories(limit: 1000);
+      ref
+          .read(customizationsNotifierProvider.notifier)
+          .loadOptions(limit: 1000);
+      ref.read(taxNotifierProvider.notifier).loadTaxes(limit: 1000);
     });
   }
 
@@ -72,7 +78,9 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
         onPressed: () {
           final state = categoriesState;
           if (state is CategoriesLoaded) {
-            context.push(RouteConstants.addItem, extra: state.categories);
+            context.push(
+              RouteConstants.addItem,
+            ); // Removed extra: state.categories
           }
         },
         backgroundColor: AppColors.primary,

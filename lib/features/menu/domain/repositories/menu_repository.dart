@@ -12,6 +12,7 @@ abstract class MenuRepository {
     String menuId,
     Map<String, dynamic> itemData,
   );
+  Future<Result<void>> addItem(Map<String, dynamic> itemData);
   Future<Result<void>> updateMenuAdvanced(String id, Map<String, dynamic> data);
   Future<Result<PaginatedData<MenuEntity>>> getAllMenus({
     int page = 1,

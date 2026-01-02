@@ -9,4 +9,8 @@ class AddItemToMenuUseCase {
   Future<Result<void>> call(String menuId, Map<String, dynamic> itemData) {
     return _repository.addItemToMenu(menuId, itemData);
   }
+
+  Future<Result<void>> callV2(Map<String, dynamic> itemData) {
+    return _repository.addItem(itemData);
+  }
 }

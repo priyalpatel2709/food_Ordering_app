@@ -167,6 +167,22 @@ class MenuRepositoryImpl implements MenuRepository {
   }
 
   @override
+  Future<Result<void>> addItem(Map<String, dynamic> itemData) async {
+    try {
+      await _remoteDataSource.addItem(itemData);
+      return Result.success(null);
+    } on NetworkException catch (e) {
+      return Result.failure(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(
+        Failure.server(e.message, statusCode: e.statusCode),
+      );
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
+
+  @override
   Future<Result<void>> createCategory(Map<String, dynamic> data) async {
     try {
       await _remoteDataSource.createCategory(data);

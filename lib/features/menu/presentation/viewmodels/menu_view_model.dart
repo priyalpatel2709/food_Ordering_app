@@ -1,6 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/providers.dart';
 import '../../domain/entities/menu_entity.dart';
+import 'items_view_model.dart';
+import 'categories_view_model.dart';
+import 'customizations_view_model.dart';
 
 /// Menu State
 /// TODO: When build_runner is fixed, restore Freezed code generation
@@ -140,7 +143,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
           currentState.currentPage >= currentState.totalPages) {
         return;
       }
-      await loadMenus(page: currentState.currentPage + 1);
+      // await loadMenus(page: currentState.currentPage + 1);
     }
   }
 
@@ -150,14 +153,14 @@ class MenuNotifier extends StateNotifier<MenuState> {
   }
 
   /// Add item to menu
-  Future<bool> addItem(String menuId, Map<String, dynamic> itemData) async {
+  Future<bool> addItem(Map<String, dynamic> itemData) async {
     final result = await ref
         .read(addItemToMenuUseCaseProvider)
-        .call(menuId, itemData);
+        .callV2(itemData);
 
     return result.when(
       success: (_) async {
-        await loadMenus(); // Reload to show new item
+        await ref.read(itemsNotifierProvider.notifier).loadItems();
         return true;
       },
       failure: (failure) {
@@ -171,7 +174,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
     final result = await ref.read(createCategoryUseCaseProvider).call(data);
     return result.when(
       success: (_) async {
-        await loadMenus();
+        await ref.read(categoriesNotifierProvider.notifier).loadCategories();
         return true;
       },
       failure: (_) => false,
@@ -183,7 +186,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
     final result = await ref.read(updateCategoryUseCaseProvider).call(id, data);
     return result.when(
       success: (_) async {
-        await loadMenus();
+        await ref.read(categoriesNotifierProvider.notifier).loadCategories();
         return true;
       },
       failure: (_) => false,
@@ -195,7 +198,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
     final result = await ref.read(deleteCategoryUseCaseProvider).call(id);
     return result.when(
       success: (_) async {
-        await loadMenus();
+        await ref.read(categoriesNotifierProvider.notifier).loadCategories();
         return true;
       },
       failure: (_) => false,
@@ -209,7 +212,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
         .call(data);
     return result.when(
       success: (_) async {
-        await loadMenus();
+        await ref.read(customizationsNotifierProvider.notifier).loadOptions();
         return true;
       },
       failure: (_) => false,
@@ -226,7 +229,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
         .call(id, data);
     return result.when(
       success: (_) async {
-        await loadMenus();
+        await ref.read(customizationsNotifierProvider.notifier).loadOptions();
         return true;
       },
       failure: (_) => false,
@@ -238,7 +241,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
     final result = await ref.read(deleteCustomizationUseCaseProvider).call(id);
     return result.when(
       success: (_) async {
-        await loadMenus();
+        await ref.read(customizationsNotifierProvider.notifier).loadOptions();
         return true;
       },
       failure: (_) => false,
@@ -250,7 +253,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
     final result = await ref.read(updateItemUseCaseProvider).call(id, data);
     return result.when(
       success: (_) async {
-        await loadMenus();
+        await ref.read(itemsNotifierProvider.notifier).loadItems();
         return true;
       },
       failure: (_) => false,
@@ -262,7 +265,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
     final result = await ref.read(deleteItemUseCaseProvider).call(id);
     return result.when(
       success: (_) async {
-        await loadMenus();
+        await ref.read(itemsNotifierProvider.notifier).loadItems();
         return true;
       },
       failure: (_) => false,

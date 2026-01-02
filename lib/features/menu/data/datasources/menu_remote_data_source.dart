@@ -11,6 +11,7 @@ abstract class MenuRemoteDataSource {
   Future<void> createMenu(Map<String, dynamic> data);
   Future<void> updateMenu(String id, Map<String, dynamic> data);
   Future<void> addItemToMenu(String menuId, Map<String, dynamic> itemData);
+  Future<void> addItem(Map<String, dynamic> itemData);
   Future<void> updateMenuAdvanced(String id, Map<String, dynamic> data);
   Future<PaginatedResponseDto<MenuDto>> getAllMenus({
     int page = 1,
@@ -93,6 +94,14 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
     await _dioClient.put(
       '${ApiConstants.v1}${ApiConstants.menuEndpoint}/$id',
       data: data,
+    );
+  }
+
+  @override
+  Future<void> addItem(Map<String, dynamic> itemData) async {
+    await _dioClient.post(
+      '${ApiConstants.v1}${ApiConstants.itemEndpoint}/createItem',
+      data: itemData,
     );
   }
 
