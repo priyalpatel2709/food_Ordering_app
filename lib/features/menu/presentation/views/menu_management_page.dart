@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/di/providers.dart';
+import '../../../../core/constants/route_constants.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../domain/entities/menu_entity.dart';
 import '../viewmodels/menu_view_model.dart';
@@ -41,6 +41,12 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
         MenuError(:final message) => Center(child: Text('Error: $message')),
         MenuLoaded(:final menus) => _buildMenuList(menus),
       },
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => context.push(RouteConstants.addMenu),
+        label: const Text('Add Menu'),
+        icon: const Icon(Icons.add),
+        backgroundColor: AppColors.primary,
+      ),
     );
   }
 
@@ -54,186 +60,134 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
       itemCount: menus.length,
       itemBuilder: (context, index) {
         final menu = menus[index];
+        final isActiveNow = _isMenuCurrent(menu);
+
         return Card(
           margin: const EdgeInsets.only(bottom: 16),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
+            side: isActiveNow
+                ? const BorderSide(color: Colors.green, width: 2)
+                : BorderSide.none,
           ),
-          child: ExpansionTile(
-            title: Text(
-              menu.name,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text(menu.description),
-            children: [
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: () => _showGeneralUpdateDialog(menu),
-                          icon: const Icon(Icons.edit),
-                          label: const Text('General Info'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: () => _showAdvancedUpdateDialog(menu),
-                          icon: const Icon(Icons.settings),
-                          label: const Text('Advanced Rules'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.secondary,
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundColor: isActiveNow
+                  ? Colors.green.shade100
+                  : Colors.grey.shade100,
+              child: Icon(
+                Icons.menu_book,
+                color: isActiveNow ? Colors.green : Colors.grey,
               ),
-            ],
+            ),
+            title: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    menu.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+                if (isActiveNow)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.green,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Text(
+                      'ACTIVE',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            subtitle: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  menu.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  menu.isActive ? 'Enabled' : 'Disabled',
+                  style: TextStyle(
+                    color: menu.isActive ? Colors.green : Colors.red,
+                    fontSize: 12,
+                  ),
+                ),
+              ],
+            ),
+            trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+            onTap: () => context.push(RouteConstants.addMenu, extra: menu),
           ),
         );
       },
     );
   }
 
-  void _showGeneralUpdateDialog(MenuEntity menu) {
-    final nameController = TextEditingController(text: menu.name);
-    final descController = TextEditingController(text: menu.description);
+  bool _isMenuCurrent(MenuEntity menu) {
+    if (!menu.isActive) return false;
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Update General Info'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Menu Name'),
-            ),
-            TextField(
-              controller: descController,
-              decoration: const InputDecoration(labelText: 'Description'),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final navigator = Navigator.of(context);
-              final result = await ref.read(updateMenuUseCaseProvider).call(
-                menu.id,
-                {
-                  'name': nameController.text,
-                  'description': descController.text,
-                },
-              );
+    final now = DateTime.now();
+    final days = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
+    final currentDay = days[now.weekday - 1];
 
-              result.when(
-                success: (_) {
-                  navigator.pop();
-                  ref.read(menuNotifierProvider.notifier).loadMenus();
-                  ScaffoldMessenger.of(this.context).showSnackBar(
-                    const SnackBar(content: Text('Menu updated successfully!')),
-                  );
-                },
-                failure: (f) {
-                  ScaffoldMessenger.of(
-                    this.context,
-                  ).showSnackBar(SnackBar(content: Text('Error: $f')));
-                },
-              );
-            },
-            child: const Text('Update'),
-          ),
-        ],
-      ),
-    );
+    // Check if available today
+    // Note: availableDays might be null if not populated correctly in some legacy data, but Entity says required non-nullable.
+    // However, the list might be empty.
+
+    try {
+      final availability = menu.availableDays.firstWhere(
+        (a) => a.day == currentDay,
+      );
+
+      // Check time slots
+      for (final slot in availability.timeSlots) {
+        if (_isTimeInRange(slot.openTime, slot.closeTime, now)) {
+          return true;
+        }
+      }
+    } catch (e) {
+      // firstWhere throws StateError if not found
+      return false;
+    }
+
+    return false;
   }
 
-  void _showAdvancedUpdateDialog(MenuEntity menu) {
-    // For demonstration, we'll implement a simple dialog that accepts common fields from the guide
-    final timeSlotIdController = TextEditingController();
-    final openTimeController = TextEditingController();
-    final closeTimeController = TextEditingController();
+  bool _isTimeInRange(String start, String end, DateTime now) {
+    try {
+      final currentTime = now.hour * 60 + now.minute;
 
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Advanced Rule Update'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Text(
-                'Update a specific Time Slot using array filters',
-                style: TextStyle(fontSize: 12, color: Colors.grey),
-              ),
-              TextField(
-                controller: timeSlotIdController,
-                decoration: const InputDecoration(labelText: 'Time Slot ID'),
-              ),
-              TextField(
-                controller: openTimeController,
-                decoration: const InputDecoration(
-                  labelText: 'Open Time (HH:mm)',
-                ),
-              ),
-              TextField(
-                controller: closeTimeController,
-                decoration: const InputDecoration(
-                  labelText: 'Close Time (HH:mm)',
-                ),
-              ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final navigator = Navigator.of(context);
-              final result = await ref
-                  .read(updateMenuAdvancedUseCaseProvider)
-                  .call(menu.id, {
-                    'timeSlotId': timeSlotIdController.text,
-                    'openTime': openTimeController.text,
-                    'closeTime': closeTimeController.text,
-                  });
+      final startParts = start.split(':');
+      final startMinutes =
+          int.parse(startParts[0]) * 60 + int.parse(startParts[1]);
 
-              result.when(
-                success: (_) {
-                  navigator.pop();
-                  ref.read(menuNotifierProvider.notifier).loadMenus();
-                  ScaffoldMessenger.of(this.context).showSnackBar(
-                    const SnackBar(content: Text('Advanced rules updated!')),
-                  );
-                },
-                failure: (f) {
-                  ScaffoldMessenger.of(
-                    this.context,
-                  ).showSnackBar(SnackBar(content: Text('Error: $f')));
-                },
-              );
-            },
-            child: const Text('Update Rules'),
-          ),
-        ],
-      ),
-    );
+      final endParts = end.split(':');
+      final endMinutes = int.parse(endParts[0]) * 60 + int.parse(endParts[1]);
+
+      // Handle overnight? Assuming strict daily slots for now based on schema comments (e.g. 08:00 - 12:00)
+      return currentTime >= startMinutes && currentTime <= endMinutes;
+    } catch (e) {
+      return false;
+    }
   }
 }

@@ -6,6 +6,11 @@ class MenuEntity {
   final String description;
   final List<CategoryEntity> categories;
   final List<MenuItemEntity> items;
+  final bool isActive;
+  final List<MenuAvailability> availableDays;
+  final List<TaxRateEntity> taxes;
+  // final List<DiscountEntity> discounts; // TODO: Import DiscountEntity
+  final List<MetaDataEntity> metaData;
 
   const MenuEntity({
     required this.id,
@@ -13,6 +18,10 @@ class MenuEntity {
     required this.description,
     required this.categories,
     required this.items,
+    required this.isActive,
+    required this.availableDays,
+    required this.taxes,
+    required this.metaData,
   });
 
   MenuEntity copyWith({
@@ -21,6 +30,10 @@ class MenuEntity {
     String? description,
     List<CategoryEntity>? categories,
     List<MenuItemEntity>? items,
+    bool? isActive,
+    List<MenuAvailability>? availableDays,
+    List<TaxRateEntity>? taxes,
+    List<MetaDataEntity>? metaData,
   }) {
     return MenuEntity(
       id: id ?? this.id,
@@ -28,12 +41,30 @@ class MenuEntity {
       description: description ?? this.description,
       categories: categories ?? this.categories,
       items: items ?? this.items,
+      isActive: isActive ?? this.isActive,
+      availableDays: availableDays ?? this.availableDays,
+      taxes: taxes ?? this.taxes,
+      metaData: metaData ?? this.metaData,
     );
   }
 
   @override
   String toString() =>
-      'MenuEntity(id: $id, name: $name, description: $description)';
+      'MenuEntity(id: $id, name: $name, description: $description, isActive: $isActive)';
+}
+
+class MenuAvailability {
+  final String day;
+  final List<TimeSlot> timeSlots;
+
+  const MenuAvailability({required this.day, required this.timeSlots});
+}
+
+class TimeSlot {
+  final String openTime;
+  final String closeTime;
+
+  const TimeSlot({required this.openTime, required this.closeTime});
 }
 
 /// Category Entity

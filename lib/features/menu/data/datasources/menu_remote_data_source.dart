@@ -46,7 +46,7 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
   Future<MenuResponseDto> getCurrentMenu() async {
     try {
       final response = await _dioClient.get(
-        '${ApiConstants.v1}${ApiConstants.menuEndpoint}${ApiConstants.menuCurrentEndpoint}',
+        '${ApiConstants.v2}${ApiConstants.menuEndpoint}${ApiConstants.menuCurrentEndpoint}',
       );
 
       final responseData = response.data;
@@ -131,7 +131,11 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
   }) async {
     final response = await _dioClient.get(
       '${ApiConstants.v1}${ApiConstants.menuEndpoint}',
-      queryParameters: {'page': page, 'limit': limit},
+      queryParameters: {
+        'page': page,
+        'limit': limit,
+        'select[category]': 'name,description',
+      },
     );
     return PaginatedResponseDto.fromJson(
       response.data as Map<String, dynamic>,

@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/services/storage_service.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../menu/domain/entities/menu_entity.dart';
 import '../../../menu/presentation/viewmodels/menu_view_model.dart';
 import '../../../menu/presentation/viewmodels/categories_view_model.dart';
 import '../../../menu/presentation/viewmodels/customizations_view_model.dart';
+import '../../../menu/presentation/viewmodels/items_view_model.dart';
 import '../../../../features/tax/presentation/providers/tax_provider.dart';
 
 class AddItemPage extends ConsumerStatefulWidget {
-  const AddItemPage({super.key});
+  final MenuItemEntity? item;
+  const AddItemPage({super.key, this.item});
 
   @override
   ConsumerState<AddItemPage> createState() => _AddItemPageState();
@@ -43,6 +44,32 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
   bool _isSubmitting = false;
 
   @override
+  void initState() {
+    super.initState();
+    if (widget.item != null) {
+      final item = widget.item!;
+      _nameController.text = item.name;
+      _descriptionController.text = item.description;
+      _priceController.text = item.price.toString();
+      _imageController.text = item.image;
+      _prepTimeController.text = item.preparationTime.toString();
+      _minQtyController.text = item.minOrderQuantity.toString();
+      _maxQtyController.text = item.maxOrderQuantity.toString();
+      _selectedCategoryId = item.category.id;
+      _isAvailable = item.isAvailable;
+      _taxable = item.taxable;
+      if (item.taxRate != null) {
+        _selectedTaxId = item.taxRate!.id;
+      }
+      _allergens.addAll(item.allergens);
+      _selectedCustomizationIds.addAll(
+        item.customizationOptions.map((e) => e.id),
+      );
+      // Assuming metaData structure needs handling if it comes as List<dynamic>
+      // For now we skip population or need mapping logic based on actual data shape
+    }
+  }
+
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
@@ -168,21 +195,40 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
     //   return;
     // }
 
-    final success = await ref
-        .read(menuNotifierProvider.notifier)
-        .addItem(itemData);
+    bool success = false;
+    if (widget.item != null) {
+      // Update existing item
+      success = await ref
+          .read(itemsNotifierProvider.notifier)
+          .updateItem(widget.item!.id, itemData);
+    } else {
+      // Create new item
+      success = await ref.read(menuNotifierProvider.notifier).addItem(itemData);
+    }
 
     if (mounted) {
       setState(() => _isSubmitting = false);
       if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Item added successfully')),
+          SnackBar(
+            content: Text(
+              widget.item != null
+                  ? 'Item updated successfully'
+                  : 'Item added successfully',
+            ),
+          ),
         );
         context.pop();
       } else {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Failed to add item')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              widget.item != null
+                  ? 'Failed to update item'
+                  : 'Failed to add item',
+            ),
+          ),
+        );
       }
     }
   }
@@ -205,7 +251,7 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Add New Item'),
+        title: Text(widget.item != null ? 'Edit Item' : 'Add New Item'),
         backgroundColor: AppColors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -334,6 +380,23 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
                 hintText: 'e.g. Nuts, Dairy, Soy',
               ),
             ),
+            if (_allergens.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Wrap(
+                  spacing: 8,
+                  children: _allergens.map((allergen) {
+                    return Chip(
+                      label: Text(allergen),
+                      onDeleted: () {
+                        setState(() {
+                          _allergens.remove(allergen);
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
 
             const SizedBox(height: 24),
             const Text(
@@ -467,7 +530,10 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
               ),
               child: _isSubmitting
                   ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text('Add Item', style: TextStyle(fontSize: 18)),
+                  : Text(
+                      widget.item != null ? 'Update Item' : 'Add Item',
+                      style: const TextStyle(fontSize: 18),
+                    ),
             ),
             const SizedBox(height: 40),
           ],

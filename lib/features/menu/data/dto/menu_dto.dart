@@ -45,6 +45,10 @@ class MenuDto {
   final String description;
   final List<CategoryDto> categories;
   final List<MenuItemWrapperDto> items;
+  final bool isActive;
+  final List<MenuAvailabilityDto> availableDays;
+  final List<TaxRateDto> taxes;
+  final List<MetaDataDto> metaData;
 
   const MenuDto({
     required this.id,
@@ -52,6 +56,10 @@ class MenuDto {
     required this.description,
     required this.categories,
     required this.items,
+    required this.isActive,
+    required this.availableDays,
+    required this.taxes,
+    required this.metaData,
   });
 
   factory MenuDto.fromJson(Map<String, dynamic> json) {
@@ -71,6 +79,25 @@ class MenuDto {
                 )
                 .toList()
           : [],
+      isActive: (json['isActive'] as bool?) ?? true,
+      availableDays: json['availableDays'] is List
+          ? (json['availableDays'] as List<dynamic>)
+                .map(
+                  (e) =>
+                      MenuAvailabilityDto.fromJson(e as Map<String, dynamic>),
+                )
+                .toList()
+          : [],
+      taxes: json['taxes'] is List
+          ? (json['taxes'] as List<dynamic>)
+                .map((e) => TaxRateDto.fromJson(e as Map<String, dynamic>))
+                .toList()
+          : [],
+      metaData: json['metaData'] is List
+          ? (json['metaData'] as List<dynamic>)
+                .map((e) => MetaDataDto.fromJson(e as Map<String, dynamic>))
+                .toList()
+          : [],
     );
   }
 
@@ -81,6 +108,10 @@ class MenuDto {
       'description': description,
       'categories': categories.map((e) => e.toJson()).toList(),
       'items': items.map((e) => e.toJson()).toList(),
+      'isActive': isActive,
+      'availableDays': availableDays.map((e) => e.toJson()).toList(),
+      'taxes': taxes.map((e) => e.toJson()).toList(),
+      'metaData': metaData.map((e) => e.toJson()).toList(),
     };
   }
 
@@ -92,7 +123,62 @@ class MenuDto {
       description: description,
       categories: categories.map((c) => c.toEntity()).toList(),
       items: items.map((i) => i.item.toEntity()).toList(),
+      isActive: isActive,
+      availableDays: availableDays.map((e) => e.toEntity()).toList(),
+      taxes: taxes.map((e) => e.toEntity()).toList(),
+      metaData: metaData.map((e) => e.toEntity()).toList(),
     );
+  }
+}
+
+class MenuAvailabilityDto {
+  final String day;
+  final List<TimeSlotDto> timeSlots;
+
+  const MenuAvailabilityDto({required this.day, required this.timeSlots});
+
+  factory MenuAvailabilityDto.fromJson(Map<String, dynamic> json) {
+    return MenuAvailabilityDto(
+      day: (json['day'] as String?) ?? '',
+      timeSlots: json['timeSlots'] is List
+          ? (json['timeSlots'] as List<dynamic>)
+                .map((e) => TimeSlotDto.fromJson(e as Map<String, dynamic>))
+                .toList()
+          : [],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'day': day, 'timeSlots': timeSlots.map((e) => e.toJson()).toList()};
+  }
+
+  MenuAvailability toEntity() {
+    return MenuAvailability(
+      day: day,
+      timeSlots: timeSlots.map((e) => e.toEntity()).toList(),
+    );
+  }
+}
+
+class TimeSlotDto {
+  final String openTime;
+  final String closeTime;
+
+  const TimeSlotDto({required this.openTime, required this.closeTime});
+
+  factory TimeSlotDto.fromJson(Map<String, dynamic> json) {
+    return TimeSlotDto(
+      openTime: (json['openTime'] as String?) ?? '',
+      closeTime: (json['closeTime'] as String?) ?? '',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'openTime': openTime, 'closeTime': closeTime};
+  }
+
+  TimeSlot toEntity() {
+    return TimeSlot(openTime: openTime, closeTime: closeTime);
   }
 }
 

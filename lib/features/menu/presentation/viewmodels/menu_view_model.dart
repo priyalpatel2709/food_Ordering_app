@@ -261,11 +261,36 @@ class MenuNotifier extends StateNotifier<MenuState> {
   }
 
   /// Delete menu item
+  /// Delete menu item
   Future<bool> deleteItem(String id) async {
     final result = await ref.read(deleteItemUseCaseProvider).call(id);
     return result.when(
       success: (_) async {
         await ref.read(itemsNotifierProvider.notifier).loadItems();
+        return true;
+      },
+      failure: (_) => false,
+    );
+  }
+
+  /// Create menu
+  Future<bool> createMenu(Map<String, dynamic> data) async {
+    final result = await ref.read(createMenuUseCaseProvider).call(data);
+    return result.when(
+      success: (_) async {
+        await loadMenus();
+        return true;
+      },
+      failure: (_) => false,
+    );
+  }
+
+  /// Update menu
+  Future<bool> updateMenu(String id, Map<String, dynamic> data) async {
+    final result = await ref.read(updateMenuUseCaseProvider).call(id, data);
+    return result.when(
+      success: (_) async {
+        await loadMenus();
         return true;
       },
       failure: (_) => false,

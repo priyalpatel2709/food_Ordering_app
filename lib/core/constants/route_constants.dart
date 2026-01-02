@@ -32,6 +32,7 @@ class RouteConstants {
   static const String restaurantSettings = '/staff/restaurant-settings';
   static const String reports = '/staff/reports';
   static const String addItem = '/staff/items/add';
+  static const String addMenu = '/staff/menu/add';
 
   // Route Names (for named navigation)
   static const String splashName = 'splash';

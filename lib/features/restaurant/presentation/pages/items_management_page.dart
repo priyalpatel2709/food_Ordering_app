@@ -78,9 +78,7 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
         onPressed: () {
           final state = categoriesState;
           if (state is CategoriesLoaded) {
-            context.push(
-              RouteConstants.addItem,
-            ); // Removed extra: state.categories
+            context.push(RouteConstants.addItem, extra: null);
           }
         },
         backgroundColor: AppColors.primary,
@@ -144,56 +142,10 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
                 ),
               ],
             ),
-            onTap: () => _showEditItemDialog(item),
+            onTap: () => context.push(RouteConstants.addItem, extra: item),
           ),
         );
       },
-    );
-  }
-
-  void _showEditItemDialog(MenuItemEntity item) {
-    final nameController = TextEditingController(text: item.name);
-    final priceController = TextEditingController(text: item.price.toString());
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit Item (Basic)'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
-            ),
-            TextField(
-              controller: priceController,
-              decoration: const InputDecoration(labelText: 'Price'),
-              keyboardType: TextInputType.number,
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final success = await ref
-                  .read(itemsNotifierProvider.notifier)
-                  .updateItem(item.id, {
-                    'name': nameController.text,
-                    'price': double.tryParse(priceController.text) ?? 0.0,
-                  });
-              if (success && mounted) {
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Update'),
-          ),
-        ],
-      ),
     );
   }
 
