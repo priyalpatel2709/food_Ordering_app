@@ -57,9 +57,13 @@ class RestaurantRemoteDataSourceImpl implements RestaurantRemoteDataSource {
   @override
   Future<Map<String, dynamic>> getRestaurantSettings(String id) async {
     final response = await _dioClient.get(
-      '${ApiConstants.v1}${ApiConstants.restaurantEndpoint}/$id',
+      '${ApiConstants.v1}${ApiConstants.restaurantEndpoint}',
     );
-    return response.data['data'] as Map<String, dynamic>;
+    final data = response.data['data'];
+    if (data is List && data.isNotEmpty) {
+      return data[0] as Map<String, dynamic>;
+    }
+    return data as Map<String, dynamic>;
   }
 
   @override
@@ -67,7 +71,7 @@ class RestaurantRemoteDataSourceImpl implements RestaurantRemoteDataSource {
     String id,
     Map<String, dynamic> data,
   ) async {
-    await _dioClient.put(
+    await _dioClient.patch(
       '${ApiConstants.v1}${ApiConstants.restaurantEndpoint}/$id',
       data: data,
     );

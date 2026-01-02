@@ -64,3 +64,6 @@ final kdsSocketProvider = StreamProvider.autoDispose<List<KdsOrder>>((
     }
   }
 });
+
+// Selected Station Provider
+final selectedStationProvider = StateProvider<String?>((ref) => null);
