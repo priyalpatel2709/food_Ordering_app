@@ -141,6 +141,7 @@ class _TaxesManagementPageState extends ConsumerState<TaxesManagementPage> {
                 labelText: 'Tax Name (e.g. VAT)',
               ),
             ),
+            SizedBox(height: 16.0),
             TextField(
               controller: rateController,
               decoration: const InputDecoration(labelText: 'Rate (%)'),
@@ -165,7 +166,7 @@ class _TaxesManagementPageState extends ConsumerState<TaxesManagementPage> {
                   .read(taxNotifierProvider.notifier)
                   .createTax({
                     'name': nameController.text,
-                    'rate': double.tryParse(rateController.text) ?? 0.0,
+                    'percentage': double.tryParse(rateController.text) ?? 0.0,
                     'isActive': true,
                     if (restaurantId != null) 'restaurantId': restaurantId,
                   });

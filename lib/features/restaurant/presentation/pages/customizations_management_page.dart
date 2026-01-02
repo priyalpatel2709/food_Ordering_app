@@ -145,6 +145,7 @@ class _CustomizationsManagementPageState
               controller: nameController,
               decoration: const InputDecoration(labelText: 'Option Name'),
             ),
+            SizedBox(height: 16),
             TextField(
               controller: priceController,
               decoration: const InputDecoration(labelText: 'Price'),
@@ -194,6 +195,7 @@ class _CustomizationsManagementPageState
               controller: nameController,
               decoration: const InputDecoration(labelText: 'Option Name'),
             ),
+            SizedBox(height: 16.0),
             TextField(
               controller: priceController,
               decoration: const InputDecoration(labelText: 'Price'),

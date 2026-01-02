@@ -133,6 +133,7 @@ class _CategoriesManagementPageState
   void _showAddCategoryDialog() {
     final nameController = TextEditingController();
     final descController = TextEditingController();
+    final displayOrderController = TextEditingController();
 
     showDialog(
       context: context,
@@ -145,9 +146,16 @@ class _CategoriesManagementPageState
               controller: nameController,
               decoration: const InputDecoration(labelText: 'Name'),
             ),
+            SizedBox(height: 16),
             TextField(
               controller: descController,
               decoration: const InputDecoration(labelText: 'Description'),
+            ),
+            SizedBox(height: 16),
+            TextField(
+              controller: displayOrderController,
+              decoration: const InputDecoration(labelText: 'Display Order'),
+              keyboardType: TextInputType.number,
             ),
           ],
         ),
@@ -163,6 +171,7 @@ class _CategoriesManagementPageState
                   .createCategory({
                     'name': nameController.text,
                     'description': descController.text,
+                    'displayOrder': displayOrderController.text,
                     'isActive': true,
                   });
               if (success && mounted) {
@@ -191,6 +200,7 @@ class _CategoriesManagementPageState
               controller: nameController,
               decoration: const InputDecoration(labelText: 'Name'),
             ),
+            SizedBox(height: 16.0),
             TextField(
               controller: descController,
               decoration: const InputDecoration(labelText: 'Description'),
