@@ -44,7 +44,7 @@ class ApiConstants {
   static const String kdsConfig = '/config';
 
   // dashboard
-  static const String dashboard = 'restaurant/dashboard';
+  static const String dashboard = 'dashboard';
   static const String dashboardStats = '/stats';
   static const String dashboardExport = '/export';
 

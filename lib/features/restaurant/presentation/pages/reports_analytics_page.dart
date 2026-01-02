@@ -86,28 +86,70 @@ class _ReportsAnalyticsPageState extends ConsumerState<ReportsAnalyticsPage> {
   }
 
   Widget _buildDashboard(Map<String, dynamic> stats) {
-    final totalRevenue = stats['totalRevenue'] ?? 0.0;
-    final totalOrders = stats['totalOrders'] ?? 0;
-    final averageOrderValue = stats['averageOrderValue'] ?? 0.0;
+    final summary = stats['summary'] ?? {};
+    final totalNetSales = (summary['netSales'] as num?)?.toDouble() ?? 0.0;
+    final totalOrderCount = (summary['orderCount'] as num?)?.toInt() ?? 0;
+    final avgOrderValue = (summary['avgOrderValue'] as num?)?.toDouble() ?? 0.0;
 
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        _buildStatCards(totalRevenue, totalOrders, averageOrderValue),
+        _buildStatCards(totalNetSales, totalOrderCount, avgOrderValue),
         const SizedBox(height: 32),
         const Text(
-          'Revenue Overview',
+          'Daily Sales Trend',
           style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
-        _buildRevenueChart(stats['revenueHistory'] ?? []),
+        _buildSalesChart(stats['salesChart'] ?? []),
         const SizedBox(height: 32),
         const Text(
-          'Popular Items',
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          'Peak Hours (Orders)',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
         ),
         const SizedBox(height: 16),
-        _buildPopularItems(stats['popularItems'] ?? []),
+        _buildPeakHoursChart(stats['peakHours'] ?? []),
+        const SizedBox(height: 32),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Top Items',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildPopularItems(stats['topItems'] ?? []),
+                ],
+              ),
+            ),
+            const SizedBox(width: 24),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Payment Methods',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  _buildPaymentStats(stats['paymentStats'] ?? []),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 32),
+        const Text(
+          'Staff Performance',
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16),
+        _buildStaffPerformance(stats['staffPerformance'] ?? []),
+        const SizedBox(height: 40),
       ],
     );
   }
@@ -117,7 +159,7 @@ class _ReportsAnalyticsPageState extends ConsumerState<ReportsAnalyticsPage> {
       children: [
         Expanded(
           child: _StatCard(
-            title: 'Revenue',
+            title: 'Net Sales',
             value: '\$${revenue.toStringAsFixed(2)}',
             icon: Icons.attach_money,
             color: Colors.green,
@@ -132,13 +174,34 @@ class _ReportsAnalyticsPageState extends ConsumerState<ReportsAnalyticsPage> {
             color: Colors.blue,
           ),
         ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _StatCard(
+            title: 'Avg Order Value',
+            value: '\$${aov.toStringAsFixed(2)}',
+            icon: Icons.trending_up,
+            color: Colors.orange,
+          ),
+        ),
       ],
     );
   }
 
-  Widget _buildRevenueChart(List<dynamic> history) {
+  Widget _buildSalesChart(List<dynamic> salesChart) {
+    if (salesChart.isEmpty) {
+      return const SizedBox(
+        height: 200,
+        child: Center(child: Text("No sales data available")),
+      );
+    }
+
+    // Sort by date just in case
+    // Assuming _id is YYYY-MM-DD
+    final sortedChart = List<Map<String, dynamic>>.from(salesChart);
+    sortedChart.sort((a, b) => (a['_id'] ?? '').compareTo(b['_id'] ?? ''));
+
     return Container(
-      height: 200,
+      height: 250,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -153,21 +216,65 @@ class _ReportsAnalyticsPageState extends ConsumerState<ReportsAnalyticsPage> {
       ),
       child: LineChart(
         LineChartData(
-          gridData: const FlGridData(show: false),
-          titlesData: const FlTitlesData(show: false),
-          borderData: FlBorderData(show: false),
+          gridData: const FlGridData(
+            show: true,
+            drawVerticalLine: true,
+            horizontalInterval: 50,
+          ),
+          titlesData: FlTitlesData(
+            show: true,
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  final index = value.toInt();
+                  if (index >= 0 && index < sortedChart.length) {
+                    final dateStr = sortedChart[index]['_id'].toString();
+                    // Show only MM-DD for brevity
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 8.0),
+                      child: Text(
+                        dateStr.length >= 10 ? dateStr.substring(5) : dateStr,
+                        style: const TextStyle(fontSize: 10),
+                      ),
+                    );
+                  }
+                  return const Text('');
+                },
+                interval: 1,
+              ),
+            ),
+            leftTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: true, reservedSize: 40),
+            ),
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+          ),
+          borderData: FlBorderData(
+            show: true,
+            border: Border.all(color: Colors.grey.shade200),
+          ),
           lineBarsData: [
+            // Sales Line
             LineChartBarData(
-              spots: history.asMap().entries.map((e) {
+              spots: sortedChart.asMap().entries.map((e) {
                 return FlSpot(
                   e.key.toDouble(),
-                  (e.value['amount'] as num).toDouble(),
+                  (e.value['sales'] as num).toDouble(),
                 );
               }).toList(),
               isCurved: true,
-              color: AppColors.primary,
-              barWidth: 4,
-              dotData: const FlDotData(show: false),
+              color: Colors.green,
+              barWidth: 3,
+              dotData: const FlDotData(show: true),
+              belowBarData: BarAreaData(
+                show: true,
+                color: Colors.green.withOpacity(0.1),
+              ),
             ),
           ],
         ),
@@ -175,22 +282,168 @@ class _ReportsAnalyticsPageState extends ConsumerState<ReportsAnalyticsPage> {
     );
   }
 
+  Widget _buildPeakHoursChart(List<dynamic> peakHours) {
+    if (peakHours.isEmpty)
+      return const SizedBox(
+        height: 100,
+        child: Center(child: Text('No peak hours data')),
+      );
+
+    final sortedHours = List<Map<String, dynamic>>.from(peakHours);
+    sortedHours.sort((a, b) => (a['_id'] as num).compareTo(b['_id'] as num));
+
+    return Container(
+      height: 200,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
+      ),
+      child: BarChart(
+        BarChartData(
+          gridData: const FlGridData(show: false),
+          titlesData: FlTitlesData(
+            show: true,
+            bottomTitles: AxisTitles(
+              sideTitles: SideTitles(
+                showTitles: true,
+                getTitlesWidget: (value, meta) {
+                  return Text(
+                    '${value.toInt()}h',
+                    style: const TextStyle(fontSize: 10),
+                  );
+                },
+              ),
+            ),
+            leftTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            topTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+            rightTitles: const AxisTitles(
+              sideTitles: SideTitles(showTitles: false),
+            ),
+          ),
+          borderData: FlBorderData(show: false),
+          barGroups: sortedHours.map((e) {
+            return BarChartGroupData(
+              x: (e['_id'] as num).toInt(),
+              barRods: [
+                BarChartRodData(
+                  toY: (e['count'] as num).toDouble(),
+                  color: AppColors.primary,
+                  width: 16,
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(4),
+                    topRight: Radius.circular(4),
+                  ),
+                ),
+              ],
+            );
+          }).toList(),
+        ),
+      ),
+    );
+  }
+
   Widget _buildPopularItems(List<dynamic> items) {
+    if (items.isEmpty) return const Text('No data');
+
     return Column(
       children: items.map((item) {
         return Card(
-          margin: const EdgeInsets.only(bottom: 12),
+          elevation: 0,
+          color: Colors.grey.shade50,
+          margin: const EdgeInsets.only(bottom: 8),
           child: ListTile(
-            leading: const CircleAvatar(child: Icon(Icons.fastfood)),
-            title: Text(item['name'] ?? 'Unknown Item'),
-            subtitle: Text('${item['count']} orders'),
+            dense: true,
+            title: Text(
+              item['name'] ?? 'Unknown',
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+            subtitle: Text('${item['quantitySold'] ?? 0} sold'),
             trailing: Text(
               '\$${(item['revenue'] as num).toDouble().toStringAsFixed(2)}',
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  }
+
+  Widget _buildPaymentStats(List<dynamic> stats) {
+    if (stats.isEmpty) return const Text('No data');
+
+    return Column(
+      children: stats.map((stat) {
+        return Card(
+          elevation: 0,
+          color: Colors.grey.shade50,
+          margin: const EdgeInsets.only(bottom: 8),
+          child: ListTile(
+            dense: true,
+            leading: const Icon(Icons.payment, color: Colors.grey),
+            title: Text(
+              (stat['_id'] ?? 'Unknown').toString().toUpperCase(),
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            subtitle: Text('${stat['count']} txns'),
+            trailing: Text(
+              '\$${(stat['volume'] as num).toDouble().toStringAsFixed(2)}',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
         );
       }).toList(),
+    );
+  }
+
+  Widget _buildStaffPerformance(List<dynamic> stats) {
+    if (stats.isEmpty) return const Center(child: Text('No staff data'));
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: DataTable(
+        columns: const [
+          DataColumn(label: Text('Staff')),
+          DataColumn(label: Text('Orders')),
+          DataColumn(label: Text('Sales')),
+          DataColumn(label: Text('Avg Tip')),
+        ],
+        rows: stats.map((s) {
+          return DataRow(
+            cells: [
+              DataCell(
+                Text(
+                  s['_id'] ?? 'Unknown',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                ),
+              ),
+              DataCell(Text('${s['ordersHandled']}')),
+              DataCell(
+                Text(
+                  '\$${(s['totalSales'] as num).toDouble().toStringAsFixed(2)}',
+                ),
+              ),
+              DataCell(
+                Text('\$${(s['avgTip'] as num).toDouble().toStringAsFixed(2)}'),
+              ),
+            ],
+          );
+        }).toList(),
+      ),
     );
   }
 }

@@ -41,11 +41,10 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
         MenuError(:final message) => Center(child: Text('Error: $message')),
         MenuLoaded(:final menus) => _buildMenuList(menus),
       },
-      floatingActionButton: FloatingActionButton.extended(
+      floatingActionButton: FloatingActionButton(
         onPressed: () => context.push(RouteConstants.addMenu),
-        label: const Text('Add Menu'),
-        icon: const Icon(Icons.add),
         backgroundColor: AppColors.primary,
+        child: const Icon(Icons.add),
       ),
     );
   }
