@@ -30,7 +30,7 @@ final kdsSocketProvider = StreamProvider.autoDispose<List<KdsOrder>>((
   if (authState is AuthAuthenticated) {
     final restaurantId = '123';
 
-    if (restaurantId != null) {
+    {
       log(
         'KDS Page Monitoring Started: Connecting socket and joining room $restaurantId',
       );

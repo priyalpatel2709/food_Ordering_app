@@ -9,6 +9,8 @@ import '../../../../shared/navigation/navigation_provider.dart';
 import '../../../../core/constants/route_constants.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../../core/services/storage_service.dart';
+import '../../../discount/domain/entities/discount_entity.dart';
+import '../../../discount/presentation/providers/discount_provider.dart';
 
 class TableDetailsPage extends ConsumerStatefulWidget {
   final TableEntity table;
@@ -290,39 +292,162 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: const Text("Complete Payment"),
-          content: Text("Pay \$${amount.toStringAsFixed(2)}?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () async {
-                try {
-                  await ref.read(completeDineInPaymentUseCaseProvider).call(
-                    orderId,
-                    {
-                      "method": "cash",
-                      "amount": amount,
-                      "notes": "Paid via App",
-                    },
+        return Consumer(
+          builder: (context, ref, child) {
+            final discountsAsync = ref.watch(discountNotifierProvider);
+            DiscountEntity? selectedDiscount;
+
+            return StatefulBuilder(
+              builder: (context, setState) {
+                double finalAmount = amount;
+                if (selectedDiscount != null) {
+                  final discountAmount = selectedDiscount!
+                      .calculateDiscountAmount(amount);
+                  finalAmount = (amount - discountAmount).clamp(
+                    0,
+                    double.infinity,
                   );
-                  if (context.mounted) {
-                    ref.invalidate(tablesProvider);
-                    Navigator.pop(context); // Close dialog
-                    context.pop(); // Close detail page
-                  }
-                } catch (e) {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('Error: $e')));
                 }
+
+                return AlertDialog(
+                  title: const Text("Complete Payment"),
+                  content: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text("Subtotal:"),
+                          Text("\$${amount.toStringAsFixed(2)}"),
+                        ],
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        "Apply Discount:",
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      if (discountsAsync is DiscountLoaded) ...[
+                        DropdownButton<DiscountEntity>(
+                          isExpanded: true,
+                          value: selectedDiscount,
+                          hint: const Text("Select Discount"),
+                          items: [
+                            const DropdownMenuItem<DiscountEntity>(
+                              value: null,
+                              child: Text("None"),
+                            ),
+                            ...discountsAsync.discounts.map((d) {
+                              return DropdownMenuItem(
+                                value: d,
+                                child: Text(
+                                  "${d.discountCode} (${d.type == 'percentage' ? '${d.value}%' : '\$${d.value}'})",
+                                ),
+                              );
+                            }),
+                          ],
+                          onChanged: (val) {
+                            setState(() {
+                              selectedDiscount = val;
+                            });
+                          },
+                        ),
+                      ] else if (discountsAsync is DiscountLoading) ...[
+                        const LinearProgressIndicator(),
+                      ],
+                      if (selectedDiscount != null) ...[
+                        const SizedBox(height: 8),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              "Discard:",
+                              style: TextStyle(color: Colors.green),
+                            ),
+                            Text(
+                              "- \$${selectedDiscount!.calculateDiscountAmount(amount).toStringAsFixed(2)}",
+                              style: const TextStyle(color: Colors.green),
+                            ),
+                          ],
+                        ),
+                      ],
+                      const Divider(),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "Total To Pay:",
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            "\$${finalAmount.toStringAsFixed(2)}",
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        // Reset discount selection if needed, but local state handles it
+                        Navigator.pop(context);
+                      },
+                      child: const Text("Cancel"),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        try {
+                          Map<String, dynamic> discountData = {
+                            "discounts": [],
+                            "totalDiscountAmount": 0,
+                          };
+
+                          if (selectedDiscount != null) {
+                            discountData = {
+                              "discounts": [
+                                {
+                                  "discountId": selectedDiscount!.id,
+                                  "discountAmount": selectedDiscount!
+                                      .calculateDiscountAmount(amount),
+                                },
+                              ],
+                              "totalDiscountAmount": selectedDiscount!
+                                  .calculateDiscountAmount(amount),
+                            };
+                          }
+
+                          await ref
+                              .read(completeDineInPaymentUseCaseProvider)
+                              .call(orderId, {
+                                "method": "cash",
+                                "amount": finalAmount,
+                                "notes": "Paid via App",
+                                "discount": discountData,
+                              });
+                          if (context.mounted) {
+                            ref.invalidate(tablesProvider);
+                            Navigator.pop(context); // Close dialog
+                            context.pop(); // Close detail page
+                          }
+                        } catch (e) {
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(content: Text('Error: $e')),
+                            );
+                          }
+                        }
+                      },
+                      child: const Text("Confirm Payment"),
+                    ),
+                  ],
+                );
               },
-              child: const Text("Confirm Cash Pay"),
-            ),
-          ],
+            );
+          },
         );
       },
     );

@@ -172,17 +172,6 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
     // Solution: Read `MenuNotifier` which contains `MenuLoaded` state with menus.
     // Find the menu that contains the selected category.
 
-    final menuState = ref.read(menuNotifierProvider);
-    String? derivedMenuId;
-    if (menuState is MenuLoaded) {
-      for (final menu in menuState.menus) {
-        if (menu.categories.any((c) => c.id == _selectedCategoryId)) {
-          derivedMenuId = menu.id;
-          break;
-        }
-      }
-    }
-
     // if (derivedMenuId == null) {
     //   ScaffoldMessenger.of(context).showSnackBar(
     //     const SnackBar(

@@ -24,6 +24,7 @@ import '../features/restaurant/presentation/pages/taxes_management_page.dart';
 import '../../features/restaurant/presentation/pages/add_item_page.dart';
 import '../../features/restaurant/presentation/pages/restaurant_settings_page.dart';
 import '../../features/menu/presentation/views/add_menu_page.dart';
+import '../../features/restaurant/presentation/pages/staff_orders_page.dart';
 
 class AppRouter {
   // Route paths and names are now centralized in RouteConstants
@@ -219,6 +220,11 @@ class AppRouter {
         path: RouteConstants.reports,
         name: RouteConstants.reportsName,
         builder: (context, state) => const ReportsAnalyticsPage(),
+      ),
+      GoRoute(
+        path: RouteConstants.staffOrders,
+        name: RouteConstants.staffOrdersName,
+        builder: (context, state) => const StaffOrdersPage(),
       ),
     ],
   );

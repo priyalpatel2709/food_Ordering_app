@@ -48,6 +48,10 @@ class ApiConstants {
   static const String dashboardStats = '/stats';
   static const String dashboardExport = '/export';
 
+  //payment
+  static const String payment = 'payment';
+  static const String refund = '/refund';
+
   // Full URLs
   static String get loginUrl => '$baseUrl$v1$user$loginEndpoint';
   static String get registerUrl => '$baseUrl$v1$user$registerEndpoint';

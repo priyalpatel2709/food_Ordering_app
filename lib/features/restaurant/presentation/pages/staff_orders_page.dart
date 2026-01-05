@@ -4,29 +4,29 @@ import 'package:intl/intl.dart';
 import '../../../order/presentation/providers/order_provider.dart';
 import '../../../order/domain/entities/order_entity.dart';
 
-class OrdersPage extends ConsumerStatefulWidget {
-  const OrdersPage({super.key});
+class StaffOrdersPage extends ConsumerStatefulWidget {
+  const StaffOrdersPage({super.key});
 
   @override
-  ConsumerState<OrdersPage> createState() => _OrdersPageState();
+  ConsumerState<StaffOrdersPage> createState() => _StaffOrdersPageState();
 }
 
-class _OrdersPageState extends ConsumerState<OrdersPage> {
+class _StaffOrdersPageState extends ConsumerState<StaffOrdersPage> {
   @override
   void initState() {
     super.initState();
-    // Fetch orders when page loads
+    // Fetch ALL orders when page loads
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(ordersListNotifierProvider.notifier).getMyOrders();
+      ref.read(staffOrdersListNotifierProvider.notifier).getAllOrders();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final ordersState = ref.watch(ordersListNotifierProvider);
+    final ordersState = ref.watch(staffOrdersListNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Orders'), elevation: 0),
+      appBar: AppBar(title: const Text('All Orders (Staff)'), elevation: 0),
       body: _buildBody(ordersState),
     );
   }
@@ -49,17 +49,12 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
           Icon(Icons.receipt_long_outlined, size: 80, color: Colors.grey[400]),
           const SizedBox(height: 16),
           Text(
-            'No orders yet',
+            'No orders found',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Colors.grey[600],
             ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Your orders will appear here',
-            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
           ),
         ],
       ),
@@ -90,7 +85,7 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
           const SizedBox(height: 24),
           ElevatedButton.icon(
             onPressed: () {
-              ref.read(ordersListNotifierProvider.notifier).getMyOrders();
+              ref.read(staffOrdersListNotifierProvider.notifier).getAllOrders();
             },
             icon: const Icon(Icons.refresh),
             label: const Text('Retry'),
@@ -103,7 +98,7 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
   Widget _buildOrdersList(List<OrderEntity> orders) {
     return RefreshIndicator(
       onRefresh: () async {
-        ref.read(ordersListNotifierProvider.notifier).getMyOrders();
+        ref.read(staffOrdersListNotifierProvider.notifier).getAllOrders();
       },
       child: ListView.builder(
         padding: const EdgeInsets.all(16),
@@ -126,7 +121,7 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          // TODO: Navigate to order details
+          // TODO: Navigate to staff order details if needed
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -233,8 +228,20 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
                 children: [
                   _buildSummaryRow('Subtotal', order.subtotal),
                   _buildSummaryRow('Tax', order.totalTaxAmount),
-                  if (order.totalDiscountAmount > 0)
-                    _buildSummaryRow('Discount', -order.totalDiscountAmount),
+                  if (order.discount.discounts.isNotEmpty)
+                    ...order.discount.discounts.map(
+                      (d) => _buildSummaryRow(
+                        'Discount (${d.discountId.discountName})',
+                        -d.discountAmount,
+                        color: Colors.green[700],
+                      ),
+                    )
+                  else if (order.totalDiscountAmount > 0)
+                    _buildSummaryRow(
+                      'Discount',
+                      -order.totalDiscountAmount,
+                      color: Colors.green[700],
+                    ),
                   if (order.deliveryCharge > 0)
                     _buildSummaryRow('Delivery', order.deliveryCharge),
                   if (order.restaurantTipCharge > 0)
@@ -248,23 +255,44 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
                 ],
               ),
 
+              // Payment status
               const SizedBox(height: 12),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(
-                    _getPaymentIcon(order.payment.paymentStatus),
-                    size: 16,
-                    color: _getPaymentColor(order.payment.paymentStatus),
+                  Row(
+                    children: [
+                      Icon(
+                        _getPaymentIcon(order.payment.paymentStatus),
+                        size: 16,
+                        color: _getPaymentColor(order.payment.paymentStatus),
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Payment: ${order.payment.paymentStatus.toUpperCase()}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                          color: _getPaymentColor(order.payment.paymentStatus),
+                        ),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Payment: ${order.payment.paymentStatus.toUpperCase()}',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: _getPaymentColor(order.payment.paymentStatus),
+                  if (order.payment.paymentStatus.toLowerCase() == 'paid' &&
+                      order.orderStatus.toLowerCase() != 'cancelled')
+                    OutlinedButton(
+                      onPressed: () => _showRefundDialog(context, order),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        side: const BorderSide(color: Colors.red),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 0,
+                        ),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      child: const Text('Refund'),
                     ),
-                  ),
                 ],
               ),
             ],
@@ -325,7 +353,12 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
     );
   }
 
-  Widget _buildSummaryRow(String label, double amount, {bool isBold = false}) {
+  Widget _buildSummaryRow(
+    String label,
+    double amount, {
+    bool isBold = false,
+    Color? color,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
@@ -336,7 +369,7 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
             style: TextStyle(
               fontSize: isBold ? 16 : 14,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
-              color: isBold ? Colors.black : Colors.grey[700],
+              color: color ?? (isBold ? Colors.black : Colors.grey[700]),
             ),
           ),
           Text(
@@ -344,7 +377,7 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
             style: TextStyle(
               fontSize: isBold ? 16 : 14,
               fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
-              color: isBold ? Colors.black : Colors.grey[900],
+              color: color ?? (isBold ? Colors.black : Colors.grey[900]),
             ),
           ),
         ],
@@ -376,5 +409,177 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
       default:
         return Colors.grey;
     }
+  }
+
+  void _showRefundDialog(BuildContext context, OrderEntity order) {
+    if (order.orderStatus.toLowerCase() == 'cancelled') {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Order cannot be refunded')));
+      return;
+    }
+
+    // Calculate refundable amount
+    // assuming totalPaid is the max refundable if not already refunded
+    final totalPaid = order.payment.totalPaid;
+    final refunded = order.refunds.totalRefundedAmount;
+    final refundable = totalPaid - refunded;
+
+    if (refundable <= 0) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No refundable amount remaining')),
+      );
+      return;
+    }
+
+    final amountController = TextEditingController(
+      text: refundable.toStringAsFixed(2),
+    );
+    final reasonController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Issue Refund'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Refundable Amount: \$${refundable.toStringAsFixed(2)}',
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 16),
+            // Order Summary Breakdown
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.grey[50],
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.grey[200]!),
+              ),
+              child: Column(
+                children: [
+                  _buildSummaryRow('Subtotal', order.subtotal),
+                  _buildSummaryRow('Tax', order.totalTaxAmount),
+                  if (order.discount.discounts.isNotEmpty)
+                    ...order.discount.discounts.map(
+                      (d) => _buildSummaryRow(
+                        'Discount (${d.discountId.discountName})',
+                        -d.discountAmount,
+                        color: Colors.green[700],
+                      ),
+                    )
+                  else if (order.totalDiscountAmount > 0)
+                    _buildSummaryRow(
+                      'Discount',
+                      -order.totalDiscountAmount,
+                      color: Colors.green[700],
+                    ),
+                  if (order.deliveryCharge > 0)
+                    _buildSummaryRow('Delivery', order.deliveryCharge),
+                  if (order.restaurantTipCharge > 0)
+                    _buildSummaryRow('Tip', order.restaurantTipCharge),
+                  const Divider(height: 16),
+                  _buildSummaryRow(
+                    'Total Paid',
+                    order.payment.totalPaid,
+                    isBold: true,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: amountController,
+              decoration: const InputDecoration(
+                labelText: 'Refund Amount',
+                prefixText: '\$',
+                border: OutlineInputBorder(),
+              ),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: reasonController,
+              decoration: const InputDecoration(
+                labelText: 'Reason for Refund',
+                border: OutlineInputBorder(),
+              ),
+              maxLines: 2,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          Consumer(
+            builder: (context, ref, child) {
+              return ElevatedButton(
+                onPressed: () async {
+                  final amount = double.tryParse(amountController.text) ?? 0.0;
+                  final reason = reasonController.text.trim();
+
+                  if (amount <= 0 || amount > refundable) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Invalid refund amount')),
+                    );
+                    return;
+                  }
+
+                  if (reason.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Please provide a reason')),
+                    );
+                    return;
+                  }
+
+                  Navigator.pop(context); // Close dialog
+
+                  // Show loading indicator or snackbar?
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Processing refund...')),
+                  );
+
+                  // Use Staff provider here
+                  final success = await ref
+                      .read(staffOrdersListNotifierProvider.notifier)
+                      .refundOrder(order.id, amount, reason);
+
+                  if (success) {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Refund processed successfully'),
+                          backgroundColor: Colors.green,
+                        ),
+                      );
+                    }
+                  } else {
+                    if (context.mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Failed to process refund'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Refund'),
+              );
+            },
+          ),
+        ],
+      ),
+    );
   }
 }

@@ -90,11 +90,17 @@ class _ReportsAnalyticsPageState extends ConsumerState<ReportsAnalyticsPage> {
     final totalNetSales = (summary['netSales'] as num?)?.toDouble() ?? 0.0;
     final totalOrderCount = (summary['orderCount'] as num?)?.toInt() ?? 0;
     final avgOrderValue = (summary['avgOrderValue'] as num?)?.toDouble() ?? 0.0;
+    final totalRefunds = (summary['totalRefunds'] as num?)?.toDouble() ?? 0.0;
 
     return ListView(
       padding: const EdgeInsets.all(24),
       children: [
-        _buildStatCards(totalNetSales, totalOrderCount, avgOrderValue),
+        _buildStatCards(
+          totalNetSales,
+          totalOrderCount,
+          avgOrderValue,
+          totalRefunds,
+        ),
         const SizedBox(height: 32),
         const Text(
           'Daily Sales Trend',
@@ -154,34 +160,56 @@ class _ReportsAnalyticsPageState extends ConsumerState<ReportsAnalyticsPage> {
     );
   }
 
-  Widget _buildStatCards(double revenue, int orders, double aov) {
-    return Row(
+  Widget _buildStatCards(
+    double revenue,
+    int orders,
+    double aov,
+    double refunds,
+  ) {
+    return Column(
       children: [
-        Expanded(
-          child: _StatCard(
-            title: 'Net Sales',
-            value: '\$${revenue.toStringAsFixed(2)}',
-            icon: Icons.attach_money,
-            color: Colors.green,
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                title: 'Net Sales',
+                value: '\$${revenue.toStringAsFixed(2)}',
+                icon: Icons.attach_money,
+                color: Colors.green,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _StatCard(
+                title: 'Orders',
+                value: orders.toString(),
+                icon: Icons.shopping_bag,
+                color: Colors.blue,
+              ),
+            ),
+          ],
         ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _StatCard(
-            title: 'Orders',
-            value: orders.toString(),
-            icon: Icons.shopping_bag,
-            color: Colors.blue,
-          ),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _StatCard(
-            title: 'Avg Order Value',
-            value: '\$${aov.toStringAsFixed(2)}',
-            icon: Icons.trending_up,
-            color: Colors.orange,
-          ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: _StatCard(
+                title: 'Avg Order Value',
+                value: '\$${aov.toStringAsFixed(2)}',
+                icon: Icons.trending_up,
+                color: Colors.orange,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _StatCard(
+                title: 'Total Refunds',
+                value: '\$${refunds.toStringAsFixed(2)}',
+                icon: Icons.money_off,
+                color: Colors.red,
+              ),
+            ),
+          ],
         ),
       ],
     );

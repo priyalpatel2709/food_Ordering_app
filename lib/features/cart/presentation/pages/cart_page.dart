@@ -27,8 +27,6 @@ class CartPage extends ConsumerStatefulWidget {
 class _CartPageState extends ConsumerState<CartPage> {
   bool _isProcessingCheckout = false;
 
-  final StorageService _storageService = StorageService();
-
   @override
   void initState() {
     super.initState();
@@ -201,8 +199,10 @@ class _CartPageState extends ConsumerState<CartPage> {
                     );
                   }),
 
-                  // Discount section
-                  _buildDiscountSection(context, ref, summary),
+                  // Discount section - Only show for pickup/delivery (not dine-in)
+                  // For dine-in, discounts are applied at table payment
+                  if (ref.watch(dineInSessionProvider) == null)
+                    _buildDiscountSection(context, ref, summary),
 
                   // Summary card appears after all items
                   if (discountedSummary != null)

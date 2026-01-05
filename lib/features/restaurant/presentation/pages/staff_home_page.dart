@@ -69,6 +69,12 @@ class StaffHomePage extends StatelessWidget {
                       onTap: () => context.push(RouteConstants.dineInTables),
                     ),
                     _DashboardCard(
+                      title: 'All Orders (History)',
+                      icon: Icons.history,
+                      color: Colors.brown,
+                      onTap: () => context.push(RouteConstants.staffOrders),
+                    ),
+                    _DashboardCard(
                       title: 'Kitchen (KDS)',
                       icon: Icons.restaurant,
                       color: AppColors.secondary,

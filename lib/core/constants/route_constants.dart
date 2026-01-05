@@ -33,6 +33,7 @@ class RouteConstants {
   static const String reports = '/staff/reports';
   static const String addItem = '/staff/items/add';
   static const String addMenu = '/staff/menu/add';
+  static const String staffOrders = '/staff/orders';
 
   // Route Names (for named navigation)
   static const String splashName = 'splash';
@@ -48,6 +49,7 @@ class RouteConstants {
   static const String favoritesName = 'favorites';
   static const String searchName = 'search';
   static const String staffHomeName = 'staffHome';
+  static const String staffOrdersName = 'staffOrders';
   static const String dineInTablesName = 'dineInTables';
   static const String dineInTableDetailsName = 'dineInTableDetails';
   static const String kdsName = 'kds';

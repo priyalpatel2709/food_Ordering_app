@@ -68,7 +68,7 @@ class OrderNotifier extends StateNotifier<OrderState> {
       final order = await _repository.createOrder(request);
 
       state = OrderSuccess(order);
-    } catch (e,st) {
+    } catch (e, st) {
       log('order error: $e /n $st');
       state = OrderError(e.toString());
     }
@@ -81,6 +81,22 @@ class OrderNotifier extends StateNotifier<OrderState> {
 }
 
 /// Orders List Notifier
+
+/// Order Notifier Provider
+final orderNotifierProvider = StateNotifierProvider<OrderNotifier, OrderState>((
+  ref,
+) {
+  final repository = ref.watch(orderRepositoryProvider);
+  return OrderNotifier(repository);
+});
+
+/// Orders List Notifier Provider
+final ordersListNotifierProvider =
+    StateNotifierProvider<OrdersListNotifier, OrdersListState>((ref) {
+      final repository = ref.watch(orderRepositoryProvider);
+      return OrdersListNotifier(repository);
+    });
+
 class OrdersListNotifier extends StateNotifier<OrdersListState> {
   final OrderRepository _repository;
 
@@ -98,23 +114,57 @@ class OrdersListNotifier extends StateNotifier<OrdersListState> {
     }
   }
 
+  /// Refund order
+  Future<bool> refundOrder(String orderId, double amount, String reason) async {
+    try {
+      await _repository.refundOrder(orderId, amount, reason);
+      await getMyOrders(); // Refresh list to show updated status
+      return true;
+    } catch (e) {
+      log('refund error: $e');
+      return false;
+    }
+  }
+
   /// Reset state
   void reset() {
     state = OrdersListInitial();
   }
 }
 
-/// Order Notifier Provider
-final orderNotifierProvider = StateNotifierProvider<OrderNotifier, OrderState>((
-  ref,
-) {
-  final repository = ref.watch(orderRepositoryProvider);
-  return OrderNotifier(repository);
-});
-
-/// Orders List Notifier Provider
-final ordersListNotifierProvider =
-    StateNotifierProvider<OrdersListNotifier, OrdersListState>((ref) {
+/// Staff Orders List Notifier Provider
+final staffOrdersListNotifierProvider =
+    StateNotifierProvider<StaffOrdersNotifier, OrdersListState>((ref) {
       final repository = ref.watch(orderRepositoryProvider);
-      return OrdersListNotifier(repository);
+      return StaffOrdersNotifier(repository);
     });
+
+class StaffOrdersNotifier extends StateNotifier<OrdersListState> {
+  final OrderRepository _repository;
+
+  StaffOrdersNotifier(this._repository) : super(OrdersListInitial());
+
+  /// Get ALL orders
+  Future<void> getAllOrders() async {
+    state = OrdersListLoading();
+    try {
+      final orders = await _repository.getOrders();
+      state = OrdersListSuccess(orders);
+    } catch (e,st) {
+      log('get all orders error: $e, $st');
+      state = OrdersListError(e.toString());
+    }
+  }
+
+  /// Refund order
+  Future<bool> refundOrder(String orderId, double amount, String reason) async {
+    try {
+      await _repository.refundOrder(orderId, amount, reason);
+      await getAllOrders(); // Refresh list
+      return true;
+    } catch (e) {
+      log('refund error: $e');
+      return false;
+    }
+  }
+}

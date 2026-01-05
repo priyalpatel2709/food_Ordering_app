@@ -22,4 +22,8 @@ class OrderRepository {
   Future<List<OrderEntity>> getMyOrders() async {
     return await _remoteDataSource.getMyOrders();
   }
+
+  Future<void> refundOrder(String orderId, double amount, String reason) async {
+    return await _remoteDataSource.refundOrder(orderId, amount, reason);
+  }
 }

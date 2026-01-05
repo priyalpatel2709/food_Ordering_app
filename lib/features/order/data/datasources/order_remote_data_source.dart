@@ -8,6 +8,7 @@ abstract class OrderRemoteDataSource {
   Future<OrderEntity> getOrder(String orderId);
   Future<List<OrderEntity>> getOrders();
   Future<List<OrderEntity>> getMyOrders();
+  Future<void> refundOrder(String orderId, double amount, String reason);
 }
 
 class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
@@ -48,6 +49,7 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
   Future<List<OrderEntity>> getOrders() async {
     final response = await _dioClient.get(
       '${ApiConstants.v1}${ApiConstants.orders}',
+      queryParameters: {"sort":"-1"},
     );
 
     final data = response.data as Map<String, dynamic>;
@@ -77,6 +79,19 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
       return orders;
     } else {
       throw Exception(data['message'] ?? 'Failed to get my orders');
+    }
+  }
+
+  @override
+  Future<void> refundOrder(String orderId, double amount, String reason) async {
+    final response = await _dioClient.post(
+      '${ApiConstants.v1}${ApiConstants.payment}${ApiConstants.refund}/$orderId',
+      data: {'amount': amount, 'reason': reason},
+    );
+
+    final data = response.data as Map<String, dynamic>;
+    if (data['status'] != 'success') {
+      throw Exception(data['message'] ?? 'Failed to refund order');
     }
   }
 }

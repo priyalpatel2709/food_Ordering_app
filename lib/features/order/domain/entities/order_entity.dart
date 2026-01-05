@@ -59,22 +59,38 @@ class CreateOrderRequest {
 
 /// Tax Breakdown
 class TaxBreakdown {
-  final String taxId;
+  final TaxId taxId;
   final double taxCharge;
 
   const TaxBreakdown({required this.taxId, required this.taxCharge});
 
   factory TaxBreakdown.fromJson(Map<String, dynamic> json) {
     return TaxBreakdown(
-      taxId: json['taxId'] as String,
+      taxId: TaxId.fromJson(json['taxId'] as Map<String, dynamic>),
       taxCharge: (json['taxCharge'] as num).toDouble(),
+    );
+  }
+}
+
+class TaxId {
+  final String id;
+  final String name;
+  final num percentage;
+
+  const TaxId({required this.id, required this.name, required this.percentage});
+
+  factory TaxId.fromJson(Map<String, dynamic> json) {
+    return TaxId(
+      id: json['_id'] as String,
+      name: json['name'] as String,
+      percentage: json['percentage'] as num,
     );
   }
 }
 
 /// Discount Breakdown
 class DiscountBreakdown {
-  final String discountId;
+  final DiscountId discountId;
   final double discountAmount;
 
   const DiscountBreakdown({
@@ -84,9 +100,59 @@ class DiscountBreakdown {
 
   factory DiscountBreakdown.fromJson(Map<String, dynamic> json) {
     return DiscountBreakdown(
-      discountId: json['discountId'] as String,
+      discountId: DiscountId.fromJson(json['discountId'] as Map<String, dynamic>),
       discountAmount: (json['discountAmount'] as num).toDouble(),
     );
+  }
+}
+
+class DiscountId {
+  final String id;
+  final String type;
+  final String discountName;
+  final num value;
+
+  const DiscountId({
+    required this.id,
+    required this.type,
+    required this.discountName,
+    required this.value,
+  });
+
+  factory DiscountId.fromJson(Map<String, dynamic> json) {
+    return DiscountId(
+      id: json['_id'] as String,
+      type: json['type'] as String,
+      discountName: json['discountName'] as String,
+      value: json['value'] as num,
+    );
+  }
+}
+
+/// Refund Info
+class RefundInfo {
+  final List<dynamic> history;
+  final double totalRefundedAmount;
+
+  const RefundInfo({required this.history, required this.totalRefundedAmount});
+
+  factory RefundInfo.fromJson(Map<String, dynamic> json) {
+    return RefundInfo(
+      history: json['history'] as List<dynamic>? ?? [],
+      totalRefundedAmount:
+          (json['totalRefundedAmount'] as num?)?.toDouble() ?? 0.0,
+    );
+  }
+}
+
+class CustomerId {
+  final String id;
+  final String name;
+
+  const CustomerId({required this.id, required this.name});
+
+  factory CustomerId.fromJson(Map<String, dynamic> json) {
+    return CustomerId(id: json['_id'] as String, name: json['name'] as String);
   }
 }
 
@@ -95,7 +161,7 @@ class OrderEntity {
   final String id;
   final String orderId;
   final String restaurantId;
-  final String customerId;
+  final CustomerId customerId;
   final double restaurantTipCharge;
   final bool isScheduledOrder;
   final bool isDeliveryOrder;
@@ -111,6 +177,7 @@ class OrderEntity {
   final List<OrderItemEntity> orderItems;
   final List<dynamic> statusHistory;
   final List<dynamic> metaData;
+  final RefundInfo refunds;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -134,6 +201,7 @@ class OrderEntity {
     required this.orderItems,
     required this.statusHistory,
     required this.metaData,
+    required this.refunds,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -143,7 +211,10 @@ class OrderEntity {
       id: json['_id'] as String,
       orderId: json['orderId'] as String,
       restaurantId: json['restaurantId'].toString(), // Convert to string
-      customerId: json['customerId'] as String,
+      // customerId: json['customerId'] as String,
+      customerId: CustomerId.fromJson(
+        json['customerId'] as Map<String, dynamic>,
+      ),
       restaurantTipCharge:
           (json['restaurantTipCharge'] as num?)?.toDouble() ?? 0.0,
       isScheduledOrder: json['isScheduledOrder'] as bool? ?? false,
@@ -162,6 +233,9 @@ class OrderEntity {
           .toList(),
       statusHistory: json['statusHistory'] as List<dynamic>? ?? [],
       metaData: json['metaData'] as List<dynamic>? ?? [],
+      refunds: json['refunds'] != null
+          ? RefundInfo.fromJson(json['refunds'] as Map<String, dynamic>)
+          : const RefundInfo(history: [], totalRefundedAmount: 0.0),
       createdAt: DateTime.parse(json['createdAt'] as String),
       updatedAt: DateTime.parse(json['updatedAt'] as String),
     );
@@ -220,25 +294,35 @@ class MenuItem {
 
   factory MenuItem.fromJson(Map<String, dynamic> json) {
     return MenuItem(
-      id: json['_id'] as String,
-      restaurantId: json['restaurantId'],
-      category: json['category'],
-      name: json['name'],
-      description: json['description'],
-      price: (json['price'] as num).toDouble(),
-      image: json['image'],
+      id: json['_id'] as String?,
+      restaurantId: json['restaurantId'] as String?,
+      category: json['category'] as String?,
+      name: json['name'] as String?,
+      description: json['description'] as String?,
+      price: (json['price'] as num?)?.toDouble(),
+      image: json['image'] as String?,
       isAvailable: json['isAvailable'] as bool? ?? true,
-      preparationTime: json['preparationTime'],
-      allergens: (json['allergens'] as List).cast<String>(),
-      customizationOptions: (json['customizationOptions']).cast<String>(),
-      popularityScore: json['popularityScore'],
-      averageRating: (json['averageRating']).toDouble(),
+      preparationTime: json['preparationTime'] as int?,
+      allergens: json['allergens'] != null
+          ? (json['allergens'] as List).cast<String>()
+          : [],
+      customizationOptions: json['customizationOptions'] != null
+          ? (json['customizationOptions'] as List).cast<String>()
+          : [],
+      popularityScore: json['popularityScore'] as int?,
+      averageRating: (json['averageRating'] as num?)?.toDouble(),
       taxable: json['taxable'] as bool? ?? false,
-      taxRate: (json['taxRate'] as List).cast<String>(),
-      minOrderQuantity: json['minOrderQuantity'],
-      maxOrderQuantity: json['maxOrderQuantity'],
-      createdAt: DateTime.parse(json['createdAt']),
-      updatedAt: DateTime.parse(json['updatedAt']),
+      taxRate: json['taxRate'] != null
+          ? (json['taxRate'] as List).cast<String>()
+          : [],
+      minOrderQuantity: json['minOrderQuantity'] as int?,
+      maxOrderQuantity: json['maxOrderQuantity'] as int?,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : null,
     );
   }
 }
