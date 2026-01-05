@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -14,10 +15,27 @@ class MenuManagementPage extends ConsumerStatefulWidget {
 }
 
 class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounceTimer;
+
   @override
   void initState() {
     super.initState();
     Future.microtask(() => ref.read(menuNotifierProvider.notifier).loadMenus());
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    _debounceTimer?.cancel();
+    super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      ref.read(menuNotifierProvider.notifier).loadMenus(search: query);
+    });
   }
 
   @override
@@ -35,12 +53,35 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
           onPressed: () => context.pop(),
         ),
       ),
-      body: switch (menuState) {
-        MenuInitial() ||
-        MenuLoading() => const Center(child: CircularProgressIndicator()),
-        MenuError(:final message) => Center(child: Text('Error: $message')),
-        MenuLoaded(:final menus) => _buildMenuList(menus),
-      },
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search menus...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              onChanged: _onSearchChanged,
+            ),
+          ),
+          Expanded(
+            child: switch (menuState) {
+              MenuInitial() ||
+              MenuLoading() => const Center(child: CircularProgressIndicator()),
+              MenuError(:final message) => Center(
+                child: Text('Error: $message'),
+              ),
+              MenuLoaded(:final menus) => _buildMenuList(menus),
+            },
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.push(RouteConstants.addMenu),
         backgroundColor: AppColors.primary,

@@ -8,6 +8,7 @@ abstract class DiscountRemoteDataSource {
   Future<PaginatedResponseDto<DiscountEntity>> getAllDiscounts({
     int page = 1,
     int limit = 10,
+    String? search,
   });
   Future<void> createDiscount(Map<String, dynamic> data);
   Future<void> updateDiscount(String id, Map<String, dynamic> data);
@@ -23,10 +24,16 @@ class DiscountRemoteDataSourceImpl implements DiscountRemoteDataSource {
   Future<PaginatedResponseDto<DiscountEntity>> getAllDiscounts({
     int page = 1,
     int limit = 10,
+    String? search,
   }) async {
+    final Map<String, dynamic> queryParams = {'page': page, 'limit': limit};
+    if (search != null && search.isNotEmpty) {
+      queryParams['search'] = search;
+    }
+
     final response = await _dioClient.get(
       '${ApiConstants.v1}${ApiConstants.discount}',
-      queryParameters: {'page': page, 'limit': limit},
+      queryParameters: queryParams,
     );
 
     return PaginatedResponseDto.fromJson(

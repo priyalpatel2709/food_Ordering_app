@@ -16,6 +16,7 @@ abstract class MenuRemoteDataSource {
   Future<PaginatedResponseDto<MenuDto>> getAllMenus({
     int page = 1,
     int limit = 10,
+    String? search,
   });
   Future<void> createCategory(Map<String, dynamic> data);
   Future<void> updateCategory(String id, Map<String, dynamic> data);
@@ -28,13 +29,15 @@ abstract class MenuRemoteDataSource {
   Future<PaginatedResponseDto<MenuItemDto>> getAllItems({
     int page = 1,
     int limit = 10,
+    String? search,
   });
   Future<PaginatedResponseDto<CategoryDto>> getAllCategories({
     int page = 1,
     int limit = 10,
+    String? search,
   });
   Future<PaginatedResponseDto<CustomizationOptionDto>>
-  getAllCustomizationOptions({int page = 1, int limit = 10});
+  getAllCustomizationOptions({int page = 1, int limit = 10, String? search});
   Future<void> deleteMenu(String id);
 }
 
@@ -129,14 +132,20 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
   Future<PaginatedResponseDto<MenuDto>> getAllMenus({
     int page = 1,
     int limit = 10,
+    String? search,
   }) async {
+    final Map<String, dynamic> queryParams = {
+      'page': page,
+      'limit': limit,
+      'select[category]': 'name,description',
+    };
+    if (search != null && search.isNotEmpty) {
+      queryParams['search'] = search;
+    }
+
     final response = await _dioClient.get(
       '${ApiConstants.v1}${ApiConstants.menuEndpoint}',
-      queryParameters: {
-        'page': page,
-        'limit': limit,
-        'select[category]': 'name,description',
-      },
+      queryParameters: queryParams,
     );
     return PaginatedResponseDto.fromJson(
       response.data as Map<String, dynamic>,
@@ -212,10 +221,16 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
   Future<PaginatedResponseDto<MenuItemDto>> getAllItems({
     int page = 1,
     int limit = 10,
+    String? search,
   }) async {
+    final Map<String, dynamic> queryParams = {'page': page, 'limit': limit};
+    if (search != null && search.isNotEmpty) {
+      queryParams['search'] = search;
+    }
+
     final response = await _dioClient.get(
       '${ApiConstants.v1}${ApiConstants.itemEndpoint}',
-      queryParameters: {'page': page, 'limit': limit},
+      queryParameters: queryParams,
     );
     return PaginatedResponseDto.fromJson(
       response.data as Map<String, dynamic>,
@@ -227,10 +242,16 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
   Future<PaginatedResponseDto<CategoryDto>> getAllCategories({
     int page = 1,
     int limit = 10,
+    String? search,
   }) async {
+    final Map<String, dynamic> queryParams = {'page': page, 'limit': limit};
+    if (search != null && search.isNotEmpty) {
+      queryParams['search'] = search;
+    }
+
     final response = await _dioClient.get(
       '${ApiConstants.v1}${ApiConstants.categoryEndpoint}',
-      queryParameters: {'page': page, 'limit': limit},
+      queryParameters: queryParams,
     );
     return PaginatedResponseDto.fromJson(
       response.data as Map<String, dynamic>,
@@ -240,10 +261,19 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
 
   @override
   Future<PaginatedResponseDto<CustomizationOptionDto>>
-  getAllCustomizationOptions({int page = 1, int limit = 10}) async {
+  getAllCustomizationOptions({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  }) async {
+    final Map<String, dynamic> queryParams = {'page': page, 'limit': limit};
+    if (search != null && search.isNotEmpty) {
+      queryParams['search'] = search;
+    }
+
     final response = await _dioClient.get(
       '${ApiConstants.v1}${ApiConstants.customizationOptionEndpoint}',
-      queryParameters: {'page': page, 'limit': limit},
+      queryParameters: queryParams,
     );
     return PaginatedResponseDto.fromJson(
       response.data as Map<String, dynamic>,

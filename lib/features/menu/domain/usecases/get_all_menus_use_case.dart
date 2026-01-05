@@ -11,7 +11,8 @@ class GetAllMenusUseCase {
   Future<Result<PaginatedData<MenuEntity>>> call({
     int page = 1,
     int limit = 10,
+    String? search,
   }) {
-    return repository.getAllMenus(page: page, limit: limit);
+    return repository.getAllMenus(page: page, limit: limit, search: search);
   }
 }

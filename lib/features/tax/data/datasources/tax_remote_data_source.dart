@@ -7,6 +7,7 @@ abstract class TaxRemoteDataSource {
   Future<PaginatedResponseDto<TaxEntity>> getAllTaxes({
     int page = 1,
     int limit = 10,
+    String? search,
   });
   Future<void> createTax(Map<String, dynamic> data);
   Future<void> updateTax(String id, Map<String, dynamic> data);
@@ -22,10 +23,16 @@ class TaxRemoteDataSourceImpl implements TaxRemoteDataSource {
   Future<PaginatedResponseDto<TaxEntity>> getAllTaxes({
     int page = 1,
     int limit = 10,
+    String? search,
   }) async {
+    final Map<String, dynamic> queryParams = {'page': page, 'limit': limit};
+    if (search != null && search.isNotEmpty) {
+      queryParams['search'] = search;
+    }
+
     final response = await _dioClient.get(
       '${ApiConstants.v1}${ApiConstants.taxEndpoint}',
-      queryParameters: {'page': page, 'limit': limit},
+      queryParameters: queryParams,
     );
 
     return PaginatedResponseDto.fromJson(

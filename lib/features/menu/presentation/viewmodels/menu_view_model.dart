@@ -25,6 +25,7 @@ class MenuLoaded extends MenuState {
   final int currentPage;
   final int totalPages;
   final int totalDocs;
+  final String? searchQuery;
 
   const MenuLoaded(
     this.menus, {
@@ -32,6 +33,7 @@ class MenuLoaded extends MenuState {
     this.currentPage = 1,
     this.totalPages = 1,
     this.totalDocs = 0,
+    this.searchQuery,
   });
 
   MenuLoaded copyWith({
@@ -40,6 +42,7 @@ class MenuLoaded extends MenuState {
     int? currentPage,
     int? totalPages,
     int? totalDocs,
+    String? searchQuery,
   }) {
     return MenuLoaded(
       menus ?? this.menus,
@@ -47,6 +50,7 @@ class MenuLoaded extends MenuState {
       currentPage: currentPage ?? this.currentPage,
       totalPages: totalPages ?? this.totalPages,
       totalDocs: totalDocs ?? this.totalDocs,
+      searchQuery: searchQuery ?? this.searchQuery,
     );
   }
 }
@@ -90,7 +94,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
   }
 
   /// Load all menus (Management view)
-  Future<void> loadMenus({int page = 1, int limit = 10}) async {
+  Future<void> loadMenus({int page = 1, int limit = 10, String? search}) async {
     if (page == 1) {
       state = const MenuLoading();
     } else {
@@ -101,7 +105,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
 
     final result = await ref
         .read(getAllMenusUseCaseProvider)
-        .call(page: page, limit: limit);
+        .call(page: page, limit: limit, search: search);
 
     result.when(
       success: (data) {
@@ -111,6 +115,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
             currentPage: data.page,
             totalPages: data.totalPages,
             totalDocs: data.totalDocs,
+            searchQuery: search,
           );
         } else {
           if (state is MenuLoaded) {
@@ -121,6 +126,7 @@ class MenuNotifier extends StateNotifier<MenuState> {
               currentPage: data.page,
               totalPages: data.totalPages,
               totalDocs: data.totalDocs,
+              searchQuery: search ?? oldState.searchQuery,
             );
           }
         }
@@ -143,7 +149,10 @@ class MenuNotifier extends StateNotifier<MenuState> {
           currentState.currentPage >= currentState.totalPages) {
         return;
       }
-      // await loadMenus(page: currentState.currentPage + 1);
+      await loadMenus(
+        page: currentState.currentPage + 1,
+        search: currentState.searchQuery,
+      );
     }
   }
 

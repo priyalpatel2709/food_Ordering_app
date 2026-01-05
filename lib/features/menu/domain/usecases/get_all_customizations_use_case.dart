@@ -11,7 +11,12 @@ class GetAllCustomizationsUseCase {
   Future<Result<PaginatedData<CustomizationOptionEntity>>> call({
     int page = 1,
     int limit = 10,
+    String? search,
   }) {
-    return _repository.getAllCustomizationOptions(page: page, limit: limit);
+    return _repository.getAllCustomizationOptions(
+      page: page,
+      limit: limit,
+      search: search,
+    );
   }
 }

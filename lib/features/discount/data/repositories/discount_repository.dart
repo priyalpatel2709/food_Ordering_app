@@ -11,10 +11,12 @@ class DiscountRepository {
   Future<PaginatedData<DiscountEntity>> getAllDiscounts({
     int page = 1,
     int limit = 10,
+    String? search,
   }) async {
     final responseDto = await _remoteDataSource.getAllDiscounts(
       page: page,
       limit: limit,
+      search: search,
     );
     return responseDto.toPaginatedData((e) => e);
   }

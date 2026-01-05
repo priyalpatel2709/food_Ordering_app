@@ -15,11 +15,13 @@ class TaxRepositoryImpl implements TaxRepository {
   Future<Result<PaginatedData<TaxEntity>>> getAllTaxes({
     int page = 1,
     int limit = 10,
+    String? search,
   }) async {
     try {
       final responseDto = await _remoteDataSource.getAllTaxes(
         page: page,
         limit: limit,
+        search: search,
       );
       return Result.success(responseDto.toPaginatedData((e) => e));
     } on NetworkException catch (e) {

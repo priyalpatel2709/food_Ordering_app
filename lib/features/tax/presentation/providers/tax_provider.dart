@@ -14,6 +14,7 @@ class TaxLoaded extends TaxState {
   final int totalPages;
   final int totalDocs;
   final bool isLoadingMore;
+  final String? searchQuery;
 
   TaxLoaded({
     required this.taxes,
@@ -21,6 +22,7 @@ class TaxLoaded extends TaxState {
     required this.totalPages,
     required this.totalDocs,
     this.isLoadingMore = false,
+    this.searchQuery,
   });
 
   TaxLoaded copyWith({
@@ -29,6 +31,7 @@ class TaxLoaded extends TaxState {
     int? totalPages,
     int? totalDocs,
     bool? isLoadingMore,
+    String? searchQuery,
   }) {
     return TaxLoaded(
       taxes: taxes ?? this.taxes,
@@ -36,6 +39,7 @@ class TaxLoaded extends TaxState {
       totalPages: totalPages ?? this.totalPages,
       totalDocs: totalDocs ?? this.totalDocs,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      searchQuery: searchQuery ?? this.searchQuery,
     );
   }
 }
@@ -50,7 +54,7 @@ class TaxNotifier extends StateNotifier<TaxState> {
 
   TaxNotifier(this._ref) : super(TaxInitial());
 
-  Future<void> loadTaxes({int page = 1, int limit = 10}) async {
+  Future<void> loadTaxes({int page = 1, int limit = 10, String? search}) async {
     if (page == 1) {
       state = TaxLoading();
     } else {
@@ -62,7 +66,7 @@ class TaxNotifier extends StateNotifier<TaxState> {
 
     final result = await _ref
         .read(getAllTaxesUseCaseProvider)
-        .call(page: page, limit: limit);
+        .call(page: page, limit: limit, search: search);
 
     result.when(
       success: (paginatedData) {
@@ -72,6 +76,7 @@ class TaxNotifier extends StateNotifier<TaxState> {
             currentPage: paginatedData.page,
             totalPages: paginatedData.totalPages,
             totalDocs: paginatedData.totalDocs,
+            searchQuery: search,
           );
         } else {
           final currentState = state;
@@ -81,6 +86,7 @@ class TaxNotifier extends StateNotifier<TaxState> {
               currentPage: paginatedData.page,
               totalPages: paginatedData.totalPages,
               totalDocs: paginatedData.totalDocs,
+              searchQuery: search ?? currentState.searchQuery,
             );
           }
         }
@@ -94,7 +100,10 @@ class TaxNotifier extends StateNotifier<TaxState> {
     if (currentState is TaxLoaded &&
         !currentState.isLoadingMore &&
         currentState.currentPage < currentState.totalPages) {
-      await loadTaxes(page: currentState.currentPage + 1);
+      await loadTaxes(
+        page: currentState.currentPage + 1,
+        search: currentState.searchQuery,
+      );
     }
   }
 

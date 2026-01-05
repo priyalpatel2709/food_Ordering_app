@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../discount/presentation/providers/discount_provider.dart';
@@ -15,6 +16,8 @@ class DiscountsManagementPage extends ConsumerStatefulWidget {
 class _DiscountsManagementPageState
     extends ConsumerState<DiscountsManagementPage> {
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounceTimer;
 
   @override
   void initState() {
@@ -28,7 +31,16 @@ class _DiscountsManagementPageState
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
+    _debounceTimer?.cancel();
     super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      ref.read(discountNotifierProvider.notifier).loadDiscounts(search: query);
+    });
   }
 
   void _onScroll() {
@@ -49,22 +61,46 @@ class _DiscountsManagementPageState
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
-      body: switch (discountState) {
-        DiscountInitial() ||
-        DiscountLoading() => const Center(child: CircularProgressIndicator()),
-        DiscountError(:final message) => Center(child: Text('Error: $message')),
-        DiscountLoaded(
-          :final discounts,
-          :final isLoadingMore,
-          :final currentPage,
-          :final totalPages,
-        ) =>
-          _buildDiscountList(
-            discounts,
-            isLoadingMore,
-            currentPage < totalPages,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search discounts...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              onChanged: _onSearchChanged,
+            ),
           ),
-      },
+          Expanded(
+            child: switch (discountState) {
+              DiscountInitial() || DiscountLoading() => const Center(
+                child: CircularProgressIndicator(),
+              ),
+              DiscountError(:final message) => Center(
+                child: Text('Error: $message'),
+              ),
+              DiscountLoaded(
+                :final discounts,
+                :final isLoadingMore,
+                :final currentPage,
+                :final totalPages,
+              ) =>
+                _buildDiscountList(
+                  discounts,
+                  isLoadingMore,
+                  currentPage < totalPages,
+                ),
+            },
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         // heroTag: 'discounts_management_fab',
         onPressed: () => _showAddDiscountDialog(),

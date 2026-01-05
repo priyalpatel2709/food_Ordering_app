@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/theme/app_colors.dart';
@@ -15,6 +16,8 @@ class TaxesManagementPage extends ConsumerStatefulWidget {
 
 class _TaxesManagementPageState extends ConsumerState<TaxesManagementPage> {
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounceTimer;
 
   @override
   void initState() {
@@ -26,7 +29,16 @@ class _TaxesManagementPageState extends ConsumerState<TaxesManagementPage> {
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
+    _debounceTimer?.cancel();
     super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      ref.read(taxNotifierProvider.notifier).loadTaxes(search: query);
+    });
   }
 
   void _onScroll() {
@@ -47,18 +59,41 @@ class _TaxesManagementPageState extends ConsumerState<TaxesManagementPage> {
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
-      body: switch (taxState) {
-        TaxInitial() ||
-        TaxLoading() => const Center(child: CircularProgressIndicator()),
-        TaxError(:final message) => Center(child: Text('Error: $message')),
-        TaxLoaded(
-          :final taxes,
-          :final isLoadingMore,
-          :final currentPage,
-          :final totalPages,
-        ) =>
-          _buildTaxList(taxes, isLoadingMore, currentPage < totalPages),
-      },
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search taxes...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              onChanged: _onSearchChanged,
+            ),
+          ),
+          Expanded(
+            child: switch (taxState) {
+              TaxInitial() ||
+              TaxLoading() => const Center(child: CircularProgressIndicator()),
+              TaxError(:final message) => Center(
+                child: Text('Error: $message'),
+              ),
+              TaxLoaded(
+                :final taxes,
+                :final isLoadingMore,
+                :final currentPage,
+                :final totalPages,
+              ) =>
+                _buildTaxList(taxes, isLoadingMore, currentPage < totalPages),
+            },
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         // heroTag: 'taxes_management_fab',
         onPressed: () => _showAddTaxDialog(),

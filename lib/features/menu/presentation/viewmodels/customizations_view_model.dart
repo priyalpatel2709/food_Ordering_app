@@ -20,6 +20,7 @@ class CustomizationsLoaded extends CustomizationsState {
   final int totalPages;
   final int totalDocs;
   final bool isLoadingMore;
+  final String? searchQuery;
 
   const CustomizationsLoaded({
     required this.options,
@@ -27,6 +28,7 @@ class CustomizationsLoaded extends CustomizationsState {
     required this.totalPages,
     required this.totalDocs,
     this.isLoadingMore = false,
+    this.searchQuery,
   });
 
   CustomizationsLoaded copyWith({
@@ -35,6 +37,7 @@ class CustomizationsLoaded extends CustomizationsState {
     int? totalPages,
     int? totalDocs,
     bool? isLoadingMore,
+    String? searchQuery,
   }) {
     return CustomizationsLoaded(
       options: options ?? this.options,
@@ -42,6 +45,7 @@ class CustomizationsLoaded extends CustomizationsState {
       totalPages: totalPages ?? this.totalPages,
       totalDocs: totalDocs ?? this.totalDocs,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      searchQuery: searchQuery ?? this.searchQuery,
     );
   }
 }
@@ -58,7 +62,11 @@ class CustomizationsNotifier extends StateNotifier<CustomizationsState> {
     loadOptions();
   }
 
-  Future<void> loadOptions({int page = 1, int limit = 10}) async {
+  Future<void> loadOptions({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  }) async {
     if (page == 1) {
       state = const CustomizationsLoading();
     } else {
@@ -70,7 +78,7 @@ class CustomizationsNotifier extends StateNotifier<CustomizationsState> {
 
     final result = await ref
         .read(getAllCustomizationsUseCaseProvider)
-        .call(page: page, limit: limit);
+        .call(page: page, limit: limit, search: search);
 
     result.when(
       success: (paginatedData) {
@@ -80,6 +88,7 @@ class CustomizationsNotifier extends StateNotifier<CustomizationsState> {
             currentPage: paginatedData.page,
             totalPages: paginatedData.totalPages,
             totalDocs: paginatedData.totalDocs,
+            searchQuery: search,
           );
         } else {
           final currentState = state;
@@ -89,6 +98,7 @@ class CustomizationsNotifier extends StateNotifier<CustomizationsState> {
               currentPage: paginatedData.page,
               totalPages: paginatedData.totalPages,
               totalDocs: paginatedData.totalDocs,
+              searchQuery: search ?? currentState.searchQuery,
             );
           }
         }
@@ -102,7 +112,10 @@ class CustomizationsNotifier extends StateNotifier<CustomizationsState> {
     if (currentState is CustomizationsLoaded &&
         !currentState.isLoadingMore &&
         currentState.currentPage < currentState.totalPages) {
-      await loadOptions(page: currentState.currentPage + 1);
+      await loadOptions(
+        page: currentState.currentPage + 1,
+        search: currentState.searchQuery,
+      );
     }
   }
 

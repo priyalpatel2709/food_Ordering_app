@@ -20,6 +20,7 @@ class CategoriesLoaded extends CategoriesState {
   final int totalPages;
   final int totalDocs;
   final bool isLoadingMore;
+  final String? searchQuery;
 
   const CategoriesLoaded({
     required this.categories,
@@ -27,6 +28,7 @@ class CategoriesLoaded extends CategoriesState {
     required this.totalPages,
     required this.totalDocs,
     this.isLoadingMore = false,
+    this.searchQuery,
   });
 
   CategoriesLoaded copyWith({
@@ -35,6 +37,7 @@ class CategoriesLoaded extends CategoriesState {
     int? totalPages,
     int? totalDocs,
     bool? isLoadingMore,
+    String? searchQuery,
   }) {
     return CategoriesLoaded(
       categories: categories ?? this.categories,
@@ -42,6 +45,7 @@ class CategoriesLoaded extends CategoriesState {
       totalPages: totalPages ?? this.totalPages,
       totalDocs: totalDocs ?? this.totalDocs,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      searchQuery: searchQuery ?? this.searchQuery,
     );
   }
 }
@@ -58,7 +62,11 @@ class CategoriesNotifier extends StateNotifier<CategoriesState> {
     loadCategories();
   }
 
-  Future<void> loadCategories({int page = 1, int limit = 10}) async {
+  Future<void> loadCategories({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  }) async {
     if (page == 1) {
       state = const CategoriesLoading();
     } else {
@@ -70,7 +78,7 @@ class CategoriesNotifier extends StateNotifier<CategoriesState> {
 
     final result = await ref
         .read(getAllCategoriesUseCaseProvider)
-        .call(page: page, limit: limit);
+        .call(page: page, limit: limit, search: search);
 
     result.when(
       success: (paginatedData) {
@@ -80,6 +88,7 @@ class CategoriesNotifier extends StateNotifier<CategoriesState> {
             currentPage: paginatedData.page,
             totalPages: paginatedData.totalPages,
             totalDocs: paginatedData.totalDocs,
+            searchQuery: search,
           );
         } else {
           final currentState = state;
@@ -89,6 +98,7 @@ class CategoriesNotifier extends StateNotifier<CategoriesState> {
               currentPage: paginatedData.page,
               totalPages: paginatedData.totalPages,
               totalDocs: paginatedData.totalDocs,
+              searchQuery: search ?? currentState.searchQuery,
             );
           }
         }
@@ -102,7 +112,10 @@ class CategoriesNotifier extends StateNotifier<CategoriesState> {
     if (currentState is CategoriesLoaded &&
         !currentState.isLoadingMore &&
         currentState.currentPage < currentState.totalPages) {
-      await loadCategories(page: currentState.currentPage + 1);
+      await loadCategories(
+        page: currentState.currentPage + 1,
+        search: currentState.searchQuery,
+      );
     }
   }
 

@@ -11,8 +11,9 @@ class GetAllTaxesUseCase {
   Future<Result<PaginatedData<TaxEntity>>> call({
     int page = 1,
     int limit = 10,
+    String? search,
   }) {
-    return _repository.getAllTaxes(page: page, limit: limit);
+    return _repository.getAllTaxes(page: page, limit: limit, search: search);
   }
 }
 

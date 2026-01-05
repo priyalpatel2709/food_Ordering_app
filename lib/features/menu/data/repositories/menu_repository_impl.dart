@@ -97,11 +97,13 @@ class MenuRepositoryImpl implements MenuRepository {
   Future<Result<PaginatedData<MenuEntity>>> getAllMenus({
     int page = 1,
     int limit = 10,
+    String? search,
   }) async {
     try {
       final responseDto = await _remoteDataSource.getAllMenus(
         page: page,
         limit: limit,
+        search: search,
       );
       return Result.success(responseDto.toPaginatedData((e) => e.toEntity()));
     } on NetworkException catch (e) {
@@ -322,11 +324,13 @@ class MenuRepositoryImpl implements MenuRepository {
   Future<Result<PaginatedData<MenuItemEntity>>> getAllItems({
     int page = 1,
     int limit = 10,
+    String? search,
   }) async {
     try {
       final responseDto = await _remoteDataSource.getAllItems(
         page: page,
         limit: limit,
+        search: search,
       );
       return Result.success(responseDto.toPaginatedData((e) => e.toEntity()));
     } on NetworkException catch (e) {
@@ -344,11 +348,13 @@ class MenuRepositoryImpl implements MenuRepository {
   Future<Result<PaginatedData<CategoryEntity>>> getAllCategories({
     int page = 1,
     int limit = 10,
+    String? search,
   }) async {
     try {
       final responseDto = await _remoteDataSource.getAllCategories(
         page: page,
         limit: limit,
+        search: search,
       );
       return Result.success(responseDto.toPaginatedData((e) => e.toEntity()));
     } on NetworkException catch (e) {
@@ -364,11 +370,16 @@ class MenuRepositoryImpl implements MenuRepository {
 
   @override
   Future<Result<PaginatedData<CustomizationOptionEntity>>>
-  getAllCustomizationOptions({int page = 1, int limit = 10}) async {
+  getAllCustomizationOptions({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  }) async {
     try {
       final responseDto = await _remoteDataSource.getAllCustomizationOptions(
         page: page,
         limit: limit,
+        search: search,
       );
       return Result.success(responseDto.toPaginatedData((e) => e.toEntity()));
     } on NetworkException catch (e) {

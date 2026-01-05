@@ -20,6 +20,7 @@ class ItemsLoaded extends ItemsState {
   final int totalPages;
   final int totalDocs;
   final bool isLoadingMore;
+  final String? searchQuery;
 
   const ItemsLoaded({
     required this.items,
@@ -27,6 +28,7 @@ class ItemsLoaded extends ItemsState {
     required this.totalPages,
     required this.totalDocs,
     this.isLoadingMore = false,
+    this.searchQuery,
   });
 
   ItemsLoaded copyWith({
@@ -35,6 +37,7 @@ class ItemsLoaded extends ItemsState {
     int? totalPages,
     int? totalDocs,
     bool? isLoadingMore,
+    String? searchQuery,
   }) {
     return ItemsLoaded(
       items: items ?? this.items,
@@ -42,6 +45,7 @@ class ItemsLoaded extends ItemsState {
       totalPages: totalPages ?? this.totalPages,
       totalDocs: totalDocs ?? this.totalDocs,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      searchQuery: searchQuery ?? this.searchQuery,
     );
   }
 }
@@ -58,7 +62,7 @@ class ItemsNotifier extends StateNotifier<ItemsState> {
     loadItems();
   }
 
-  Future<void> loadItems({int page = 1, int limit = 10}) async {
+  Future<void> loadItems({int page = 1, int limit = 10, String? search}) async {
     if (page == 1) {
       state = const ItemsLoading();
     } else {
@@ -70,7 +74,7 @@ class ItemsNotifier extends StateNotifier<ItemsState> {
 
     final result = await ref
         .read(getAllItemsUseCaseProvider)
-        .call(page: page, limit: limit);
+        .call(page: page, limit: limit, search: search);
 
     result.when(
       success: (paginatedData) {
@@ -80,6 +84,7 @@ class ItemsNotifier extends StateNotifier<ItemsState> {
             currentPage: paginatedData.page,
             totalPages: paginatedData.totalPages,
             totalDocs: paginatedData.totalDocs,
+            searchQuery: search,
           );
         } else {
           final currentState = state;
@@ -89,6 +94,7 @@ class ItemsNotifier extends StateNotifier<ItemsState> {
               currentPage: paginatedData.page,
               totalPages: paginatedData.totalPages,
               totalDocs: paginatedData.totalDocs,
+              searchQuery: search ?? currentState.searchQuery,
             );
           }
         }
@@ -102,7 +108,10 @@ class ItemsNotifier extends StateNotifier<ItemsState> {
     if (currentState is ItemsLoaded &&
         !currentState.isLoadingMore &&
         currentState.currentPage < currentState.totalPages) {
-      await loadItems(page: currentState.currentPage + 1);
+      await loadItems(
+        page: currentState.currentPage + 1,
+        search: currentState.searchQuery,
+      );
     }
   }
 

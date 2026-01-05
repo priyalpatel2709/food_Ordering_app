@@ -17,6 +17,7 @@ abstract class MenuRepository {
   Future<Result<PaginatedData<MenuEntity>>> getAllMenus({
     int page = 1,
     int limit = 10,
+    String? search,
   });
   Future<Result<void>> createCategory(Map<String, dynamic> data);
   Future<Result<void>> updateCategory(String id, Map<String, dynamic> data);
@@ -32,12 +33,14 @@ abstract class MenuRepository {
   Future<Result<PaginatedData<MenuItemEntity>>> getAllItems({
     int page = 1,
     int limit = 10,
+    String? search,
   });
   Future<Result<PaginatedData<CategoryEntity>>> getAllCategories({
     int page = 1,
     int limit = 10,
+    String? search,
   });
   Future<Result<PaginatedData<CustomizationOptionEntity>>>
-  getAllCustomizationOptions({int page = 1, int limit = 10});
+  getAllCustomizationOptions({int page = 1, int limit = 10, String? search});
   Future<Result<void>> deleteMenu(String id);
 }

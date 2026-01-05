@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/theme/app_colors.dart';
@@ -15,6 +16,8 @@ class CustomizationsManagementPage extends ConsumerStatefulWidget {
 class _CustomizationsManagementPageState
     extends ConsumerState<CustomizationsManagementPage> {
   final ScrollController _scrollController = ScrollController();
+  final TextEditingController _searchController = TextEditingController();
+  Timer? _debounceTimer;
 
   @override
   void initState() {
@@ -28,7 +31,18 @@ class _CustomizationsManagementPageState
   @override
   void dispose() {
     _scrollController.dispose();
+    _searchController.dispose();
+    _debounceTimer?.cancel();
     super.dispose();
+  }
+
+  void _onSearchChanged(String query) {
+    if (_debounceTimer?.isActive ?? false) _debounceTimer!.cancel();
+    _debounceTimer = Timer(const Duration(milliseconds: 500), () {
+      ref
+          .read(customizationsNotifierProvider.notifier)
+          .loadOptions(search: query);
+    });
   }
 
   void _onScroll() {
@@ -49,25 +63,45 @@ class _CustomizationsManagementPageState
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
       ),
-      body: switch (state) {
-        CustomizationsInitial() || CustomizationsLoading() => const Center(
-          child: CircularProgressIndicator(),
-        ),
-        CustomizationsError(:final message) => Center(
-          child: Text('Error: $message'),
-        ),
-        CustomizationsLoaded(
-          :final options,
-          :final isLoadingMore,
-          :final currentPage,
-          :final totalPages,
-        ) =>
-          _buildCustomizationList(
-            options,
-            isLoadingMore,
-            currentPage < totalPages,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search customizations...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              ),
+              onChanged: _onSearchChanged,
+            ),
           ),
-      },
+          Expanded(
+            child: switch (state) {
+              CustomizationsInitial() || CustomizationsLoading() =>
+                const Center(child: CircularProgressIndicator()),
+              CustomizationsError(:final message) => Center(
+                child: Text('Error: $message'),
+              ),
+              CustomizationsLoaded(
+                :final options,
+                :final isLoadingMore,
+                :final currentPage,
+                :final totalPages,
+              ) =>
+                _buildCustomizationList(
+                  options,
+                  isLoadingMore,
+                  currentPage < totalPages,
+                ),
+            },
+          ),
+        ],
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => _showAddCustomizationDialog(),
         child: const Icon(Icons.add),

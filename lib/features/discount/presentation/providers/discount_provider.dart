@@ -33,6 +33,7 @@ class DiscountLoaded extends DiscountState {
   final int totalPages;
   final int totalDocs;
   final bool isLoadingMore;
+  final String? searchQuery;
 
   DiscountLoaded({
     required this.discounts,
@@ -40,6 +41,7 @@ class DiscountLoaded extends DiscountState {
     required this.totalPages,
     required this.totalDocs,
     this.isLoadingMore = false,
+    this.searchQuery,
   });
 
   DiscountLoaded copyWith({
@@ -48,6 +50,7 @@ class DiscountLoaded extends DiscountState {
     int? totalPages,
     int? totalDocs,
     bool? isLoadingMore,
+    String? searchQuery,
   }) {
     return DiscountLoaded(
       discounts: discounts ?? this.discounts,
@@ -55,6 +58,7 @@ class DiscountLoaded extends DiscountState {
       totalPages: totalPages ?? this.totalPages,
       totalDocs: totalDocs ?? this.totalDocs,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      searchQuery: searchQuery ?? this.searchQuery,
     );
   }
 }
@@ -71,8 +75,13 @@ class DiscountNotifier extends StateNotifier<DiscountState> {
   DiscountNotifier(this._repository) : super(DiscountInitial());
 
   /// Get discounts with pagination
-  Future<void> loadDiscounts({int page = 1, int limit = 10}) async {
+  Future<void> loadDiscounts({
+    int page = 1,
+    int limit = 10,
+    String? search,
+  }) async {
     if (page == 1) {
+      // If we searching, maybe keep loading indicator if needed, or just loading state
       state = DiscountLoading();
     } else {
       final currentState = state;
@@ -85,6 +94,7 @@ class DiscountNotifier extends StateNotifier<DiscountState> {
       final paginatedData = await _repository.getAllDiscounts(
         page: page,
         limit: limit,
+        search: search,
       );
 
       if (page == 1) {
@@ -93,6 +103,7 @@ class DiscountNotifier extends StateNotifier<DiscountState> {
           currentPage: paginatedData.page,
           totalPages: paginatedData.totalPages,
           totalDocs: paginatedData.totalDocs,
+          searchQuery: search,
         );
       } else {
         final currentState = state;
@@ -102,6 +113,7 @@ class DiscountNotifier extends StateNotifier<DiscountState> {
             currentPage: paginatedData.page,
             totalPages: paginatedData.totalPages,
             totalDocs: paginatedData.totalDocs,
+            searchQuery: search ?? currentState.searchQuery,
           );
         }
       }
@@ -119,7 +131,10 @@ class DiscountNotifier extends StateNotifier<DiscountState> {
     if (currentState is DiscountLoaded &&
         !currentState.isLoadingMore &&
         currentState.currentPage < currentState.totalPages) {
-      await loadDiscounts(page: currentState.currentPage + 1);
+      await loadDiscounts(
+        page: currentState.currentPage + 1,
+        search: currentState.searchQuery,
+      );
     }
   }
 
