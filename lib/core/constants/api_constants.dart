@@ -52,6 +52,15 @@ class ApiConstants {
   static const String payment = 'payment';
   static const String refund = '/refund';
 
+  // RBAC
+  static const String rbac = 'rbac';
+  static const String assignRole = '/assign-role';
+  static const String roles = 'roles';
+  static const String permissions = 'permissions';
+  // Also need to get staff list
+  static const String staff =
+      'staff'; // Assuming /restaurant/staff or /user/staff
+
   // Full URLs
   static String get loginUrl => '$baseUrl$v1$user$loginEndpoint';
   static String get registerUrl => '$baseUrl$v1$user$registerEndpoint';
