@@ -85,7 +85,7 @@ class RbacRemoteDataSourceImpl implements RbacRemoteDataSource {
   Future<List<UserDto>> getStaffUsers() async {
     // Assuming endpoint to get staff
     final response = await _dioClient.get(
-      '${ApiConstants.v1}${ApiConstants.user}/restaurant/restaurant_123',
+      '${ApiConstants.v1}${ApiConstants.user}/staff',
     );
     return (response.data as List)
         .map((e) => UserDto.fromJson(e as Map<String, dynamic>))

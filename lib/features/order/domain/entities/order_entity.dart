@@ -59,28 +59,32 @@ class CreateOrderRequest {
 
 /// Tax Breakdown
 class TaxBreakdown {
-  final TaxId taxId;
+  final Tax? tax;
+  final String? taxId;
   final double taxCharge;
 
-  const TaxBreakdown({required this.taxId, required this.taxCharge});
+  const TaxBreakdown({this.tax, required this.taxCharge, this.taxId});
 
   factory TaxBreakdown.fromJson(Map<String, dynamic> json) {
     return TaxBreakdown(
-      taxId: TaxId.fromJson(json['taxId'] as Map<String, dynamic>),
+      tax: json['taxId'] is String
+          ? null
+          : Tax.fromJson(json['taxId'] as Map<String, dynamic>),
+      taxId: json['taxId'] is String ? json['taxId'] as String : null,
       taxCharge: (json['taxCharge'] as num).toDouble(),
     );
   }
 }
 
-class TaxId {
+class Tax {
   final String id;
   final String name;
   final num percentage;
 
-  const TaxId({required this.id, required this.name, required this.percentage});
+  const Tax({required this.id, required this.name, required this.percentage});
 
-  factory TaxId.fromJson(Map<String, dynamic> json) {
-    return TaxId(
+  factory Tax.fromJson(Map<String, dynamic> json) {
+    return Tax(
       id: json['_id'] as String,
       name: json['name'] as String,
       percentage: json['percentage'] as num,
@@ -90,37 +94,39 @@ class TaxId {
 
 /// Discount Breakdown
 class DiscountBreakdown {
-  final DiscountId discountId;
+  final Discount discount;
   final double discountAmount;
 
   const DiscountBreakdown({
-    required this.discountId,
+    required this.discount,
     required this.discountAmount,
   });
 
   factory DiscountBreakdown.fromJson(Map<String, dynamic> json) {
     return DiscountBreakdown(
-      discountId: DiscountId.fromJson(json['discountId'] as Map<String, dynamic>),
+      discount: Discount.fromJson(
+        json['discountId'] as Map<String, dynamic>,
+      ),
       discountAmount: (json['discountAmount'] as num).toDouble(),
     );
   }
 }
 
-class DiscountId {
+class Discount {
   final String id;
   final String type;
   final String discountName;
   final num value;
 
-  const DiscountId({
+  const Discount({
     required this.id,
     required this.type,
     required this.discountName,
     required this.value,
   });
 
-  factory DiscountId.fromJson(Map<String, dynamic> json) {
-    return DiscountId(
+  factory Discount.fromJson(Map<String, dynamic> json) {
+    return Discount(
       id: json['_id'] as String,
       type: json['type'] as String,
       discountName: json['discountName'] as String,
@@ -145,14 +151,14 @@ class RefundInfo {
   }
 }
 
-class CustomerId {
+class Customer {
   final String id;
   final String name;
 
-  const CustomerId({required this.id, required this.name});
+  const Customer({required this.id, required this.name});
 
-  factory CustomerId.fromJson(Map<String, dynamic> json) {
-    return CustomerId(id: json['_id'] as String, name: json['name'] as String);
+  factory Customer.fromJson(Map<String, dynamic> json) {
+    return Customer(id: json['_id'] as String, name: json['name'] as String);
   }
 }
 
@@ -161,7 +167,8 @@ class OrderEntity {
   final String id;
   final String orderId;
   final String restaurantId;
-  final CustomerId customerId;
+  final Customer? customer;
+  final String? customerId;
   final double restaurantTipCharge;
   final bool isScheduledOrder;
   final bool isDeliveryOrder;
@@ -185,7 +192,8 @@ class OrderEntity {
     required this.id,
     required this.orderId,
     required this.restaurantId,
-    required this.customerId,
+    this.customer,
+    this.customerId,
     required this.restaurantTipCharge,
     required this.isScheduledOrder,
     required this.isDeliveryOrder,
@@ -211,10 +219,12 @@ class OrderEntity {
       id: json['_id'] as String,
       orderId: json['orderId'] as String,
       restaurantId: json['restaurantId'].toString(), // Convert to string
-      // customerId: json['customerId'] as String,
-      customerId: CustomerId.fromJson(
-        json['customerId'] as Map<String, dynamic>,
-      ),
+      customerId: json['customerId'] is String
+          ? json['customerId'] as String
+          : null,
+      customer: json['customerId'] is String
+          ? null
+          : Customer.fromJson(json['customerId'] as Map<String, dynamic>),
       restaurantTipCharge:
           (json['restaurantTipCharge'] as num?)?.toDouble() ?? 0.0,
       isScheduledOrder: json['isScheduledOrder'] as bool? ?? false,
