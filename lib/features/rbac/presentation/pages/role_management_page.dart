@@ -181,7 +181,7 @@ class _CreateRoleDialogState extends ConsumerState<CreateRoleDialog> {
             // Call API
             try {
               if (isEditing) {
-                final updatedRole = await ref
+                await ref
                     .read(updateRoleUseCaseProvider)
                     .call(
                       widget.role!.id,
@@ -189,12 +189,13 @@ class _CreateRoleDialogState extends ConsumerState<CreateRoleDialog> {
                       desc,
                       _selectedPermissions.toList(),
                     );
-                ref.read(rolesProvider.notifier).updateRole(updatedRole);
+                // Refresh list to ensure we have full permission objects
+                ref.read(rolesProvider.notifier).getRoles();
               } else {
-                final newRole = await ref
+                await ref
                     .read(createRoleUseCaseProvider)
                     .call(name, desc, _selectedPermissions.toList());
-                ref.read(rolesProvider.notifier).addRole(newRole);
+                ref.read(rolesProvider.notifier).getRoles();
               }
 
               if (context.mounted) Navigator.pop(context);

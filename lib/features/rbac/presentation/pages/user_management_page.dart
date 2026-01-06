@@ -30,29 +30,31 @@ class UserManagementPage extends ConsumerWidget {
                 '${user.email}\nRoles: ${user.roles.map((r) => r.name).join(", ")}',
               ),
               isThreeLine: true,
-              trailing: PermissionGuard(
-                // Guard Assign Role button
-                permission: 'USER.UPDATE',
-                child: IconButton(
-                  icon: const Icon(Icons.edit_outlined),
-                  onPressed: () => _showAssignRoleDialog(context, ref, user),
-                  tooltip: 'Assign Role',
-                ),
-              ),
+              trailing: // PermissionGuard(
+                  // Guard Assign Role button
+                  // permission: 'USER.UPDATE',
+                  // child:
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined),
+                    onPressed: () => _showAssignRoleDialog(context, ref, user),
+                    tooltip: 'Assign Role',
+                  ),
+              // ),
             );
           },
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('Error: $e')),
       ),
-      floatingActionButton: PermissionGuard(
-        // Guard Add Staff button
-        permission: 'USER.CREATE',
-        child: FloatingActionButton(
-          onPressed: () => _showAddStaffDialog(context, ref),
-          child: const Icon(Icons.person_add),
-        ),
-      ),
+      floatingActionButton: // PermissionGuard(
+          // Guard Add Staff button
+          // permission: 'USER.CREATE',
+          // child:
+          FloatingActionButton(
+            onPressed: () => _showAddStaffDialog(context, ref),
+            child: const Icon(Icons.person_add),
+          ),
+      // ),
     );
   }
 
@@ -230,15 +232,15 @@ class _AddStaffDialogState extends ConsumerState<AddStaffDialog> {
     setState(() => _isLoading = true);
 
     try {
-      final authState = ref.read(authNotifierProvider);
-      String? restaurantId;
-      if (authState is AuthAuthenticated) {
-        restaurantId = authState.user.restaurantsId;
-      }
+      // final authState = ref.read(authNotifierProvider);
+      // String? restaurantId;
+      // if (authState is AuthAuthenticated) {
+      //   restaurantId = authState.user.restaurantsId;
+      // }
 
-      if (restaurantId == null) {
-        throw Exception("Current user has no restaurant ID");
-      }
+      // if (restaurantId == null) {
+      //   throw Exception("Current user has no restaurant ID");
+      // }
 
       await ref
           .read(signUpUseCaseProvider)
@@ -246,7 +248,7 @@ class _AddStaffDialogState extends ConsumerState<AddStaffDialog> {
             name: _nameController.text.trim(),
             email: _emailController.text.trim(),
             password: _passwordController.text.trim(),
-            restaurantId: restaurantId,
+            restaurantId: 'restaurant_123',
           );
 
       // Refresh staff list

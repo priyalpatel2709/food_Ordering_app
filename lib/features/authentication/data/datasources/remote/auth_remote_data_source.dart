@@ -41,7 +41,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     int? age,
   }) async {
     final response = await _dioClient.post(
-      '${ApiConstants.v1}${ApiConstants.user}${ApiConstants.registerEndpoint}',
+      '${ApiConstants.v1}${ApiConstants.user}',
       data: {
         'name': name,
         'email': email,

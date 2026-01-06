@@ -136,30 +136,30 @@ class StaffHomePage extends StatelessWidget {
                     // PermissionGuard(
                     //   permission: 'USER.READ',
                     //   child:
-                    _DashboardCard(
-                      title: 'Staff & Roles',
-                      icon: Icons.admin_panel_settings,
-                      color: Colors.indigo,
-                      onTap: () => context.push(RouteConstants.userManagement),
-                    ),
+                    // _DashboardCard(
+                    //   title: 'Staff & Roles',
+                    //   icon: Icons.admin_panel_settings,
+                    //   color: Colors.indigo,
+                    //   onTap: () => context.push(RouteConstants.userManagement),
+                    // ),
                     // ),
                     // PermissionGuard(
                     //   permission: 'ROLE.READ',
                     //   child:
-                    _DashboardCard(
-                      title: 'Role Mgmt',
-                      icon: Icons.security,
-                      color: Colors.deepPurple,
-                      onTap: () => context.push(RouteConstants.roleManagement),
-                    ),
+                    // _DashboardCard(
+                    //   title: 'Role Mgmt',
+                    //   icon: Icons.security,
+                    //   color: Colors.deepPurple,
+                    //   onTap: () => context.push(RouteConstants.roleManagement),
+                    // ),
 
                     // ),
-                    _DashboardCard(
-                      title: 'Permission',
-                      icon: Icons.security,
-                      color: Colors.deepPurple,
-                      onTap: () => context.push(RouteConstants.permissionManagement),
-                    ),
+                    // _DashboardCard(
+                    //   title: 'Permission',
+                    //   icon: Icons.security,
+                    //   color: Colors.deepPurple,
+                    //   onTap: () => context.push(RouteConstants.permissionManagement),
+                    // ),
                   ],
                 ),
               ),
