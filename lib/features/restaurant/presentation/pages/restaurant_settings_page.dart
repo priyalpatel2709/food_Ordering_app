@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/theme/app_colors.dart';
@@ -22,6 +20,26 @@ class _RestaurantSettingsPageState
   final _addressController = TextEditingController();
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
+  final _cuisineController = TextEditingController();
+  final _capacityController = TextEditingController();
+  final _totalTablesController = TextEditingController();
+  final _paymentMethodsController = TextEditingController();
+
+  bool _isActive = true;
+  bool _isVegetarianFriendly = false;
+  bool _hasParking = false;
+  bool _acceptsOnlineOrders = false;
+  bool _acceptsReservations = false;
+
+  final Map<String, Map<String, String>> _operatingHours = {
+    'Monday': {'openTime': '09:00', 'closeTime': '22:00'},
+    'Tuesday': {'openTime': '09:00', 'closeTime': '22:00'},
+    'Wednesday': {'openTime': '09:00', 'closeTime': '22:00'},
+    'Thursday': {'openTime': '09:00', 'closeTime': '22:00'},
+    'Friday': {'openTime': '09:00', 'closeTime': '23:00'},
+    'Saturday': {'openTime': '10:00', 'closeTime': '23:00'},
+    'Sunday': {'openTime': '10:00', 'closeTime': '22:00'},
+  };
 
   List<CategoryEntity> _allCategories = [];
   List<Map<String, dynamic>> _stations = [];
@@ -30,7 +48,6 @@ class _RestaurantSettingsPageState
   @override
   void initState() {
     super.initState();
-    log('Does me');
     Future.microtask(() {
       _loadInitialData();
     });
@@ -74,6 +91,10 @@ class _RestaurantSettingsPageState
     _addressController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
+    _cuisineController.dispose();
+    _capacityController.dispose();
+    _totalTablesController.dispose();
+    _paymentMethodsController.dispose();
     super.dispose();
   }
 
@@ -82,6 +103,43 @@ class _RestaurantSettingsPageState
     _addressController.text = settings['address'] ?? '';
     _phoneController.text = settings['phone'] ?? '';
     _emailController.text = settings['email'] ?? '';
+
+    _isActive = settings['isActive'] ?? true;
+    _isVegetarianFriendly = settings['isVegetarianFriendly'] ?? false;
+    _hasParking = settings['hasParking'] ?? false;
+    _acceptsOnlineOrders = settings['acceptsOnlineOrders'] ?? false;
+    _acceptsReservations = settings['acceptsReservations'] ?? false;
+
+    _capacityController.text = (settings['capacity'] ?? '').toString();
+    _totalTablesController.text =
+        (settings['tableConfiguration']?['totalTables'] ?? '').toString();
+
+    if (settings['cuisineType'] is List) {
+      _cuisineController.text = (settings['cuisineType'] as List).join(', ');
+    }
+
+    if (settings['paymentMethods'] is List) {
+      _paymentMethodsController.text = (settings['paymentMethods'] as List)
+          .join(', ');
+    }
+
+    if (settings['operatingHours'] is Map) {
+      final Map hours = settings['operatingHours'];
+      hours.forEach((key, value) {
+        // Simple case-insensitive match or direct match
+        final dayKey = _operatingHours.keys.firstWhere(
+          (k) => k.toLowerCase() == key.toString().toLowerCase(),
+          orElse: () => '',
+        );
+
+        if (dayKey.isNotEmpty && value is Map) {
+          _operatingHours[dayKey] = {
+            'openTime': value['openTime']?.toString() ?? '09:00',
+            'closeTime': value['closeTime']?.toString() ?? '22:00',
+          };
+        }
+      });
+    }
 
     // Parse Stations
     if (settings['kdsConfiguration'] != null &&
@@ -120,54 +178,104 @@ class _RestaurantSettingsPageState
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         actions: [
-          if (settingsState.settings != null)
-            TextButton(
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  final settings = settingsState.settings;
-                  if (settings != null && settings['_id'] != null) {
-                    final success = await ref
-                        .read(restaurantSettingsProvider.notifier)
-                        .updateSettings(settings['_id'], {
-                          'name': _nameController.text,
-                          'address': _addressController.text,
-                          'phone': _phoneController.text,
-                          'email': _emailController.text,
-                          'kdsConfiguration': {
-                            'stations': _stations,
-                            'workflow':
-                                settings['kdsConfiguration']?['workflow'] ??
-                                ['new', 'preparing', 'ready', 'served'],
-                          },
-                        });
-                    if (success && mounted) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Settings updated successfully'),
-                        ),
-                      );
-                    }
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Error: Restaurant ID not found in settings',
-                        ),
-                      ),
-                    );
-                  }
+          // Show save button always (or if form is valid/dirty ideally)
+          TextButton(
+            onPressed: () async {
+              if (_formKey.currentState!.validate()) {
+                final settings = settingsState.settings;
+                bool success;
+                if (settings != null && settings['_id'] != null) {
+                  success = await ref
+                      .read(restaurantSettingsProvider.notifier)
+                      .updateSettings(settings['_id'], {
+                        'name': _nameController.text,
+                        'address': _addressController.text,
+                        'phone': _phoneController.text,
+                        'email': _emailController.text,
+                        'isActive': _isActive,
+                        'capacity': int.tryParse(_capacityController.text) ?? 0,
+                        'isVegetarianFriendly': _isVegetarianFriendly,
+                        'hasParking': _hasParking,
+                        'acceptsOnlineOrders': _acceptsOnlineOrders,
+                        'acceptsReservations': _acceptsReservations,
+                        'tableConfiguration': {
+                          'totalTables':
+                              int.tryParse(_totalTablesController.text) ?? 0,
+                        },
+                        'cuisineType': _cuisineController.text
+                            .split(',')
+                            .map((e) => e.trim())
+                            .where((e) => e.isNotEmpty)
+                            .toList(),
+                        'paymentMethods': _paymentMethodsController.text
+                            .split(',')
+                            .map((e) => e.trim())
+                            .where((e) => e.isNotEmpty)
+                            .toList(),
+                        'operatingHours': _operatingHours,
+                        'kdsConfiguration': {
+                          'stations': _stations,
+                          'workflow':
+                              settings['kdsConfiguration']?['workflow'] ??
+                              ['new', 'start', 'prepared', 'ready'],
+                        },
+                      });
+                } else {
+                  // Create mode
+                  success = await ref
+                      .read(restaurantSettingsProvider.notifier)
+                      .createSettings({
+                        'name': _nameController.text,
+                        'address': _addressController.text,
+                        'phone': _phoneController.text,
+                        'email': _emailController.text,
+                        'isActive': _isActive,
+                        'capacity': int.tryParse(_capacityController.text) ?? 0,
+                        'isVegetarianFriendly': _isVegetarianFriendly,
+                        'hasParking': _hasParking,
+                        'acceptsOnlineOrders': _acceptsOnlineOrders,
+                        'acceptsReservations': _acceptsReservations,
+                        'tableConfiguration': {
+                          'totalTables':
+                              int.tryParse(_totalTablesController.text) ?? 0,
+                        },
+                        'cuisineType': _cuisineController.text
+                            .split(',')
+                            .map((e) => e.trim())
+                            .where((e) => e.isNotEmpty)
+                            .toList(),
+                        'paymentMethods': _paymentMethodsController.text
+                            .split(',')
+                            .map((e) => e.trim())
+                            .where((e) => e.isNotEmpty)
+                            .toList(),
+                        'operatingHours': _operatingHours,
+                        'kdsConfiguration': {
+                          'stations': _stations,
+                          'workflow': ['new', 'start', 'prepared', 'ready'],
+                        },
+                      });
                 }
-              },
-              child: const Text(
-                'Save',
-                style: TextStyle(color: AppColors.primary),
-              ),
+
+                if (success && mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Settings saved successfully'),
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text(
+              'Save',
+              style: TextStyle(color: AppColors.primary),
             ),
+          ),
         ],
       ),
       body: settingsState.isLoading && settingsState.settings == null
           ? const Center(child: CircularProgressIndicator())
-          : settingsState.error != null
+          : settingsState.error != null && settingsState.settings == null
           ? Center(child: Text('Error: ${settingsState.error}'))
           : Form(
               key: _formKey,
@@ -209,6 +317,191 @@ class _RestaurantSettingsPageState
                     ),
                     keyboardType: TextInputType.emailAddress,
                   ),
+                  const SizedBox(height: 16),
+                  SwitchListTile(
+                    title: const Text('Restaurant Is Active'),
+                    value: _isActive,
+                    onChanged: (val) => setState(() => _isActive = val),
+                  ),
+
+                  const Divider(),
+                  const Text(
+                    'Operational Details',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _capacityController,
+                    decoration: const InputDecoration(
+                      labelText: 'Capacity',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _totalTablesController,
+                    decoration: const InputDecoration(
+                      labelText: 'Total Tables',
+                      border: OutlineInputBorder(),
+                    ),
+                    keyboardType: TextInputType.number,
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _cuisineController,
+                    decoration: const InputDecoration(
+                      labelText: 'Cuisine Types (comma separated)',
+                      hintText: 'e.g. Italian, Mexican, Fast Food',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  TextFormField(
+                    controller: _paymentMethodsController,
+                    decoration: const InputDecoration(
+                      labelText: 'Payment Methods (comma separated)',
+                      hintText: 'e.g. Cash, Credit Card, Apple Pay',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+
+                  const SizedBox(height: 16),
+                  SwitchListTile(
+                    title: const Text('Vegetarian Friendly'),
+                    value: _isVegetarianFriendly,
+                    onChanged: (val) =>
+                        setState(() => _isVegetarianFriendly = val),
+                  ),
+                  SwitchListTile(
+                    title: const Text('Has Parking'),
+                    value: _hasParking,
+                    onChanged: (val) => setState(() => _hasParking = val),
+                  ),
+                  SwitchListTile(
+                    title: const Text('Accepts Online Orders'),
+                    value: _acceptsOnlineOrders,
+                    onChanged: (val) =>
+                        setState(() => _acceptsOnlineOrders = val),
+                  ),
+                  SwitchListTile(
+                    title: const Text('Accepts Reservations'),
+                    value: _acceptsReservations,
+                    onChanged: (val) =>
+                        setState(() => _acceptsReservations = val),
+                  ),
+
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Operating Hours',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  ..._operatingHours.keys.map((day) {
+                    final times = _operatingHours[day]!;
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8.0),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 2,
+                            child: Text(
+                              day,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: InkWell(
+                              onTap: () async {
+                                final time = await showTimePicker(
+                                  context: context,
+                                  initialTime: TimeOfDay(
+                                    hour: int.parse(
+                                      times['openTime']!.split(':')[0],
+                                    ),
+                                    minute: int.parse(
+                                      times['openTime']!.split(':')[1],
+                                    ),
+                                  ),
+                                );
+                                if (time != null) {
+                                  setState(() {
+                                    final hour = time.hour.toString().padLeft(
+                                      2,
+                                      '0',
+                                    );
+                                    final minute = time.minute
+                                        .toString()
+                                        .padLeft(2, '0');
+                                    times['openTime'] = '$hour:$minute';
+                                  });
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(times['openTime']!),
+                              ),
+                            ),
+                          ),
+                          const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 8),
+                            child: Text('to'),
+                          ),
+                          Expanded(
+                            flex: 3,
+                            child: InkWell(
+                              onTap: () async {
+                                final time = await showTimePicker(
+                                  context: context,
+                                  initialTime: TimeOfDay(
+                                    hour: int.parse(
+                                      times['closeTime']!.split(':')[0],
+                                    ),
+                                    minute: int.parse(
+                                      times['closeTime']!.split(':')[1],
+                                    ),
+                                  ),
+                                );
+                                if (time != null) {
+                                  setState(() {
+                                    final hour = time.hour.toString().padLeft(
+                                      2,
+                                      '0',
+                                    );
+                                    final minute = time.minute
+                                        .toString()
+                                        .padLeft(2, '0');
+                                    times['closeTime'] = '$hour:$minute';
+                                  });
+                                }
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 8,
+                                ),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey),
+                                  borderRadius: BorderRadius.circular(4),
+                                ),
+                                child: Text(times['closeTime']!),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }),
 
                   const SizedBox(height: 32),
                   const Divider(),

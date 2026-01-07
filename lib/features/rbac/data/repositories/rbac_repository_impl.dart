@@ -26,11 +26,13 @@ class RbacRepositoryImpl implements RbacRepository {
     String name,
     String description,
     List<String> permissionIds,
+    String restaurantId,
   ) async {
     final dto = await _remoteDataSource.createRole(
       name,
       description,
       permissionIds,
+      restaurantId,
     );
     return dto.toEntity();
   }
@@ -67,11 +69,13 @@ class RbacRepositoryImpl implements RbacRepository {
     String name,
     String description,
     String module,
+    String restaurantId,
   ) async {
     final dto = await _remoteDataSource.createPermission(
       name,
       description,
       module,
+      restaurantId,
     );
     return dto.toEntity();
   }

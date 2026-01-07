@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/providers.dart';
 import '../../data/datasources/rbac_remote_data_source.dart';
@@ -137,6 +139,7 @@ class StaffUsersNotifier extends StateNotifier<AsyncValue<List<UserEntity>>> {
       final users = await _getStaffUsersUseCase();
       state = AsyncValue.data(users);
     } catch (e, st) {
+      log(' Error getting staff users: $e ,$st');
       state = AsyncValue.error(e, st);
     }
   }

@@ -22,7 +22,8 @@ class CreateRoleUseCase {
     String name,
     String description,
     List<String> permissionIds,
-  ) => repository.createRole(name, description, permissionIds);
+    String restaurantId,
+  ) => repository.createRole(name, description, permissionIds, restaurantId);
 }
 
 class UpdateRoleUseCase {
@@ -50,7 +51,8 @@ class CreatePermissionUseCase {
     String name,
     String description,
     String module,
-  ) => repository.createPermission(name, description, module);
+    String restaurantId,
+  ) => repository.createPermission(name, description, module, restaurantId);
 }
 
 class GetStaffUsersUseCase {

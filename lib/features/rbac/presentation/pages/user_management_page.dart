@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/services/storage_service.dart';
 import '../providers/rbac_provider.dart';
 import '../../../../features/authentication/presentation/providers/auth_provider.dart';
 import '../../../../core/di/providers.dart';
@@ -179,6 +180,8 @@ class _AddStaffDialogState extends ConsumerState<AddStaffDialog> {
 
   bool _isLoading = false;
 
+  final StorageService storageService = StorageService();
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -232,15 +235,12 @@ class _AddStaffDialogState extends ConsumerState<AddStaffDialog> {
     setState(() => _isLoading = true);
 
     try {
-      // final authState = ref.read(authNotifierProvider);
-      // String? restaurantId;
-      // if (authState is AuthAuthenticated) {
-      //   restaurantId = authState.user.restaurantsId;
-      // }
+      final user = storageService.getUser();
 
-      // if (restaurantId == null) {
-      //   throw Exception("Current user has no restaurant ID");
-      // }
+      final restaurantId = user?.restaurantsId;
+      if (restaurantId == null) {
+        throw Exception("Current user has no restaurant ID");
+      }
 
       await ref
           .read(signUpUseCaseProvider)
@@ -248,7 +248,7 @@ class _AddStaffDialogState extends ConsumerState<AddStaffDialog> {
             name: _nameController.text.trim(),
             email: _emailController.text.trim(),
             password: _passwordController.text.trim(),
-            restaurantId: 'restaurant_123', //TODO: get from auth
+            restaurantId: restaurantId,
           );
 
       // Refresh staff list

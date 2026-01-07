@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:developer';
 
 import 'package:dio/dio.dart';
@@ -229,7 +230,7 @@ class _LoggingInterceptor extends Interceptor {
       print('🌐 REQUEST[${options.method}] => ${options.uri}');
       // print('Headers: ${options.headers}');
       if (options.data != null) {
-        print('Body: ${options.data}');
+        print('Body: ${jsonEncode(options.data)}');
       }
     }
     handler.next(options);

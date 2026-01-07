@@ -9,6 +9,7 @@ abstract class RbacRepository {
     String name,
     String description,
     List<String> permissionIds,
+    String restaurantId,
   );
   Future<void> assignRoles(String userId, List<String> roleIds);
   Future<List<UserEntity>> getStaffUsers();
@@ -22,5 +23,6 @@ abstract class RbacRepository {
     String name,
     String description,
     String module,
+    String restaurantId,
   );
 }

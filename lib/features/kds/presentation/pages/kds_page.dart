@@ -320,11 +320,11 @@ class KdsPage extends ConsumerWidget {
     switch (status.toLowerCase()) {
       case 'new':
         return Colors.blue;
-      case 'preparing':
+      case 'start':
         return Colors.orange;
-      case 'ready':
+      case 'prepared':
         return Colors.green;
-      case 'served':
+      case 'ready':
         return Colors.grey;
       default:
         return AppColors.primary;

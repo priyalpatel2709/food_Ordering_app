@@ -7,7 +7,8 @@ abstract class RestaurantRemoteDataSource {
     String? endDate,
   });
   Future<List<int>> exportDashboardReport({String? startDate, String? endDate});
-  Future<Map<String, dynamic>> getRestaurantSettings(String id);
+  Future<Map<String, dynamic>?> getRestaurantSettings(String id);
+  Future<void> createRestaurantSettings(Map<String, dynamic> data);
   Future<void> updateRestaurantSettings(String id, Map<String, dynamic> data);
 }
 
@@ -55,15 +56,27 @@ class RestaurantRemoteDataSourceImpl implements RestaurantRemoteDataSource {
   }
 
   @override
-  Future<Map<String, dynamic>> getRestaurantSettings(String id) async {
+  Future<Map<String, dynamic>?> getRestaurantSettings(String id) async {
     final response = await _dioClient.get(
       '${ApiConstants.v1}${ApiConstants.restaurantEndpoint}',
     );
     final data = response.data['data'];
-    if (data is List && data.isNotEmpty) {
-      return data[0] as Map<String, dynamic>;
+    if (data is List) {
+      if (data.isNotEmpty) {
+        return data[0] as Map<String, dynamic>;
+      } else {
+        return null;
+      }
     }
-    return data as Map<String, dynamic>;
+    return data as Map<String, dynamic>?;
+  }
+
+  @override
+  Future<void> createRestaurantSettings(Map<String, dynamic> data) async {
+    await _dioClient.post(
+      '${ApiConstants.v1}${ApiConstants.restaurantEndpoint}',
+      data: data,
+    );
   }
 
   @override

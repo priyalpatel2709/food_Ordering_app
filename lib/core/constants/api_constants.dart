@@ -58,8 +58,7 @@ class ApiConstants {
   static const String roles = 'roles';
   static const String permissions = 'permissions';
   // Also need to get staff list
-  static const String staff =
-      'staff'; // Assuming /restaurant/staff or /user/staff
+  static const String staff = '/staff';
 
   // Full URLs
   static String get loginUrl => '$baseUrl$v1$user$loginEndpoint';

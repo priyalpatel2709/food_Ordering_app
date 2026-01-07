@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../../authentication/data/dto/user_dto.dart';
@@ -11,6 +13,7 @@ abstract class RbacRemoteDataSource {
     String name,
     String description,
     List<String> permissionIds,
+    String restaurantId,
   );
   Future<void> assignRoles(String userId, List<String> roleIds);
   Future<List<UserDto>> getStaffUsers();
@@ -24,6 +27,7 @@ abstract class RbacRemoteDataSource {
     String name,
     String description,
     String module,
+    String restaurantId,
   );
 }
 
@@ -61,6 +65,7 @@ class RbacRemoteDataSourceImpl implements RbacRemoteDataSource {
     String name,
     String description,
     List<String> permissionIds,
+    String restaurantId,
   ) async {
     final response = await _dioClient.post(
       '${ApiConstants.v1}${ApiConstants.rbac}/${ApiConstants.roles}',
@@ -68,6 +73,7 @@ class RbacRemoteDataSourceImpl implements RbacRemoteDataSource {
         'name': name,
         'description': description,
         'permissions': permissionIds,
+        'restaurantId': restaurantId,
       },
     );
     return RoleDto.fromJson(response.data as Map<String, dynamic>);
@@ -85,9 +91,11 @@ class RbacRemoteDataSourceImpl implements RbacRemoteDataSource {
   Future<List<UserDto>> getStaffUsers() async {
     // Assuming endpoint to get staff
     final response = await _dioClient.get(
-      '${ApiConstants.v1}${ApiConstants.user}/staff',
+      '${ApiConstants.v1}${ApiConstants.user}${ApiConstants.staff}',
     );
-    return (response.data as List)
+
+    // log('response.data ${response.data['data']}');
+    return (response.data['data'] as List)
         .map((e) => UserDto.fromJson(e as Map<String, dynamic>))
         .toList();
   }
@@ -115,10 +123,16 @@ class RbacRemoteDataSourceImpl implements RbacRemoteDataSource {
     String name,
     String description,
     String module,
+    String restaurantId,
   ) async {
     final response = await _dioClient.post(
       '${ApiConstants.v1}${ApiConstants.rbac}/${ApiConstants.permissions}',
-      data: {'name': name, 'description': description, 'module': module},
+      data: {
+        'name': name,
+        'description': description,
+        'module': module,
+        'restaurantId': restaurantId,
+      },
     );
     return PermissionDto.fromJson(response.data as Map<String, dynamic>);
   }

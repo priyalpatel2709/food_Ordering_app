@@ -52,7 +52,7 @@ class AuthService {
           'email': email,
           'password': password,
           'name': name,
-          "restaurantId": "restaurant_123",
+          "restaurantId": "restaurant_456", // TODO: Replace with actual ID
         },
       );
 

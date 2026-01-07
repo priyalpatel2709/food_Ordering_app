@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/services/storage_service.dart';
 import '../providers/rbac_provider.dart';
 import '../../domain/entities/role_entity.dart';
 import '../../domain/entities/permission_entity.dart';
@@ -86,6 +87,7 @@ class _CreateRoleDialogState extends ConsumerState<CreateRoleDialog> {
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final Set<String> _selectedPermissions = {};
+  final StorageService storageService = StorageService();
 
   @override
   void initState() {
@@ -176,6 +178,11 @@ class _CreateRoleDialogState extends ConsumerState<CreateRoleDialog> {
           onPressed: () async {
             final name = _nameController.text.trim();
             final desc = _descriptionController.text.trim();
+            final user = storageService.getUser();
+            final restaurantId = user?.restaurantsId;
+            if (restaurantId == null) {
+              throw Exception("Current user has no restaurant ID");
+            }
             if (name.isEmpty) return;
 
             // Call API
@@ -194,7 +201,12 @@ class _CreateRoleDialogState extends ConsumerState<CreateRoleDialog> {
               } else {
                 await ref
                     .read(createRoleUseCaseProvider)
-                    .call(name, desc, _selectedPermissions.toList());
+                    .call(
+                      name,
+                      desc,
+                      _selectedPermissions.toList(),
+                      restaurantId,
+                    );
                 ref.read(rolesProvider.notifier).getRoles();
               }
 

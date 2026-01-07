@@ -34,9 +34,26 @@ class RestaurantSettingsNotifier
         .execute(id);
     result.when(
       success: (settings) =>
-          state = state.copyWith(isLoading: false, settings: settings),
+          state = RestaurantSettingsState(isLoading: false, settings: settings),
       failure: (f) =>
           state = state.copyWith(isLoading: false, error: f.toString()),
+    );
+  }
+
+  Future<bool> createSettings(Map<String, dynamic> data) async {
+    state = state.copyWith(isLoading: true, error: null);
+    final result = await _ref
+        .read(createRestaurantSettingsUseCaseProvider)
+        .execute(data);
+    return result.when(
+      success: (_) {
+        loadSettings('current');
+        return true;
+      },
+      failure: (f) {
+        state = state.copyWith(isLoading: false, error: f.toString());
+        return false;
+      },
     );
   }
 

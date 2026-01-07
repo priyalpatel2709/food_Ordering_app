@@ -1,0 +1,50 @@
+class PermissionConstants {
+  static const Map<String, String> permissions = {
+    // User Management
+    'USER_CREATE': "USER.CREATE",
+    'USER_READ': "USER.READ",
+    'USER_UPDATE': "USER.UPDATE",
+    'USER_DELETE': "USER.DELETE",
+
+    // Role Management (RBAC)
+    'ROLE_CREATE': "ROLE.CREATE",
+    'ROLE_READ': "ROLE.READ",
+    'ROLE_UPDATE': "ROLE.UPDATE",
+    'ROLE_DELETE': "ROLE.DELETE",
+    'ROLE_ASSIGN': "ROLE.ASSIGN",
+
+    // Restaurant/Tenant Management
+    'RESTAURANT_CREATE': "RESTAURANT.CREATE",
+    'RESTAURANT_UPDATE': "RESTAURANT.UPDATE",
+
+    // Menu Management
+    'MENU_CREATE': "MENU.CREATE",
+    'MENU_READ': "MENU.READ",
+    'MENU_UPDATE': "MENU.UPDATE",
+    'MENU_DELETE': "MENU.DELETE",
+
+    // Order Management
+    'ORDER_CREATE': "ORDER.CREATE",
+    'ORDER_READ': "ORDER.READ",
+    'ORDER_UPDATE': "ORDER.UPDATE",
+    'ORDER_DELETE': "ORDER.DELETE",
+
+    // KDS
+    'KDS_VIEW': "KDS.VIEW",
+    'KDS_MANAGE': "KDS.MANAGE",
+
+    // Reports
+    'REPORT_VIEW': "REPORT.VIEW",
+    'REPORT_EXPORT': "REPORT.EXPORT",
+  };
+
+  static const Map<String, String> modules = {
+    'USER': "USER",
+    'ROLE': "ROLE",
+    'RESTAURANT': "RESTAURANT",
+    'MENU': "MENU",
+    'ORDER': "ORDER",
+    'KDS': "KDS",
+    'REPORT': "REPORT",
+  };
+}

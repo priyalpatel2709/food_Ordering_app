@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/providers.dart';
+import '../../../../core/services/storage_service.dart';
 import '../../../authentication/presentation/providers/auth_provider.dart';
 import '../../data/datasources/kds_remote_datasource.dart';
 import '../../domain/entities/kds_order.dart';
@@ -27,12 +28,16 @@ final kdsSocketProvider = StreamProvider.autoDispose<List<KdsOrder>>((
   final socketService = ref.watch(socketServiceProvider);
   final authState = ref.watch(authNotifierProvider);
 
+  final StorageService storageService = StorageService();
+
+  final user = storageService.getUser();
+
   if (authState is AuthAuthenticated) {
-    final restaurantId = '123';
+    final restaurantId = user?.restaurantsId?.split('_').last ?? '123';
 
     {
       log(
-        'KDS Page Monitoring Started: Connecting socket and joining room $restaurantId',
+        'KDS Page Monitoring Started: Connecting socket and joining room $restaurantId -- Restaurant ID: ${authState.user.restaurantsId}--',
       );
       socketService.connect();
       socketService.joinRestaurant(restaurantId);

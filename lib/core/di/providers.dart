@@ -240,6 +240,14 @@ final updateRestaurantSettingsUseCaseProvider =
       );
     });
 
+/// Create Restaurant Settings Use Case Provider
+final createRestaurantSettingsUseCaseProvider =
+    Provider<CreateRestaurantSettingsUseCase>((ref) {
+      return CreateRestaurantSettingsUseCase(
+        ref.watch(restaurantRepositoryProvider),
+      );
+    });
+
 /// Create Category Use Case Provider
 final createCategoryUseCaseProvider = Provider<CreateCategoryUseCase>((ref) {
   return CreateCategoryUseCase(ref.watch(menuRepositoryProvider));

@@ -6,8 +6,18 @@ class GetRestaurantSettingsUseCase {
 
   GetRestaurantSettingsUseCase(this._repository);
 
-  Future<Result<Map<String, dynamic>>> execute(String id) {
+  Future<Result<Map<String, dynamic>?>> execute(String id) {
     return _repository.getRestaurantSettings(id);
+  }
+}
+
+class CreateRestaurantSettingsUseCase {
+  final RestaurantRepository _repository;
+
+  CreateRestaurantSettingsUseCase(this._repository);
+
+  Future<Result<void>> execute(Map<String, dynamic> data) {
+    return _repository.createRestaurantSettings(data);
   }
 }
 

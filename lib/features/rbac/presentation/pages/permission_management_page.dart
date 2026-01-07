@@ -2,6 +2,8 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/services/storage_service.dart';
+import '../../../../core/constants/permission_constants.dart';
 import '../providers/rbac_provider.dart';
 import '../widgets/permission_guard.dart';
 
@@ -73,7 +75,42 @@ class _CreatePermissionDialogState
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _moduleController = TextEditingController();
+  final StorageService storageService = StorageService();
   bool _isLoading = false;
+  String? _selectedPermission;
+
+  void _onPermissionChanged(String? newValue) {
+    if (newValue == null) return;
+    setState(() {
+      _selectedPermission = newValue;
+      _nameController.text = newValue;
+
+      // Auto-fill module
+      final parts = newValue.split('.');
+      if (parts.isNotEmpty) {
+        _moduleController.text = parts[0];
+      }
+
+      // Auto-fill description (basic)
+      _descriptionController.text = _formatDescription(newValue);
+    });
+  }
+
+  String _formatDescription(String permission) {
+    // Convert "USER.CREATE" to "Create User" or similar if possible,
+    // or just leave it blank or friendly format.
+    // For now, let's make it readable: USER.CREATE -> Create User permission
+    final parts = permission.split('.');
+    if (parts.length == 2) {
+      final action = parts[1].toLowerCase(); // create
+      final module = parts[0].toLowerCase(); // user
+      // Capitalize first letter
+      final actionCap = action[0].toUpperCase() + action.substring(1);
+      final moduleCap = module[0].toUpperCase() + module.substring(1);
+      return "$actionCap $moduleCap permission";
+    }
+    return "$permission permission";
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -82,10 +119,27 @@ class _CreatePermissionDialogState
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          DropdownButtonFormField<String>(
+            value: _selectedPermission,
+            decoration: const InputDecoration(
+              labelText: 'Select Permission',
+              border: OutlineInputBorder(),
+            ),
+            items: PermissionConstants.permissions.values.map((perm) {
+              return DropdownMenuItem<String>(value: perm, child: Text(perm));
+            }).toList(),
+            onChanged: _onPermissionChanged,
+          ),
+          const SizedBox(height: 16),
+          // Keep hidden or read-only if we strictly follow the dropdown,
+          // but maybe user wants to see what's being sent.
+          // Note: The previous name TextField is removed/replaced by key logic mostly,
+          // but we still keep the controller updated for submission.
           TextField(
             controller: _nameController,
+            enabled: false, // Read-only as it's set by dropdown
             decoration: const InputDecoration(
-              labelText: 'Name (e.g. ORDER.DELETE)',
+              labelText: 'Selected Permission Code',
             ),
           ),
           const SizedBox(height: 16),
@@ -111,18 +165,24 @@ class _CreatePermissionDialogState
               : () async {
                   setState(() => _isLoading = true);
                   try {
+                    final user = storageService.getUser();
+                    final restaurantId = user?.restaurantsId;
+                    if (restaurantId == null) {
+                      throw Exception("Current user has no restaurant ID");
+                    }
                     final newPerm = await ref
                         .read(createPermissionUseCaseProvider)
                         .call(
                           _nameController.text.trim(),
                           _descriptionController.text.trim(),
                           _moduleController.text.trim(),
+                          restaurantId,
                         );
                     ref
                         .read(permissionsProvider.notifier)
                         .addPermission(newPerm);
                     if (context.mounted) Navigator.pop(context);
-                  } catch (e ,st) {
+                  } catch (e, st) {
                     log('ROLE.READ error: $e $st');
                     if (context.mounted) {
                       ScaffoldMessenger.of(

@@ -46,10 +46,24 @@ class RestaurantRepositoryImpl implements RestaurantRepository {
   }
 
   @override
-  Future<Result<Map<String, dynamic>>> getRestaurantSettings(String id) async {
+  Future<Result<Map<String, dynamic>?>> getRestaurantSettings(String id) async {
     try {
       final settings = await _remoteDataSource.getRestaurantSettings(id);
       return Result.success(settings);
+    } on AppException catch (e) {
+      return Result.failure(Failure.server(e.message));
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<void>> createRestaurantSettings(
+    Map<String, dynamic> data,
+  ) async {
+    try {
+      await _remoteDataSource.createRestaurantSettings(data);
+      return Result.success(null);
     } on AppException catch (e) {
       return Result.failure(Failure.server(e.message));
     } catch (e) {
