@@ -45,8 +45,21 @@ class RoleDto {
       name: name,
       permissions: permissions.map((e) => e.toEntity()).toList(),
       isSystem: isSystem,
-      description: description,
+      description: description, // Assuming RoleEntity has description
       createdAt: DateTime.tryParse(createdAt) ?? DateTime.now(),
+    );
+  }
+
+  factory RoleDto.fromEntity(RoleEntity entity) {
+    return RoleDto(
+      id: entity.id,
+      name: entity.name,
+      permissions: entity.permissions
+          .map((e) => PermissionDto.fromEntity(e))
+          .toList(),
+      isSystem: entity.isSystem,
+      description: entity.description,
+      createdAt: entity.createdAt.toIso8601String(),
     );
   }
 }

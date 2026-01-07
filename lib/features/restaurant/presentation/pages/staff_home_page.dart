@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/route_constants.dart';
+import '../../../../core/constants/permission_constants.dart';
 import '../../../../core/services/storage_service.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../menu/presentation/widgets/user_header_card.dart';
@@ -133,33 +134,35 @@ class StaffHomePage extends StatelessWidget {
                       onTap: () =>
                           context.push(RouteConstants.restaurantSettings),
                     ),
-                    // PermissionGuard(
-                    //   permission: 'USER.READ',
-                    //   child:
-                    _DashboardCard(
-                      title: 'Staff & Roles',
-                      icon: Icons.admin_panel_settings,
-                      color: Colors.indigo,
-                      onTap: () => context.push(RouteConstants.userManagement),
+                    PermissionGuard(
+                      permission: PermissionConstants.userRead,
+                      child: _DashboardCard(
+                        title: 'Staff & Roles',
+                        icon: Icons.admin_panel_settings,
+                        color: Colors.indigo,
+                        onTap: () =>
+                            context.push(RouteConstants.userManagement),
+                      ),
                     ),
-                    // ),
-                    // PermissionGuard(
-                    //   permission: 'ROLE.READ',
-                    //   child:
-                    _DashboardCard(
-                      title: 'Role Mgmt',
-                      icon: Icons.security,
-                      color: Colors.deepPurple,
-                      onTap: () => context.push(RouteConstants.roleManagement),
+                    PermissionGuard(
+                      permission: PermissionConstants.roleRead,
+                      child: _DashboardCard(
+                        title: 'Role Mgmt',
+                        icon: Icons.security,
+                        color: Colors.deepPurple,
+                        onTap: () =>
+                            context.push(RouteConstants.roleManagement),
+                      ),
                     ),
-
-                    // ),
-                    _DashboardCard(
-                      title: 'Permission',
-                      icon: Icons.security,
-                      color: Colors.deepPurple,
-                      onTap: () =>
-                          context.push(RouteConstants.permissionManagement),
+                    PermissionGuard(
+                      permission: PermissionConstants.roleRead,
+                      child: _DashboardCard(
+                        title: 'Permission',
+                        icon: Icons.security,
+                        color: Colors.deepPurple,
+                        onTap: () =>
+                            context.push(RouteConstants.permissionManagement),
+                      ),
                     ),
                   ],
                 ),

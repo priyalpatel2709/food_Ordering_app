@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/storage_service.dart';
+import '../../../../core/constants/permission_constants.dart';
 import '../providers/rbac_provider.dart';
 import '../../../../features/authentication/presentation/providers/auth_provider.dart';
 import '../../../../core/di/providers.dart';
@@ -31,31 +32,28 @@ class UserManagementPage extends ConsumerWidget {
                 '${user.email}\nRoles: ${user.roles.map((r) => r.name).join(", ")}',
               ),
               isThreeLine: true,
-              trailing: // PermissionGuard(
-                  // Guard Assign Role button
-                  // permission: 'USER.UPDATE',
-                  // child:
-                  IconButton(
-                    icon: const Icon(Icons.edit_outlined),
-                    onPressed: () => _showAssignRoleDialog(context, ref, user),
-                    tooltip: 'Assign Role',
-                  ),
-              // ),
+              trailing: PermissionGuard(
+                permission: PermissionConstants.userUpdate,
+                child: IconButton(
+                  icon: const Icon(Icons.edit_outlined),
+                  onPressed: () => _showAssignRoleDialog(context, ref, user),
+                  tooltip: 'Assign Role',
+                ),
+              ),
             );
           },
         ),
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('Error: $e')),
       ),
-      floatingActionButton: // PermissionGuard(
-          // Guard Add Staff button
-          // permission: 'USER.CREATE',
-          // child:
-          FloatingActionButton(
-            onPressed: () => _showAddStaffDialog(context, ref),
-            child: const Icon(Icons.person_add),
-          ),
-      // ),
+      floatingActionButton: PermissionGuard(
+        // Guard Add Staff button
+        permission: PermissionConstants.userCreate,
+        child: FloatingActionButton(
+          onPressed: () => _showAddStaffDialog(context, ref),
+          child: const Icon(Icons.person_add),
+        ),
+      ),
     );
   }
 

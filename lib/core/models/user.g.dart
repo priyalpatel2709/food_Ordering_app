@@ -23,13 +23,18 @@ class UserAdapter extends TypeAdapter<User> {
       token: fields[3] as String,
       role: fields[5] == null ? 'customer' : fields[5] as String,
       restaurantsId: fields[4] as String?,
+      gender: fields[6] as String?,
+      age: fields[7] as int?,
+      roles: (fields[8] as List?)?.cast<Role>(),
+      isActive: fields[9] as bool?,
+      deviceToken: fields[10] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, User obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -41,7 +46,17 @@ class UserAdapter extends TypeAdapter<User> {
       ..writeByte(4)
       ..write(obj.restaurantsId)
       ..writeByte(5)
-      ..write(obj.role);
+      ..write(obj.role)
+      ..writeByte(6)
+      ..write(obj.gender)
+      ..writeByte(7)
+      ..write(obj.age)
+      ..writeByte(8)
+      ..write(obj.roles)
+      ..writeByte(9)
+      ..write(obj.isActive)
+      ..writeByte(10)
+      ..write(obj.deviceToken);
   }
 
   @override

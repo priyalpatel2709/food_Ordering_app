@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/storage_service.dart';
+import '../../../../core/constants/permission_constants.dart';
 import '../providers/rbac_provider.dart';
 import '../../domain/entities/role_entity.dart';
 import '../../domain/entities/permission_entity.dart';
@@ -52,14 +53,13 @@ class RoleManagementPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, st) => Center(child: Text('Error: $e')),
       ),
-      floatingActionButton: // PermissionGuard(
-          // permission: 'ROLE.CREATE',
-          // child:
-          FloatingActionButton(
-            onPressed: () => _showCreateRoleDialog(context, ref, null),
-            child: const Icon(Icons.add),
-          ),
-      // ),
+      floatingActionButton: PermissionGuard(
+        permission: PermissionConstants.roleCreate,
+        child: FloatingActionButton(
+          onPressed: () => _showCreateRoleDialog(context, ref, null),
+          child: const Icon(Icons.add),
+        ),
+      ),
     );
   }
 

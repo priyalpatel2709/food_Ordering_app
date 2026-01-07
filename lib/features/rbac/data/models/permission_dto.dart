@@ -30,4 +30,13 @@ class PermissionDto {
       module: module,
     );
   }
+
+  factory PermissionDto.fromEntity(PermissionEntity entity) {
+    return PermissionDto(
+      id: entity.id,
+      name: entity.name,
+      description: entity.description,
+      module: entity.module,
+    );
+  }
 }

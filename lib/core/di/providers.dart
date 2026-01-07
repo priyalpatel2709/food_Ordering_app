@@ -2,6 +2,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../network/dio_client.dart';
 import '../services/socket_service.dart';
+import '../services/storage_service.dart';
+import '../../core/models/user.dart';
 import '../../features/menu/data/datasources/menu_local_data_source.dart';
 import '../../features/authentication/data/datasources/local/user_local_data_source.dart';
 import '../../features/authentication/data/datasources/remote/auth_remote_data_source.dart';
@@ -80,7 +82,9 @@ final authRemoteDataSourceProvider = Provider<AuthRemoteDataSource>((ref) {
 
 /// User Local Data Source Provider
 final userLocalDataSourceProvider = Provider<UserLocalDataSource>((ref) {
-  return UserLocalDataSourceImpl(ref.watch(hiveBoxProvider));
+  // Use the typed box managed by StorageService
+  // Note: StorageService.init() must be called in main.dart
+  return UserLocalDataSourceImpl(Hive.box<User>(StorageService.userBoxName));
 });
 
 /// Menu Remote Data Source Provider

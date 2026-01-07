@@ -2,6 +2,8 @@ import 'dart:developer';
 
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/user.dart';
+import '../models/role.dart';
+import '../models/permission.dart';
 
 /// Storage Service using Hive for local data persistence
 ///
@@ -12,8 +14,8 @@ import '../models/user.dart';
 /// - Reactive updates with ValueListenable
 class StorageService {
   // Box names
-  static const String _userBoxName = 'user_box';
-  static const String _settingsBoxName = 'settings_box';
+  static const String userBoxName = 'user_box'; // Made public
+  static const String settingsBoxName = 'settings_box'; // Made public
 
   // Keys
   static const String _currentUserKey = 'current_user';
@@ -41,29 +43,35 @@ class StorageService {
     if (!Hive.isAdapterRegistered(0)) {
       Hive.registerAdapter(UserAdapter());
     }
+    if (!Hive.isAdapterRegistered(1)) {
+      Hive.registerAdapter(PermissionAdapter());
+    }
+    if (!Hive.isAdapterRegistered(2)) {
+      Hive.registerAdapter(RoleAdapter());
+    }
 
     // Open boxes
     try {
-      await Hive.openBox<User>(_userBoxName);
+      await Hive.openBox<User>(userBoxName);
     } catch (e) {
       log('Error opening user box, clearing data: $e');
-      await Hive.deleteBoxFromDisk(_userBoxName);
-      await Hive.openBox<User>(_userBoxName);
+      await Hive.deleteBoxFromDisk(userBoxName);
+      await Hive.openBox<User>(userBoxName);
     }
 
     try {
-      await Hive.openBox(_settingsBoxName);
+      await Hive.openBox(settingsBoxName);
     } catch (e) {
       log('Error opening settings box, clearing data: $e');
-      await Hive.deleteBoxFromDisk(_settingsBoxName);
-      await Hive.openBox(_settingsBoxName);
+      await Hive.deleteBoxFromDisk(settingsBoxName);
+      await Hive.openBox(settingsBoxName);
     }
   }
 
   /// Get user box
   Box<User> get _getUserBox {
     if (_userBox == null || !_userBox!.isOpen) {
-      _userBox = Hive.box<User>(_userBoxName);
+      _userBox = Hive.box<User>(userBoxName);
     }
     return _userBox!;
   }
@@ -71,7 +79,7 @@ class StorageService {
   /// Get settings box
   Box get _getSettingsBox {
     if (_settingsBox == null || !_settingsBox!.isOpen) {
-      _settingsBox = Hive.box(_settingsBoxName);
+      _settingsBox = Hive.box(settingsBoxName);
     }
     return _settingsBox!;
   }

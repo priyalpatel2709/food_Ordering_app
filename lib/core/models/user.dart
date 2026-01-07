@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'role.dart';
 
 part 'user.g.dart';
 
@@ -28,6 +29,15 @@ class User extends HiveObject {
   @HiveField(7)
   final int? age;
 
+  @HiveField(8)
+  final List<Role>? roles;
+
+  @HiveField(9)
+  final bool? isActive;
+
+  @HiveField(10)
+  final String? deviceToken;
+
   User({
     required this.id,
     required this.name,
@@ -37,18 +47,32 @@ class User extends HiveObject {
     this.restaurantsId,
     this.gender,
     this.age,
+    this.roles,
+    this.isActive,
+    this.deviceToken,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
+    var rolesList = <Role>[];
+    if (json['roles'] != null) {
+      json['roles'].forEach((v) {
+        rolesList.add(Role.fromJson(v));
+      });
+    }
+
     return User(
-      id: json['_id'] as String,
-      name: json['name'] as String,
-      email: json['email'] as String,
-      token: json['token'] as String,
-      role: json['role'] as String? ?? 'customer',
+      id: json['_id'] as String? ?? '', // Handle missing _id gracefully
+      name: json['name'] as String? ?? '',
+      email: json['email'] as String? ?? '',
+      token: json['token'] as String? ?? '',
+      role:
+          json['roleName'] as String? ?? json['role'] as String? ?? 'customer',
       restaurantsId: json['restaurantId'] as String?,
       gender: json['gender'] as String?,
       age: json['age'] as int?,
+      roles: rolesList,
+      isActive: json['isActive'] as bool?,
+      deviceToken: json['deviceToken'] as String?,
     );
   }
 
@@ -58,10 +82,15 @@ class User extends HiveObject {
       'name': name,
       'email': email,
       'token': token,
-      'role': role,
+      'role':
+          role, // Mapping back to 'role' or 'roleName'? Sticking to 'role' for internal compatibility.
+      'roleName': role, // Also sending roleName if needed
       'restaurantId': restaurantsId,
       'gender': gender,
       'age': age,
+      'roles': roles?.map((v) => v.toJson()).toList(),
+      'isActive': isActive,
+      'deviceToken': deviceToken,
     };
   }
 
@@ -73,6 +102,9 @@ class User extends HiveObject {
     String? token,
     String? role,
     String? restaurantsId,
+    List<Role>? roles,
+    bool? isActive,
+    String? deviceToken,
   }) {
     return User(
       id: id ?? this.id,
@@ -83,6 +115,9 @@ class User extends HiveObject {
       restaurantsId: restaurantsId ?? this.restaurantsId,
       gender: gender ?? this.gender,
       age: age ?? this.age,
+      roles: roles ?? this.roles,
+      isActive: isActive ?? this.isActive,
+      deviceToken: deviceToken ?? this.deviceToken,
     );
   }
 }

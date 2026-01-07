@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/route_constants.dart';
@@ -79,7 +81,7 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
         await Future.delayed(const Duration(milliseconds: 500));
 
         if (!mounted) return;
-        if (result.user?.role == 'staff') {
+        if (result.user?.role == 'staff' || result.user?.role == 'Admin') {
           context.go(RouteConstants.staffHome);
         } else {
           context.go(RouteConstants.home);

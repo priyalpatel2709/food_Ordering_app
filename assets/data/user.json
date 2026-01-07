@@ -1,0 +1,282 @@
+{
+  "name": "Tasty Bytes Owner",
+  "email": "123@mail.com",
+  "deviceToken": "",
+  "restaurantId": "restaurant_123",
+  "isActive": true,
+  "roleName": "Admin",
+  "roles": [
+    {
+      "_id": "695e09e3fc63a34ffdf5149f",
+      "name": "Admin",
+      "restaurantId": "restaurant_123",
+      "__v": 0,
+      "createdAt": "2026-01-07T07:23:15.462Z",
+      "description": "Restaurant Administrator with full access to this restaurant",
+      "isSystem": false,
+      "permissions": [
+        {
+          "_id": "695e09e3fc63a34ffdf51487",
+          "name": "USER.CREATE",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.223Z",
+          "description": "Permission to user create",
+          "isSystem": true,
+          "module": "USER",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.223Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf51488",
+          "name": "USER.READ",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.323Z",
+          "description": "Permission to user read",
+          "isSystem": true,
+          "module": "USER",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.323Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf51489",
+          "name": "USER.UPDATE",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.325Z",
+          "description": "Permission to user update",
+          "isSystem": true,
+          "module": "USER",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.325Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf5148a",
+          "name": "USER.DELETE",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.327Z",
+          "description": "Permission to user delete",
+          "isSystem": true,
+          "module": "USER",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.327Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf5148b",
+          "name": "ROLE.CREATE",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.329Z",
+          "description": "Permission to role create",
+          "isSystem": true,
+          "module": "ROLE",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.329Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf5148c",
+          "name": "ROLE.READ",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.331Z",
+          "description": "Permission to role read",
+          "isSystem": true,
+          "module": "ROLE",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.331Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf5148d",
+          "name": "ROLE.UPDATE",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.332Z",
+          "description": "Permission to role update",
+          "isSystem": true,
+          "module": "ROLE",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.332Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf5148e",
+          "name": "ROLE.DELETE",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.333Z",
+          "description": "Permission to role delete",
+          "isSystem": true,
+          "module": "ROLE",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.333Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf5148f",
+          "name": "ROLE.ASSIGN",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.334Z",
+          "description": "Permission to role assign",
+          "isSystem": true,
+          "module": "ROLE",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.334Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf51490",
+          "name": "RESTAURANT.CREATE",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.336Z",
+          "description": "Permission to restaurant create",
+          "isSystem": true,
+          "module": "RESTAURANT",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.336Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf51491",
+          "name": "RESTAURANT.UPDATE",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.337Z",
+          "description": "Permission to restaurant update",
+          "isSystem": true,
+          "module": "RESTAURANT",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.337Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf51492",
+          "name": "MENU.CREATE",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.339Z",
+          "description": "Permission to menu create",
+          "isSystem": true,
+          "module": "MENU",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.339Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf51493",
+          "name": "MENU.READ",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.340Z",
+          "description": "Permission to menu read",
+          "isSystem": true,
+          "module": "MENU",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.340Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf51494",
+          "name": "MENU.UPDATE",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.341Z",
+          "description": "Permission to menu update",
+          "isSystem": true,
+          "module": "MENU",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.341Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf51495",
+          "name": "MENU.DELETE",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.342Z",
+          "description": "Permission to menu delete",
+          "isSystem": true,
+          "module": "MENU",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.342Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf51496",
+          "name": "ORDER.CREATE",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.343Z",
+          "description": "Permission to order create",
+          "isSystem": true,
+          "module": "ORDER",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.343Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf51497",
+          "name": "ORDER.READ",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.344Z",
+          "description": "Permission to order read",
+          "isSystem": true,
+          "module": "ORDER",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.344Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf51498",
+          "name": "ORDER.UPDATE",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.346Z",
+          "description": "Permission to order update",
+          "isSystem": true,
+          "module": "ORDER",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.346Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf51499",
+          "name": "ORDER.DELETE",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.347Z",
+          "description": "Permission to order delete",
+          "isSystem": true,
+          "module": "ORDER",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.347Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf5149a",
+          "name": "KDS.VIEW",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.348Z",
+          "description": "Permission to kds view",
+          "isSystem": true,
+          "module": "KDS",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.348Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf5149b",
+          "name": "KDS.MANAGE",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.349Z",
+          "description": "Permission to kds manage",
+          "isSystem": true,
+          "module": "KDS",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.349Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf5149c",
+          "name": "REPORT.VIEW",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.350Z",
+          "description": "Permission to report view",
+          "isSystem": true,
+          "module": "REPORT",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.350Z"
+        },
+        {
+          "_id": "695e09e3fc63a34ffdf5149d",
+          "name": "REPORT.EXPORT",
+          "__v": 0,
+          "createdAt": "2026-01-07T07:23:15.351Z",
+          "description": "Permission to report export",
+          "isSystem": true,
+          "module": "REPORT",
+          "restaurantId": "SYSTEM",
+          "updatedAt": "2026-01-07T07:23:15.351Z"
+        }
+      ],
+      "updatedAt": "2026-01-07T07:23:15.462Z"
+    }
+  ],
+  "access": [],
+  "isSystem": false,
+  "address": [],
+  "metaData": [],
+  "createdAt": "2026-01-07T07:23:15.466Z",
+  "updatedAt": "2026-01-07T07:23:15.466Z",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyZXN0YXVyYW50SWQiOiJyZXN0YXVyYW50XzEyMyIsImlhdCI6MTc2Nzc3MDcxMiwiZXhwIjoxNzcwMzYyNzEyfQ.W8Ui-iE-M9ktA76m6dYnwRa5EAN5yqRGp9cFn9q01HE"
+}

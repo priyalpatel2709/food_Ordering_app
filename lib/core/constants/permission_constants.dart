@@ -1,42 +1,66 @@
 class PermissionConstants {
-  static const Map<String, String> permissions = {
-    // User Management
-    'USER_CREATE': "USER.CREATE",
-    'USER_READ': "USER.READ",
-    'USER_UPDATE': "USER.UPDATE",
-    'USER_DELETE': "USER.DELETE",
+  // User Management
+  static const String userCreate = "USER.CREATE";
+  static const String userRead = "USER.READ";
+  static const String userUpdate = "USER.UPDATE";
+  static const String userDelete = "USER.DELETE";
 
-    // Role Management (RBAC)
-    'ROLE_CREATE': "ROLE.CREATE",
-    'ROLE_READ': "ROLE.READ",
-    'ROLE_UPDATE': "ROLE.UPDATE",
-    'ROLE_DELETE': "ROLE.DELETE",
-    'ROLE_ASSIGN': "ROLE.ASSIGN",
+  // Role Management (RBAC)
+  static const String roleCreate = "ROLE.CREATE";
+  static const String roleRead = "ROLE.READ";
+  static const String roleUpdate = "ROLE.UPDATE";
+  static const String roleDelete = "ROLE.DELETE";
+  static const String roleAssign = "ROLE.ASSIGN";
 
-    // Restaurant/Tenant Management
-    'RESTAURANT_CREATE': "RESTAURANT.CREATE",
-    'RESTAURANT_UPDATE': "RESTAURANT.UPDATE",
+  // Restaurant/Tenant Management
+  static const String restaurantCreate = "RESTAURANT.CREATE";
+  static const String restaurantUpdate = "RESTAURANT.UPDATE";
 
-    // Menu Management
-    'MENU_CREATE': "MENU.CREATE",
-    'MENU_READ': "MENU.READ",
-    'MENU_UPDATE': "MENU.UPDATE",
-    'MENU_DELETE': "MENU.DELETE",
+  // Menu Management
+  static const String menuCreate = "MENU.CREATE";
+  static const String menuRead = "MENU.READ";
+  static const String menuUpdate = "MENU.UPDATE";
+  static const String menuDelete = "MENU.DELETE";
 
-    // Order Management
-    'ORDER_CREATE': "ORDER.CREATE",
-    'ORDER_READ': "ORDER.READ",
-    'ORDER_UPDATE': "ORDER.UPDATE",
-    'ORDER_DELETE': "ORDER.DELETE",
+  // Order Management
+  static const String orderCreate = "ORDER.CREATE";
+  static const String orderRead = "ORDER.READ";
+  static const String orderUpdate = "ORDER.UPDATE";
+  static const String orderDelete = "ORDER.DELETE";
 
-    // KDS
-    'KDS_VIEW': "KDS.VIEW",
-    'KDS_MANAGE': "KDS.MANAGE",
+  // KDS
+  static const String kdsView = "KDS.VIEW";
+  static const String kdsManage = "KDS.MANAGE";
 
-    // Reports
-    'REPORT_VIEW': "REPORT.VIEW",
-    'REPORT_EXPORT': "REPORT.EXPORT",
-  };
+  // Reports
+  static const String reportView = "REPORT.VIEW";
+  static const String reportExport = "REPORT.EXPORT";
+
+  static const List<String> values = [
+    userCreate,
+    userRead,
+    userUpdate,
+    userDelete,
+    roleCreate,
+    roleRead,
+    roleUpdate,
+    roleDelete,
+    roleAssign,
+    restaurantCreate,
+    restaurantUpdate,
+    menuCreate,
+    menuRead,
+    menuUpdate,
+    menuDelete,
+    orderCreate,
+    orderRead,
+    orderUpdate,
+    orderDelete,
+    kdsView,
+    kdsManage,
+    reportView,
+    reportExport,
+  ];
 
   static const Map<String, String> modules = {
     'USER': "USER",

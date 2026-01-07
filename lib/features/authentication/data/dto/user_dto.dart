@@ -26,21 +26,35 @@ class UserDto {
 
   /// JSON → DTO
   factory UserDto.fromJson(Map<String, dynamic> json) {
+    // 🔒 UNWRAP DATA IF NEEDED
+    final data = json.containsKey('data') && json['data'] is Map
+        ? json['data'] as Map<String, dynamic>
+        : json;
+
     return UserDto(
-      id: json['_id'] as String? ?? json['id'] as String,
-      name: json['name'] as String? ?? '',
-      email: json['email'] as String? ?? '',
-      token: json['token'] as String? ?? '',
-      role: json['role'] as String? ?? 'customer',
+      id: data['_id'] as String? ?? data['id'] as String? ?? '',
+      name: data['name'] as String? ?? '',
+      email: data['email'] as String? ?? '',
+      token: data['token'] as String? ?? '',
+      role:
+          data['roleName'] as String? ?? data['role'] as String? ?? 'customer',
+      // Robustly parse roles
       roles:
-          (json['roles'] as List<dynamic>?)
-              ?.whereType<Map<String, dynamic>>() // 🔒 SAFETY
-              .map(RoleDto.fromJson)
+          (data['roles'] as List<dynamic>?)
+              ?.map((e) {
+                if (e is Map<String, dynamic>) return RoleDto.fromJson(e);
+                if (e is Map)
+                  return RoleDto.fromJson(Map<String, dynamic>.from(e));
+                return null;
+              })
+              .whereType<RoleDto>()
               .toList() ??
           [],
-      restaurantsId: json['restaurantsId'] as String?,
-      gender: json['gender'] as String?,
-      age: json['age'] as int?,
+      // Check both singular and plural
+      restaurantsId:
+          data['restaurantId'] as String? ?? data['restaurantsId'] as String?,
+      gender: data['gender'] as String?,
+      age: data['age'] as int?,
     );
   }
 
@@ -84,7 +98,7 @@ class UserDto {
       email: entity.email,
       token: entity.token,
       role: entity.role,
-      roles: const [],
+      roles: entity.roles.map((e) => RoleDto.fromEntity(e)).toList(),
       restaurantsId: entity.restaurantsId,
       gender: entity.gender,
       age: entity.age,

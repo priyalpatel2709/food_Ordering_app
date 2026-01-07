@@ -37,7 +37,7 @@ class PermissionManagementPage extends ConsumerWidget {
       floatingActionButton: PermissionGuard(
         // Assuming a SUPER_ADMIN permission or similar is needed to create permissions
         // Or generic permission 'PERMISSION.CREATE'
-        permission: 'PERMISSION.CREATE',
+        permission: PermissionConstants.roleCreate,
         fallback: FloatingActionButton(
           // Placeholder: Allow if no check for now, or just hide.
           // But following user request, we show it.
@@ -125,7 +125,7 @@ class _CreatePermissionDialogState
               labelText: 'Select Permission',
               border: OutlineInputBorder(),
             ),
-            items: PermissionConstants.permissions.values.map((perm) {
+            items: PermissionConstants.values.map((perm) {
               return DropdownMenuItem<String>(value: perm, child: Text(perm));
             }).toList(),
             onChanged: _onPermissionChanged,
