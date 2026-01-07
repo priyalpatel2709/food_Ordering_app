@@ -4,6 +4,8 @@ import '../../../../shared/theme/app_colors.dart';
 import '../viewmodels/restaurant_settings_view_model.dart';
 import '../../../menu/domain/entities/menu_entity.dart';
 import '../../../../core/di/providers.dart';
+import '../../../../features/rbac/presentation/widgets/permission_guard.dart';
+import '../../../../core/constants/permission_constants.dart';
 
 class RestaurantSettingsPage extends ConsumerStatefulWidget {
   const RestaurantSettingsPage({super.key});
@@ -179,96 +181,101 @@ class _RestaurantSettingsPageState
         elevation: 0,
         actions: [
           // Show save button always (or if form is valid/dirty ideally)
-          TextButton(
-            onPressed: () async {
-              if (_formKey.currentState!.validate()) {
-                final settings = settingsState.settings;
-                bool success;
-                if (settings != null && settings['_id'] != null) {
-                  success = await ref
-                      .read(restaurantSettingsProvider.notifier)
-                      .updateSettings(settings['_id'], {
-                        'name': _nameController.text,
-                        'address': _addressController.text,
-                        'phone': _phoneController.text,
-                        'email': _emailController.text,
-                        'isActive': _isActive,
-                        'capacity': int.tryParse(_capacityController.text) ?? 0,
-                        'isVegetarianFriendly': _isVegetarianFriendly,
-                        'hasParking': _hasParking,
-                        'acceptsOnlineOrders': _acceptsOnlineOrders,
-                        'acceptsReservations': _acceptsReservations,
-                        'tableConfiguration': {
-                          'totalTables':
-                              int.tryParse(_totalTablesController.text) ?? 0,
-                        },
-                        'cuisineType': _cuisineController.text
-                            .split(',')
-                            .map((e) => e.trim())
-                            .where((e) => e.isNotEmpty)
-                            .toList(),
-                        'paymentMethods': _paymentMethodsController.text
-                            .split(',')
-                            .map((e) => e.trim())
-                            .where((e) => e.isNotEmpty)
-                            .toList(),
-                        'operatingHours': _operatingHours,
-                        'kdsConfiguration': {
-                          'stations': _stations,
-                          'workflow':
-                              settings['kdsConfiguration']?['workflow'] ??
-                              ['new', 'start', 'prepared', 'ready'],
-                        },
-                      });
-                } else {
-                  // Create mode
-                  success = await ref
-                      .read(restaurantSettingsProvider.notifier)
-                      .createSettings({
-                        'name': _nameController.text,
-                        'address': _addressController.text,
-                        'phone': _phoneController.text,
-                        'email': _emailController.text,
-                        'isActive': _isActive,
-                        'capacity': int.tryParse(_capacityController.text) ?? 0,
-                        'isVegetarianFriendly': _isVegetarianFriendly,
-                        'hasParking': _hasParking,
-                        'acceptsOnlineOrders': _acceptsOnlineOrders,
-                        'acceptsReservations': _acceptsReservations,
-                        'tableConfiguration': {
-                          'totalTables':
-                              int.tryParse(_totalTablesController.text) ?? 0,
-                        },
-                        'cuisineType': _cuisineController.text
-                            .split(',')
-                            .map((e) => e.trim())
-                            .where((e) => e.isNotEmpty)
-                            .toList(),
-                        'paymentMethods': _paymentMethodsController.text
-                            .split(',')
-                            .map((e) => e.trim())
-                            .where((e) => e.isNotEmpty)
-                            .toList(),
-                        'operatingHours': _operatingHours,
-                        'kdsConfiguration': {
-                          'stations': _stations,
-                          'workflow': ['new', 'start', 'prepared', 'ready'],
-                        },
-                      });
-                }
+          PermissionGuard(
+            permission: PermissionConstants.restaurantUpdate,
+            child: TextButton(
+              onPressed: () async {
+                if (_formKey.currentState!.validate()) {
+                  final settings = settingsState.settings;
+                  bool success;
+                  if (settings != null && settings['_id'] != null) {
+                    success = await ref
+                        .read(restaurantSettingsProvider.notifier)
+                        .updateSettings(settings['_id'], {
+                          'name': _nameController.text,
+                          'address': _addressController.text,
+                          'phone': _phoneController.text,
+                          'email': _emailController.text,
+                          'isActive': _isActive,
+                          'capacity':
+                              int.tryParse(_capacityController.text) ?? 0,
+                          'isVegetarianFriendly': _isVegetarianFriendly,
+                          'hasParking': _hasParking,
+                          'acceptsOnlineOrders': _acceptsOnlineOrders,
+                          'acceptsReservations': _acceptsReservations,
+                          'tableConfiguration': {
+                            'totalTables':
+                                int.tryParse(_totalTablesController.text) ?? 0,
+                          },
+                          'cuisineType': _cuisineController.text
+                              .split(',')
+                              .map((e) => e.trim())
+                              .where((e) => e.isNotEmpty)
+                              .toList(),
+                          'paymentMethods': _paymentMethodsController.text
+                              .split(',')
+                              .map((e) => e.trim())
+                              .where((e) => e.isNotEmpty)
+                              .toList(),
+                          'operatingHours': _operatingHours,
+                          'kdsConfiguration': {
+                            'stations': _stations,
+                            'workflow':
+                                settings['kdsConfiguration']?['workflow'] ??
+                                ['new', 'start', 'prepared', 'ready'],
+                          },
+                        });
+                  } else {
+                    // Create mode
+                    success = await ref
+                        .read(restaurantSettingsProvider.notifier)
+                        .createSettings({
+                          'name': _nameController.text,
+                          'address': _addressController.text,
+                          'phone': _phoneController.text,
+                          'email': _emailController.text,
+                          'isActive': _isActive,
+                          'capacity':
+                              int.tryParse(_capacityController.text) ?? 0,
+                          'isVegetarianFriendly': _isVegetarianFriendly,
+                          'hasParking': _hasParking,
+                          'acceptsOnlineOrders': _acceptsOnlineOrders,
+                          'acceptsReservations': _acceptsReservations,
+                          'tableConfiguration': {
+                            'totalTables':
+                                int.tryParse(_totalTablesController.text) ?? 0,
+                          },
+                          'cuisineType': _cuisineController.text
+                              .split(',')
+                              .map((e) => e.trim())
+                              .where((e) => e.isNotEmpty)
+                              .toList(),
+                          'paymentMethods': _paymentMethodsController.text
+                              .split(',')
+                              .map((e) => e.trim())
+                              .where((e) => e.isNotEmpty)
+                              .toList(),
+                          'operatingHours': _operatingHours,
+                          'kdsConfiguration': {
+                            'stations': _stations,
+                            'workflow': ['new', 'start', 'prepared', 'ready'],
+                          },
+                        });
+                  }
 
-                if (success && mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Settings saved successfully'),
-                    ),
-                  );
+                  if (success && mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Settings saved successfully'),
+                      ),
+                    );
+                  }
                 }
-              }
-            },
-            child: const Text(
-              'Save',
-              style: TextStyle(color: AppColors.primary),
+              },
+              child: const Text(
+                'Save',
+                style: TextStyle(color: AppColors.primary),
+              ),
             ),
           ),
         ],
@@ -518,11 +525,14 @@ class _RestaurantSettingsPageState
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      IconButton(
-                        onPressed: () => _showStationDialog(),
-                        icon: const Icon(
-                          Icons.add_circle,
-                          color: AppColors.primary,
+                      PermissionGuard(
+                        permission: PermissionConstants.restaurantUpdate,
+                        child: IconButton(
+                          onPressed: () => _showStationDialog(),
+                          icon: const Icon(
+                            Icons.add_circle,
+                            color: AppColors.primary,
+                          ),
                         ),
                       ),
                     ],
@@ -568,26 +578,34 @@ class _RestaurantSettingsPageState
                           trailing: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.edit,
-                                  color: Colors.blue,
-                                ),
-                                onPressed: () => _showStationDialog(
-                                  index: index,
-                                  station: station,
+                              PermissionGuard(
+                                permission:
+                                    PermissionConstants.restaurantUpdate,
+                                child: IconButton(
+                                  icon: const Icon(
+                                    Icons.edit,
+                                    color: Colors.blue,
+                                  ),
+                                  onPressed: () => _showStationDialog(
+                                    index: index,
+                                    station: station,
+                                  ),
                                 ),
                               ),
-                              IconButton(
-                                icon: const Icon(
-                                  Icons.delete,
-                                  color: Colors.red,
+                              PermissionGuard(
+                                permission:
+                                    PermissionConstants.restaurantUpdate,
+                                child: IconButton(
+                                  icon: const Icon(
+                                    Icons.delete,
+                                    color: Colors.red,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      _stations.removeAt(index);
+                                    });
+                                  },
                                 ),
-                                onPressed: () {
-                                  setState(() {
-                                    _stations.removeAt(index);
-                                  });
-                                },
                               ),
                             ],
                           ),

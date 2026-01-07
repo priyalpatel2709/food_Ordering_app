@@ -104,9 +104,7 @@ class DiscountBreakdown {
 
   factory DiscountBreakdown.fromJson(Map<String, dynamic> json) {
     return DiscountBreakdown(
-      discount: Discount.fromJson(
-        json['discountId'] as Map<String, dynamic>,
-      ),
+      discount: Discount.fromJson(json['discountId'] as Map<String, dynamic>),
       discountAmount: (json['discountAmount'] as num).toDouble(),
     );
   }
@@ -115,13 +113,13 @@ class DiscountBreakdown {
 class Discount {
   final String id;
   final String type;
-  final String discountName;
+  final String? discountName;
   final num value;
 
   const Discount({
     required this.id,
     required this.type,
-    required this.discountName,
+    this.discountName,
     required this.value,
   });
 
@@ -129,7 +127,9 @@ class Discount {
     return Discount(
       id: json['_id'] as String,
       type: json['type'] as String,
-      discountName: json['discountName'] as String,
+      discountName: json['discountName'] != null
+          ? json['discountName'] as String
+          : null,
       value: json['value'] as num,
     );
   }

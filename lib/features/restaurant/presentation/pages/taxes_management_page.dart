@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/theme/app_colors.dart';
+import '../../../../features/rbac/presentation/widgets/permission_guard.dart';
+import '../../../../core/constants/permission_constants.dart';
 import '../../../tax/presentation/providers/tax_provider.dart';
 import '../../../tax/domain/entities/tax_entity.dart';
 import '../../../authentication/presentation/providers/auth_provider.dart';
@@ -94,10 +96,13 @@ class _TaxesManagementPageState extends ConsumerState<TaxesManagementPage> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        // heroTag: 'taxes_management_fab',
-        onPressed: () => _showAddTaxDialog(),
-        child: const Icon(Icons.add),
+      floatingActionButton: PermissionGuard(
+        permission: PermissionConstants.taxCreate,
+        child: FloatingActionButton(
+          // heroTag: 'taxes_management_fab',
+          onPressed: () => _showAddTaxDialog(),
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
@@ -135,20 +140,26 @@ class _TaxesManagementPageState extends ConsumerState<TaxesManagementPage> {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Switch(
-                  value: tax.isActive,
-                  onChanged: (val) {
-                    ref.read(taxNotifierProvider.notifier).updateTax(tax.id, {
-                      'isActive': val,
-                    });
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.delete_outline,
-                    color: AppColors.error,
+                PermissionGuard(
+                  permission: PermissionConstants.taxUpdate,
+                  child: Switch(
+                    value: tax.isActive,
+                    onChanged: (val) {
+                      ref.read(taxNotifierProvider.notifier).updateTax(tax.id, {
+                        'isActive': val,
+                      });
+                    },
                   ),
-                  onPressed: () => _confirmDeleteTax(tax),
+                ),
+                PermissionGuard(
+                  permission: PermissionConstants.taxDelete,
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: AppColors.error,
+                    ),
+                    onPressed: () => _confirmDeleteTax(tax),
+                  ),
                 ),
               ],
             ),
@@ -191,19 +202,12 @@ class _TaxesManagementPageState extends ConsumerState<TaxesManagementPage> {
           ),
           ElevatedButton(
             onPressed: () async {
-              final authState = ref.read(authNotifierProvider);
-              String? restaurantId;
-              if (authState is AuthAuthenticated) {
-                restaurantId = authState.user.restaurantsId;
-              }
-
               final success = await ref
                   .read(taxNotifierProvider.notifier)
                   .createTax({
                     'name': nameController.text,
                     'percentage': double.tryParse(rateController.text) ?? 0.0,
                     'isActive': true,
-                    if (restaurantId != null) 'restaurantId': restaurantId,
                   });
               if (success && mounted) {
                 Navigator.pop(context);

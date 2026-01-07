@@ -15,6 +15,7 @@ class PermissionConstants {
   // Restaurant/Tenant Management
   static const String restaurantCreate = "RESTAURANT.CREATE";
   static const String restaurantUpdate = "RESTAURANT.UPDATE";
+  static const String restaurantRead = "RESTAURANT.UPDATE";
 
   // Menu Management
   static const String menuCreate = "MENU.CREATE";
@@ -33,8 +34,38 @@ class PermissionConstants {
   static const String kdsManage = "KDS.MANAGE";
 
   // Reports
-  static const String reportView = "REPORT.VIEW";
+  static const String reportRead = "REPORT.VIEW";
   static const String reportExport = "REPORT.EXPORT";
+
+  //item
+  static const String itemCreate = "ITEM.CREATE";
+  static const String itemRead = "ITEM.READ";
+  static const String itemUpdate = "ITEM.UPDATE";
+  static const String itemDelete = "ITEM.DELETE";
+
+  //category
+  static const String categoryCreate = "CATEGORY.CREATE";
+  static const String categoryRead = "CATEGORY.READ";
+  static const String categoryUpdate = "CATEGORY.UPDATE";
+  static const String categoryDelete = "CATEGORY.DELETE";
+
+  //customization
+  static const String customizationCreate = "CUSTOMIZATION.CREATE";
+  static const String customizationRead = "CUSTOMIZATION.READ";
+  static const String customizationUpdate = "CUSTOMIZATION.UPDATE";
+  static const String customizationDelete = "CUSTOMIZATION.DELETE";
+
+  //discount
+  static const String discountCreate = "DISCOUNT.CREATE";
+  static const String discountRead = "DISCOUNT.READ";
+  static const String discountUpdate = "DISCOUNT.UPDATE";
+  static const String discountDelete = "DISCOUNT.DELETE";
+
+  //Tax
+  static const String taxCreate = "TAX.CREATE";
+  static const String taxRead = "TAX.READ";
+  static const String taxUpdate = "TAX.UPDATE";
+  static const String taxDelete = "TAX.DELETE";
 
   static const List<String> values = [
     userCreate,
@@ -58,8 +89,28 @@ class PermissionConstants {
     orderDelete,
     kdsView,
     kdsManage,
-    reportView,
+    reportRead,
     reportExport,
+    itemCreate,
+    itemRead,
+    itemUpdate,
+    itemDelete,
+    categoryCreate,
+    categoryRead,
+    categoryUpdate,
+    categoryDelete,
+    customizationCreate,
+    customizationRead,
+    customizationUpdate,
+    customizationDelete,
+    discountCreate,
+    discountRead,
+    discountUpdate,
+    discountDelete,
+    taxCreate,
+    taxRead,
+    taxUpdate,
+    taxDelete,
   ];
 
   static const Map<String, String> modules = {

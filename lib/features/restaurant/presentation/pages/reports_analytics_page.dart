@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../viewmodels/staff_dashboard_view_model.dart';
 import 'package:fl_chart/fl_chart.dart';
+import '../../../../features/rbac/presentation/widgets/permission_guard.dart';
+import '../../../../core/constants/permission_constants.dart';
 
 class ReportsAnalyticsPage extends ConsumerStatefulWidget {
   const ReportsAnalyticsPage({super.key});
@@ -57,23 +59,26 @@ class _ReportsAnalyticsPageState extends ConsumerState<ReportsAnalyticsPage> {
             icon: const Icon(Icons.date_range),
             onPressed: _selectDateRange,
           ),
-          IconButton(
-            icon: const Icon(Icons.download),
-            onPressed: () async {
-              final bytes = await ref
-                  .read(staffDashboardProvider.notifier)
-                  .exportReport(
-                    startDate: _dateRange?.start.toIso8601String(),
-                    endDate: _dateRange?.end.toIso8601String(),
+          PermissionGuard(
+            permission: PermissionConstants.reportExport,
+            child: IconButton(
+              icon: const Icon(Icons.download),
+              onPressed: () async {
+                final bytes = await ref
+                    .read(staffDashboardProvider.notifier)
+                    .exportReport(
+                      startDate: _dateRange?.start.toIso8601String(),
+                      endDate: _dateRange?.end.toIso8601String(),
+                    );
+                if (bytes != null && mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Report downloaded (simulated)'),
+                    ),
                   );
-              if (bytes != null && mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Report downloaded (simulated)'),
-                  ),
-                );
-              }
-            },
+                }
+              },
+            ),
           ),
         ],
       ),

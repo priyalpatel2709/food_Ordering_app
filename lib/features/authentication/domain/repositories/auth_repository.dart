@@ -9,6 +9,7 @@ abstract class AuthRepository {
     required String email,
     required String password,
     required String restaurantId,
+    required String roleName,
     String? gender,
     int? age,
   });

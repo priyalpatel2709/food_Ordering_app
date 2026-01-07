@@ -10,6 +10,7 @@ abstract class AuthRemoteDataSource {
     required String email,
     required String password,
     required String restaurantId,
+    required String roleName,
     String? gender,
     int? age,
   });
@@ -37,6 +38,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
     required String restaurantId,
+    required String roleName,
     String? gender,
     int? age,
   }) async {
@@ -46,6 +48,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         'name': name,
         'email': email,
         'password': password,
+        'roleName': roleName,
         'restaurantId': restaurantId,
         if (gender != null) 'gender': gender,
         if (age != null) 'age': age,

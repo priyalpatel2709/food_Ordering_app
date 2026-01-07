@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../providers/kds_providers.dart';
+import '../../../../features/rbac/presentation/widgets/permission_guard.dart';
+import '../../../../core/constants/permission_constants.dart';
 import '../../domain/entities/kds_order.dart';
 
 class KdsPage extends ConsumerWidget {
@@ -513,15 +515,18 @@ class _OrderCard extends ConsumerWidget {
                 padding: const EdgeInsets.only(top: 8, left: 32),
                 child: SizedBox(
                   height: 28,
-                  child: ElevatedButton(
-                    onPressed: () => _advanceItemStatus(context, ref, item),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: _getActionColor(item.status),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      textStyle: const TextStyle(fontSize: 12),
+                  child: PermissionGuard(
+                    permission: PermissionConstants.kdsManage,
+                    child: ElevatedButton(
+                      onPressed: () => _advanceItemStatus(context, ref, item),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _getActionColor(item.status),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 12),
+                        textStyle: const TextStyle(fontSize: 12),
+                      ),
+                      child: Text(_getNextActionLabel(item.status)),
                     ),
-                    child: Text(_getNextActionLabel(item.status)),
                   ),
                 ),
               ),

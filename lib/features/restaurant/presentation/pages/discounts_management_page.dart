@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../features/rbac/presentation/widgets/permission_guard.dart';
+import '../../../../core/constants/permission_constants.dart';
 import '../../../discount/presentation/providers/discount_provider.dart';
 import '../../../discount/domain/entities/discount_entity.dart';
 import '../../../../shared/theme/app_colors.dart';
@@ -101,10 +103,12 @@ class _DiscountsManagementPageState
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        // heroTag: 'discounts_management_fab',
-        onPressed: () => _showAddDiscountDialog(),
-        child: const Icon(Icons.add),
+      floatingActionButton: PermissionGuard(
+        permission: PermissionConstants.discountCreate,
+        child: FloatingActionButton(
+          onPressed: () => _showAddDiscountDialog(),
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
@@ -144,21 +148,26 @@ class _DiscountsManagementPageState
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Switch(
-                  value: discount.isActive ?? false,
-                  onChanged: (val) {
-                    ref.read(discountNotifierProvider.notifier).updateDiscount(
-                      discount.id ?? '',
-                      {'isActive': val},
-                    );
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.delete_outline,
-                    color: AppColors.error,
+                PermissionGuard(
+                  permission: PermissionConstants.discountUpdate,
+                  child: Switch(
+                    value: discount.isActive ?? false,
+                    onChanged: (val) {
+                      ref
+                          .read(discountNotifierProvider.notifier)
+                          .updateDiscount(discount.id ?? '', {'isActive': val});
+                    },
                   ),
-                  onPressed: () => _confirmDeleteDiscount(discount),
+                ),
+                PermissionGuard(
+                  permission: PermissionConstants.discountDelete,
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: AppColors.error,
+                    ),
+                    onPressed: () => _confirmDeleteDiscount(discount),
+                  ),
                 ),
               ],
             ),

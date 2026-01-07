@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/route_constants.dart';
 import '../../../../shared/theme/app_colors.dart';
+import '../../../../features/rbac/presentation/widgets/permission_guard.dart';
+import '../../../../core/constants/permission_constants.dart';
 import '../../../menu/domain/entities/menu_entity.dart';
 import '../../../menu/presentation/viewmodels/categories_view_model.dart';
 import '../../../menu/presentation/viewmodels/items_view_model.dart';
@@ -109,15 +111,18 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
         ],
       ),
 
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          final state = categoriesState;
-          if (state is CategoriesLoaded) {
-            context.push(RouteConstants.addItem, extra: null);
-          }
-        },
-        backgroundColor: AppColors.primary,
-        child: const Icon(Icons.add),
+      floatingActionButton: PermissionGuard(
+        permission: PermissionConstants.itemCreate,
+        child: FloatingActionButton(
+          onPressed: () {
+            final state = categoriesState;
+            if (state is CategoriesLoaded) {
+              context.push(RouteConstants.addItem, extra: null);
+            }
+          },
+          backgroundColor: AppColors.primary,
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
@@ -159,21 +164,27 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Switch(
-                  value: item.isAvailable,
-                  onChanged: (val) {
-                    ref.read(itemsNotifierProvider.notifier).updateItem(
-                      item.id,
-                      {'isAvailable': val},
-                    );
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.delete_outline,
-                    color: AppColors.error,
+                PermissionGuard(
+                  permission: PermissionConstants.itemUpdate,
+                  child: Switch(
+                    value: item.isAvailable,
+                    onChanged: (val) {
+                      ref.read(itemsNotifierProvider.notifier).updateItem(
+                        item.id,
+                        {'isAvailable': val},
+                      );
+                    },
                   ),
-                  onPressed: () => _confirmDeleteItem(item),
+                ),
+                PermissionGuard(
+                  permission: PermissionConstants.itemDelete,
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: AppColors.error,
+                    ),
+                    onPressed: () => _confirmDeleteItem(item),
+                  ),
                 ),
               ],
             ),

@@ -92,6 +92,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String name,
     required String email,
     required String password,
+    required String roleName,
     required String restaurantId,
   }) async {
     state = const AuthLoading();
@@ -103,6 +104,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
           email: email,
           password: password,
           restaurantId: restaurantId,
+          roleName: roleName,
         );
 
     result.when(

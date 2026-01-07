@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/theme/app_colors.dart';
+import '../../../../features/rbac/presentation/widgets/permission_guard.dart';
+import '../../../../core/constants/permission_constants.dart';
 import '../../../menu/domain/entities/menu_entity.dart';
 import '../../../menu/presentation/viewmodels/categories_view_model.dart';
 
@@ -103,9 +105,12 @@ class _CategoriesManagementPageState
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddCategoryDialog(),
-        child: const Icon(Icons.add),
+      floatingActionButton: PermissionGuard(
+        permission: PermissionConstants.categoryCreate,
+        child: FloatingActionButton(
+          onPressed: () => _showAddCategoryDialog(),
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
@@ -142,20 +147,26 @@ class _CategoriesManagementPageState
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Switch(
-                  value: category.isActive,
-                  onChanged: (val) {
-                    ref
-                        .read(categoriesNotifierProvider.notifier)
-                        .updateCategory(category.id, {'isActive': val});
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.delete_outline,
-                    color: AppColors.error,
+                PermissionGuard(
+                  permission: PermissionConstants.categoryUpdate,
+                  child: Switch(
+                    value: category.isActive,
+                    onChanged: (val) {
+                      ref
+                          .read(categoriesNotifierProvider.notifier)
+                          .updateCategory(category.id, {'isActive': val});
+                    },
                   ),
-                  onPressed: () => _confirmDeleteCategory(category),
+                ),
+                PermissionGuard(
+                  permission: PermissionConstants.categoryDelete,
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: AppColors.error,
+                    ),
+                    onPressed: () => _confirmDeleteCategory(category),
+                  ),
                 ),
               ],
             ),

@@ -247,6 +247,7 @@ class _AddStaffDialogState extends ConsumerState<AddStaffDialog> {
             email: _emailController.text.trim(),
             password: _passwordController.text.trim(),
             restaurantId: restaurantId,
+            roleName: 'staff',
           );
 
       // Refresh staff list

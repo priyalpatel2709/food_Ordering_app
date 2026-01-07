@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../order/presentation/providers/order_provider.dart';
 import '../../../order/domain/entities/order_entity.dart';
+import '../../../../features/rbac/presentation/widgets/permission_guard.dart';
+import '../../../../core/constants/permission_constants.dart';
 
 class StaffOrdersPage extends ConsumerStatefulWidget {
   const StaffOrdersPage({super.key});
@@ -280,18 +282,21 @@ class _StaffOrdersPageState extends ConsumerState<StaffOrdersPage> {
                   ),
                   if (order.payment.paymentStatus.toLowerCase() == 'paid' &&
                       order.orderStatus.toLowerCase() != 'cancelled')
-                    OutlinedButton(
-                      onPressed: () => _showRefundDialog(context, order),
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: Colors.red,
-                        side: const BorderSide(color: Colors.red),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 0,
+                    PermissionGuard(
+                      permission: PermissionConstants.orderUpdate,
+                      child: OutlinedButton(
+                        onPressed: () => _showRefundDialog(context, order),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          side: const BorderSide(color: Colors.red),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 0,
+                          ),
+                          visualDensity: VisualDensity.compact,
                         ),
-                        visualDensity: VisualDensity.compact,
+                        child: const Text('Refund'),
                       ),
-                      child: const Text('Refund'),
                     ),
                 ],
               ),

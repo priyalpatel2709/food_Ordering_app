@@ -2,6 +2,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/theme/app_colors.dart';
+import '../../../../features/rbac/presentation/widgets/permission_guard.dart';
+import '../../../../core/constants/permission_constants.dart';
 import '../../../menu/domain/entities/menu_entity.dart';
 import '../../../menu/presentation/viewmodels/customizations_view_model.dart';
 
@@ -102,9 +104,12 @@ class _CustomizationsManagementPageState
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddCustomizationDialog(),
-        child: const Icon(Icons.add),
+      floatingActionButton: PermissionGuard(
+        permission: PermissionConstants.customizationCreate,
+        child: FloatingActionButton(
+          onPressed: () => _showAddCustomizationDialog(),
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }
@@ -140,20 +145,26 @@ class _CustomizationsManagementPageState
             trailing: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Switch(
-                  value: option.isActive,
-                  onChanged: (val) {
-                    ref
-                        .read(customizationsNotifierProvider.notifier)
-                        .updateOption(option.id, {'isActive': val});
-                  },
-                ),
-                IconButton(
-                  icon: const Icon(
-                    Icons.delete_outline,
-                    color: AppColors.error,
+                PermissionGuard(
+                  permission: PermissionConstants.customizationUpdate,
+                  child: Switch(
+                    value: option.isActive,
+                    onChanged: (val) {
+                      ref
+                          .read(customizationsNotifierProvider.notifier)
+                          .updateOption(option.id, {'isActive': val});
+                    },
                   ),
-                  onPressed: () => _confirmDeleteOption(option),
+                ),
+                PermissionGuard(
+                  permission: PermissionConstants.customizationDelete,
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.delete_outline,
+                      color: AppColors.error,
+                    ),
+                    onPressed: () => _confirmDeleteOption(option),
+                  ),
                 ),
               ],
             ),

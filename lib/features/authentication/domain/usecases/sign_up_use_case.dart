@@ -13,6 +13,7 @@ class SignUpUseCase {
     required String email,
     required String password,
     required String restaurantId,
+    required String roleName,
     String? gender,
     int? age,
   }) {
@@ -23,6 +24,7 @@ class SignUpUseCase {
       restaurantId: restaurantId,
       gender: gender,
       age: age,
+      roleName: roleName,
     );
   }
 }

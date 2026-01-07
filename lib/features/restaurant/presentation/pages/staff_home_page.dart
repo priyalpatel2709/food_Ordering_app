@@ -64,68 +64,102 @@ class StaffHomePage extends StatelessWidget {
                   mainAxisSpacing: 20,
                   crossAxisSpacing: 20,
                   children: [
-                    _DashboardCard(
-                      title: 'Tables & Orders',
-                      icon: Icons.table_restaurant,
-                      color: AppColors.primary,
-                      onTap: () => context.push(RouteConstants.dineInTables),
+                    PermissionGuard(
+                      permission: PermissionConstants.orderCreate,
+                      child: _DashboardCard(
+                        title: 'Tables & Orders',
+                        icon: Icons.table_restaurant,
+                        color: AppColors.primary,
+                        onTap: () => context.push(RouteConstants.dineInTables),
+                      ),
                     ),
-                    _DashboardCard(
-                      title: 'All Orders (History)',
-                      icon: Icons.history,
-                      color: Colors.brown,
-                      onTap: () => context.push(RouteConstants.staffOrders),
+                    PermissionGuard(
+                      permission: PermissionConstants.orderRead,
+                      child: _DashboardCard(
+                        title: 'All Orders (History)',
+                        icon: Icons.history,
+                        color: Colors.brown,
+                        onTap: () => context.push(RouteConstants.staffOrders),
+                      ),
                     ),
-                    _DashboardCard(
-                      title: 'Kitchen (KDS)',
-                      icon: Icons.restaurant,
-                      color: AppColors.secondary,
-                      onTap: () => context.push(RouteConstants.kds),
+                    PermissionGuard(
+                      permission: PermissionConstants.kdsView,
+                      child: _DashboardCard(
+                        title: 'Kitchen (KDS)',
+                        icon: Icons.restaurant,
+                        color: AppColors.secondary,
+                        onTap: () => context.push(RouteConstants.kds),
+                      ),
                     ),
-                    _DashboardCard(
-                      title: 'Menu Management',
-                      icon: Icons.menu_book,
-                      color: AppColors.accent,
-                      onTap: () => context.push(RouteConstants.menuManagement),
+                    PermissionGuard(
+                      permission: PermissionConstants.menuRead,
+                      child: _DashboardCard(
+                        title: 'Menu Management',
+                        icon: Icons.menu_book,
+                        color: AppColors.accent,
+                        onTap: () =>
+                            context.push(RouteConstants.menuManagement),
+                      ),
                     ),
-                    _DashboardCard(
-                      title: 'Reports',
-                      icon: Icons.bar_chart,
-                      color: Colors.blue,
-                      onTap: () => context.push(RouteConstants.reports),
+                    PermissionGuard(
+                      permission: PermissionConstants.reportRead,
+                      child: _DashboardCard(
+                        title: 'Reports',
+                        icon: Icons.bar_chart,
+                        color: Colors.blue,
+                        onTap: () => context.push(RouteConstants.reports),
+                      ),
                     ),
-                    _DashboardCard(
-                      title: 'Items',
-                      icon: Icons.fastfood,
-                      color: Colors.orange,
-                      onTap: () => context.push(RouteConstants.itemsManagement),
+                    PermissionGuard(
+                      permission: PermissionConstants.itemRead,
+                      child: _DashboardCard(
+                        title: 'Items',
+                        icon: Icons.fastfood,
+                        color: Colors.orange,
+                        onTap: () =>
+                            context.push(RouteConstants.itemsManagement),
+                      ),
                     ),
-                    _DashboardCard(
-                      title: 'Categories',
-                      icon: Icons.category,
-                      color: Colors.teal,
-                      onTap: () =>
-                          context.push(RouteConstants.categoriesManagement),
+                    PermissionGuard(
+                      permission: PermissionConstants.categoryRead,
+                      child: _DashboardCard(
+                        title: 'Categories',
+                        icon: Icons.category,
+                        color: Colors.teal,
+                        onTap: () =>
+                            context.push(RouteConstants.categoriesManagement),
+                      ),
                     ),
-                    _DashboardCard(
-                      title: 'Customizations',
-                      icon: Icons.tune,
-                      color: Colors.purple,
-                      onTap: () =>
-                          context.push(RouteConstants.customizationManagement),
+                    PermissionGuard(
+                      permission: PermissionConstants.customizationRead,
+                      child: _DashboardCard(
+                        title: 'Customizations',
+                        icon: Icons.tune,
+                        color: Colors.purple,
+                        onTap: () => context.push(
+                          RouteConstants.customizationManagement,
+                        ),
+                      ),
                     ),
-                    _DashboardCard(
-                      title: 'Discounts',
-                      icon: Icons.local_offer,
-                      color: Colors.redAccent,
-                      onTap: () =>
-                          context.push(RouteConstants.discountsManagement),
+                    PermissionGuard(
+                      permission: PermissionConstants.discountRead,
+                      child: _DashboardCard(
+                        title: 'Discounts',
+                        icon: Icons.local_offer,
+                        color: Colors.redAccent,
+                        onTap: () =>
+                            context.push(RouteConstants.discountsManagement),
+                      ),
                     ),
-                    _DashboardCard(
-                      title: 'Taxes',
-                      icon: Icons.receipt_long,
-                      color: Colors.green,
-                      onTap: () => context.push(RouteConstants.taxesManagement),
+                    PermissionGuard(
+                      permission: PermissionConstants.taxRead,
+                      child: _DashboardCard(
+                        title: 'Taxes',
+                        icon: Icons.receipt_long,
+                        color: Colors.green,
+                        onTap: () =>
+                            context.push(RouteConstants.taxesManagement),
+                      ),
                     ),
                     _DashboardCard(
                       title: 'Settings',
