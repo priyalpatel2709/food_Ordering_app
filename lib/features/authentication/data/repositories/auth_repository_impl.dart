@@ -31,7 +31,9 @@ class AuthRepositoryImpl implements AuthRepository {
       // Set token in DioClient
       _dioClient.setAuthToken(userEntity.token);
 
-      return Result.success(userEntity);
+      // Reload from local storage to ensure consistency
+      final savedUser = await _localDataSource.getUser();
+      return Result.success(savedUser ?? userEntity);
     } on ServerException catch (e) {
       return Result.failure(
         Failure.server(e.message, statusCode: e.statusCode),
@@ -75,7 +77,9 @@ class AuthRepositoryImpl implements AuthRepository {
       // Set token in DioClient
       _dioClient.setAuthToken(userEntity.token);
 
-      return Result.success(userEntity);
+      // Reload to ensure consistency
+      final savedUser = await _localDataSource.getUser();
+      return Result.success(savedUser ?? userEntity);
     } on ServerException catch (e) {
       return Result.failure(
         Failure.server(e.message, statusCode: e.statusCode),

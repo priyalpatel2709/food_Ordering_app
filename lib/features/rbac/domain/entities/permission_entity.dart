@@ -19,4 +19,17 @@ class PermissionEntity {
       module: json['module'] as String,
     );
   }
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PermissionEntity &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          description == other.description &&
+          module == other.module;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^ name.hashCode ^ description.hashCode ^ module.hashCode;
 }

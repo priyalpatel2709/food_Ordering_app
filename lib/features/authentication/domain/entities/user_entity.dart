@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import '../../../rbac/domain/entities/role_entity.dart';
 
 /// User Entity - Pure domain model
@@ -76,7 +77,7 @@ class UserEntity {
           email == other.email &&
           token == other.token &&
           role == other.role &&
-          // roles == other.roles && // List equality might be tricky, usually fine if reference diff
+          listEquals(roles, other.roles) &&
           restaurantsId == other.restaurantsId &&
           gender == other.gender &&
           age == other.age;
@@ -88,7 +89,7 @@ class UserEntity {
       email.hashCode ^
       token.hashCode ^
       role.hashCode ^
-      // roles.hashCode ^
+      Object.hashAll(roles) ^
       restaurantsId.hashCode ^
       gender.hashCode ^
       age.hashCode;

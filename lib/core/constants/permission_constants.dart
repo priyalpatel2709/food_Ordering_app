@@ -15,7 +15,7 @@ class PermissionConstants {
   // Restaurant/Tenant Management
   static const String restaurantCreate = "RESTAURANT.CREATE";
   static const String restaurantUpdate = "RESTAURANT.UPDATE";
-  static const String restaurantRead = "RESTAURANT.UPDATE";
+  static const String restaurantRead = "RESTAURANT.READ";
 
   // Menu Management
   static const String menuCreate = "MENU.CREATE";

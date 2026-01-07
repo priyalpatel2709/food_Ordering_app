@@ -161,12 +161,15 @@ class StaffHomePage extends StatelessWidget {
                             context.push(RouteConstants.taxesManagement),
                       ),
                     ),
-                    _DashboardCard(
-                      title: 'Settings',
-                      icon: Icons.store,
-                      color: Colors.blueGrey,
-                      onTap: () =>
-                          context.push(RouteConstants.restaurantSettings),
+                    PermissionGuard(
+                      permission: PermissionConstants.restaurantRead,
+                      child: _DashboardCard(
+                        title: 'Settings',
+                        icon: Icons.store,
+                        color: Colors.blueGrey,
+                        onTap: () =>
+                            context.push(RouteConstants.restaurantSettings),
+                      ),
                     ),
                     PermissionGuard(
                       permission: PermissionConstants.userRead,

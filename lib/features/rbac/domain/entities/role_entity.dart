@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'permission_entity.dart';
 
 class RoleEntity {
@@ -35,4 +36,23 @@ class RoleEntity {
           : DateTime.now(),
     );
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RoleEntity &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          name == other.name &&
+          listEquals(permissions, other.permissions) &&
+          isSystem == other.isSystem &&
+          description == other.description;
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      name.hashCode ^
+      Object.hashAll(permissions) ^
+      isSystem.hashCode ^
+      description.hashCode;
 }
