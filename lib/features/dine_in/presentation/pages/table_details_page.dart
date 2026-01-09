@@ -1,8 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../domain/entities/table_entity.dart';
 import '../../domain/entities/dine_in_order_entity.dart';
 import '../providers/dine_in_providers.dart';
+import '../../../../core/di/providers.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/entities/dine_in_session.dart';
 import '../../../../shared/navigation/navigation_provider.dart';
@@ -22,6 +24,51 @@ class TableDetailsPage extends ConsumerStatefulWidget {
 }
 
 class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
+  StreamSubscription? _orderDeletedSubscription;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _joinTableRoom();
+      _listenToOrderDeletion();
+    });
+  }
+
+  @override
+  void dispose() {
+    _orderDeletedSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _joinTableRoom() {
+    final storageService = StorageService();
+    final restaurantId = storageService.getRestaurantId();
+    if (restaurantId != null) {
+      ref
+          .read(socketServiceProvider)
+          .joinTable(restaurantId, widget.table.tableNumber);
+    }
+  }
+
+  void _listenToOrderDeletion() {
+    _orderDeletedSubscription = ref
+        .read(socketServiceProvider)
+        .orderDeletedStream
+        .listen((data) {
+          if (data['orderId'] == widget.table.currentOrderId) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Order has been removed/cancelled'),
+                ),
+              );
+              context.pop();
+            }
+          }
+        });
+  }
+
   @override
   Widget build(BuildContext context) {
     // If table is available, show "Start Order"
@@ -43,6 +90,25 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
     final orderAsync = ref.watch(
       orderDetailsProvider(widget.table.currentOrderId!),
     );
+
+    // Automatically navigate back if order is completed or cancelled from another device
+    ref.listen(orderDetailsProvider(widget.table.currentOrderId!), (
+      previous,
+      next,
+    ) {
+      if (next.hasValue) {
+        final order = next.value!;
+        final status = order.status.toUpperCase();
+        if (status == 'COMPLETED' || status == 'CANCELLED') {
+          if (mounted) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Order has been $status')));
+            context.pop();
+          }
+        }
+      }
+    });
 
     return Scaffold(
       appBar: AppBar(title: Text('Table ${widget.table.tableNumber} - Order')),

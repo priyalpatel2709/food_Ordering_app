@@ -94,17 +94,24 @@ class Tax {
 
 /// Discount Breakdown
 class DiscountBreakdown {
-  final Discount discount;
+  final Discount? discount;
+  final String? discountId;
   final double discountAmount;
 
   const DiscountBreakdown({
-    required this.discount,
+    this.discount,
+    this.discountId,
     required this.discountAmount,
   });
 
   factory DiscountBreakdown.fromJson(Map<String, dynamic> json) {
     return DiscountBreakdown(
-      discount: Discount.fromJson(json['discountId'] as Map<String, dynamic>),
+      discount: json['discountId'] is String
+          ? null
+          : Discount.fromJson(json['discountId'] as Map<String, dynamic>),
+      discountId: json['discountId'] is String
+          ? json['discountId'] as String
+          : null,
       discountAmount: (json['discountAmount'] as num).toDouble(),
     );
   }

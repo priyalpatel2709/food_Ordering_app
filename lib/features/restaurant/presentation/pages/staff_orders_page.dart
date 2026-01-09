@@ -233,7 +233,7 @@ class _StaffOrdersPageState extends ConsumerState<StaffOrdersPage> {
                   if (order.discount.discounts.isNotEmpty)
                     ...order.discount.discounts.map(
                       (d) => _buildSummaryRow(
-                        'Discount (${d.discount.discountName})',
+                        'Discount (${d.discount?.discountName})',
                         -d.discountAmount,
                         color: Colors.green[700],
                       ),
@@ -470,7 +470,7 @@ class _StaffOrdersPageState extends ConsumerState<StaffOrdersPage> {
                   if (order.discount.discounts.isNotEmpty)
                     ...order.discount.discounts.map(
                       (d) => _buildSummaryRow(
-                        'Discount (${d.discount.discountName})',
+                        'Discount (${d.discount?.discountName})',
                         -d.discountAmount,
                         color: Colors.green[700],
                       ),

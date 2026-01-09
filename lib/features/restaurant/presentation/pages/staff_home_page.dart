@@ -1,19 +1,145 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/constants/route_constants.dart';
 import '../../../../core/constants/permission_constants.dart';
 import '../../../../core/services/storage_service.dart';
+import '../../../../features/authentication/presentation/providers/auth_provider.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../menu/presentation/widgets/user_header_card.dart';
-import '../../../../features/rbac/presentation/widgets/permission_guard.dart';
 
-class StaffHomePage extends StatelessWidget {
+class _DashboardItem {
+  final String title;
+  final IconData icon;
+  final Color color;
+  final String route;
+  final String permission;
+
+  _DashboardItem({
+    required this.title,
+    required this.icon,
+    required this.color,
+    required this.route,
+    required this.permission,
+  });
+}
+
+class StaffHomePage extends ConsumerWidget {
   const StaffHomePage({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final storageService = StorageService();
     final user = storageService.getUser();
+    final authState = ref.watch(authNotifierProvider);
+
+    final List<_DashboardItem> allItems = [
+      _DashboardItem(
+        title: 'Tables & Orders',
+        icon: Icons.table_restaurant,
+        color: AppColors.primary,
+        route: RouteConstants.dineInTables,
+        permission: PermissionConstants.orderCreate,
+      ),
+      _DashboardItem(
+        title: 'All Orders (History)',
+        icon: Icons.history,
+        color: Colors.brown,
+        route: RouteConstants.staffOrders,
+        permission: PermissionConstants.orderRead,
+      ),
+      _DashboardItem(
+        title: 'Kitchen (KDS)',
+        icon: Icons.restaurant,
+        color: AppColors.secondary,
+        route: RouteConstants.kds,
+        permission: PermissionConstants.kdsView,
+      ),
+      _DashboardItem(
+        title: 'Menu Management',
+        icon: Icons.menu_book,
+        color: AppColors.accent,
+        route: RouteConstants.menuManagement,
+        permission: PermissionConstants.menuRead,
+      ),
+      _DashboardItem(
+        title: 'Reports',
+        icon: Icons.bar_chart,
+        color: Colors.blue,
+        route: RouteConstants.reports,
+        permission: PermissionConstants.reportRead,
+      ),
+      _DashboardItem(
+        title: 'Items',
+        icon: Icons.fastfood,
+        color: Colors.orange,
+        route: RouteConstants.itemsManagement,
+        permission: PermissionConstants.itemRead,
+      ),
+      _DashboardItem(
+        title: 'Categories',
+        icon: Icons.category,
+        color: Colors.teal,
+        route: RouteConstants.categoriesManagement,
+        permission: PermissionConstants.categoryRead,
+      ),
+      _DashboardItem(
+        title: 'Customizations',
+        icon: Icons.tune,
+        color: Colors.purple,
+        route: RouteConstants.customizationManagement,
+        permission: PermissionConstants.customizationRead,
+      ),
+      _DashboardItem(
+        title: 'Discounts',
+        icon: Icons.local_offer,
+        color: Colors.redAccent,
+        route: RouteConstants.discountsManagement,
+        permission: PermissionConstants.discountRead,
+      ),
+      _DashboardItem(
+        title: 'Taxes',
+        icon: Icons.receipt_long,
+        color: Colors.green,
+        route: RouteConstants.taxesManagement,
+        permission: PermissionConstants.taxRead,
+      ),
+      _DashboardItem(
+        title: 'Settings',
+        icon: Icons.store,
+        color: Colors.blueGrey,
+        route: RouteConstants.restaurantSettings,
+        permission: PermissionConstants.restaurantRead,
+      ),
+      _DashboardItem(
+        title: 'Staff & Roles',
+        icon: Icons.admin_panel_settings,
+        color: Colors.indigo,
+        route: RouteConstants.userManagement,
+        permission: PermissionConstants.userRead,
+      ),
+      _DashboardItem(
+        title: 'Role Mgmt',
+        icon: Icons.security,
+        color: Colors.deepPurple,
+        route: RouteConstants.roleManagement,
+        permission: PermissionConstants.roleRead,
+      ),
+      _DashboardItem(
+        title: 'Permission',
+        icon: Icons.security,
+        color: Colors.deepPurple,
+        route: RouteConstants.permissionManagement,
+        permission: PermissionConstants.roleRead,
+      ),
+    ];
+
+    final filteredItems = allItems.where((item) {
+      if (authState is AuthAuthenticated) {
+        return authState.user.hasPermission(item.permission);
+      }
+      return false;
+    }).toList();
 
     return Scaffold(
       body: Container(
@@ -58,150 +184,23 @@ class StaffHomePage extends StatelessWidget {
               ),
               const SizedBox(height: 24),
               Expanded(
-                child: GridView.count(
-                  crossAxisCount: 2,
+                child: GridView.builder(
                   padding: const EdgeInsets.all(24),
-                  mainAxisSpacing: 20,
-                  crossAxisSpacing: 20,
-                  children: [
-                    PermissionGuard(
-                      permission: PermissionConstants.orderCreate,
-                      child: _DashboardCard(
-                        title: 'Tables & Orders',
-                        icon: Icons.table_restaurant,
-                        color: AppColors.primary,
-                        onTap: () => context.push(RouteConstants.dineInTables),
-                      ),
-                    ),
-                    PermissionGuard(
-                      permission: PermissionConstants.orderRead,
-                      child: _DashboardCard(
-                        title: 'All Orders (History)',
-                        icon: Icons.history,
-                        color: Colors.brown,
-                        onTap: () => context.push(RouteConstants.staffOrders),
-                      ),
-                    ),
-                    PermissionGuard(
-                      permission: PermissionConstants.kdsView,
-                      child: _DashboardCard(
-                        title: 'Kitchen (KDS)',
-                        icon: Icons.restaurant,
-                        color: AppColors.secondary,
-                        onTap: () => context.push(RouteConstants.kds),
-                      ),
-                    ),
-                    PermissionGuard(
-                      permission: PermissionConstants.menuRead,
-                      child: _DashboardCard(
-                        title: 'Menu Management',
-                        icon: Icons.menu_book,
-                        color: AppColors.accent,
-                        onTap: () =>
-                            context.push(RouteConstants.menuManagement),
-                      ),
-                    ),
-                    PermissionGuard(
-                      permission: PermissionConstants.reportRead,
-                      child: _DashboardCard(
-                        title: 'Reports',
-                        icon: Icons.bar_chart,
-                        color: Colors.blue,
-                        onTap: () => context.push(RouteConstants.reports),
-                      ),
-                    ),
-                    PermissionGuard(
-                      permission: PermissionConstants.itemRead,
-                      child: _DashboardCard(
-                        title: 'Items',
-                        icon: Icons.fastfood,
-                        color: Colors.orange,
-                        onTap: () =>
-                            context.push(RouteConstants.itemsManagement),
-                      ),
-                    ),
-                    PermissionGuard(
-                      permission: PermissionConstants.categoryRead,
-                      child: _DashboardCard(
-                        title: 'Categories',
-                        icon: Icons.category,
-                        color: Colors.teal,
-                        onTap: () =>
-                            context.push(RouteConstants.categoriesManagement),
-                      ),
-                    ),
-                    PermissionGuard(
-                      permission: PermissionConstants.customizationRead,
-                      child: _DashboardCard(
-                        title: 'Customizations',
-                        icon: Icons.tune,
-                        color: Colors.purple,
-                        onTap: () => context.push(
-                          RouteConstants.customizationManagement,
-                        ),
-                      ),
-                    ),
-                    PermissionGuard(
-                      permission: PermissionConstants.discountRead,
-                      child: _DashboardCard(
-                        title: 'Discounts',
-                        icon: Icons.local_offer,
-                        color: Colors.redAccent,
-                        onTap: () =>
-                            context.push(RouteConstants.discountsManagement),
-                      ),
-                    ),
-                    PermissionGuard(
-                      permission: PermissionConstants.taxRead,
-                      child: _DashboardCard(
-                        title: 'Taxes',
-                        icon: Icons.receipt_long,
-                        color: Colors.green,
-                        onTap: () =>
-                            context.push(RouteConstants.taxesManagement),
-                      ),
-                    ),
-                    PermissionGuard(
-                      permission: PermissionConstants.restaurantRead,
-                      child: _DashboardCard(
-                        title: 'Settings',
-                        icon: Icons.store,
-                        color: Colors.blueGrey,
-                        onTap: () =>
-                            context.push(RouteConstants.restaurantSettings),
-                      ),
-                    ),
-                    PermissionGuard(
-                      permission: PermissionConstants.userRead,
-                      child: _DashboardCard(
-                        title: 'Staff & Roles',
-                        icon: Icons.admin_panel_settings,
-                        color: Colors.indigo,
-                        onTap: () =>
-                            context.push(RouteConstants.userManagement),
-                      ),
-                    ),
-                    PermissionGuard(
-                      permission: PermissionConstants.roleRead,
-                      child: _DashboardCard(
-                        title: 'Role Mgmt',
-                        icon: Icons.security,
-                        color: Colors.deepPurple,
-                        onTap: () =>
-                            context.push(RouteConstants.roleManagement),
-                      ),
-                    ),
-                    PermissionGuard(
-                      permission: PermissionConstants.roleRead,
-                      child: _DashboardCard(
-                        title: 'Permission',
-                        icon: Icons.security,
-                        color: Colors.deepPurple,
-                        onTap: () =>
-                            context.push(RouteConstants.permissionManagement),
-                      ),
-                    ),
-                  ],
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    mainAxisSpacing: 20,
+                    crossAxisSpacing: 20,
+                  ),
+                  itemCount: filteredItems.length,
+                  itemBuilder: (context, index) {
+                    final item = filteredItems[index];
+                    return _DashboardCard(
+                      title: item.title,
+                      icon: item.icon,
+                      color: item.color,
+                      onTap: () => context.push(item.route),
+                    );
+                  },
                 ),
               ),
             ],

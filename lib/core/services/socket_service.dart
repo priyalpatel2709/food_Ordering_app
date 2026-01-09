@@ -9,11 +9,24 @@ class SocketService {
       StreamController<Map<String, dynamic>>.broadcast();
   final _groupCartUpdateController =
       StreamController<Map<String, dynamic>>.broadcast();
+  final _tableStatusUpdateController =
+      StreamController<Map<String, dynamic>>.broadcast();
+  final _tableOrderUpdateController =
+      StreamController<Map<String, dynamic>>.broadcast();
+  final _orderDeletedController =
+      StreamController<Map<String, dynamic>>.broadcast();
 
   Stream<Map<String, dynamic>> get kdsUpdateStream =>
       _kdsUpdateController.stream;
+  Stream<Map<String, dynamic>> get tableStatusUpdateStream =>
+      _tableStatusUpdateController.stream;
+  Stream<Map<String, dynamic>> get tableOrderUpdateStream =>
+      _tableOrderUpdateController.stream;
   Stream<Map<String, dynamic>> get groupCartUpdateStream =>
       _groupCartUpdateController.stream;
+
+  Stream<Map<String, dynamic>> get orderDeletedStream =>
+      _orderDeletedController.stream;
 
   void connect() {
     if (_socket != null && _socket!.connected) return;
@@ -46,10 +59,29 @@ class SocketService {
       _groupCartUpdateController.add(Map<String, dynamic>.from(data));
     });
 
+    _socket!.on('table_status_updated', (data) {
+      log('Table status updated received: $data');
+      _tableStatusUpdateController.add(Map<String, dynamic>.from(data));
+    });
+
+    _socket!.on('table_order_updated', (data) {
+      log('Table order updated received: $data');
+      _tableOrderUpdateController.add(Map<String, dynamic>.from(data));
+    });
+
+    _socket!.on('order_deleted', (data) {
+      log('Order deleted received: $data');
+      _orderDeletedController.add(Map<String, dynamic>.from(data));
+    });
+
     _socket!.onConnectError((err) => log('Connect Error: $err'));
     _socket!.onError((err) => log('Error: $err'));
 
     _socket!.connect();
+  }
+
+  String _sanitizeId(String id) {
+    return id.replaceFirst('restaurant_', '');
   }
 
   void joinRestaurant(String restaurantId) {
@@ -57,33 +89,61 @@ class SocketService {
       connect();
     }
 
+    final sanitizedId = _sanitizeId(restaurantId);
+
     if (_socket!.connected) {
-      log('Joining restaurant room: $restaurantId');
-      _socket!.emit('join_restaurant', restaurantId);
+      log('Joining restaurant room: $sanitizedId');
+      _socket!.emit('join_restaurant', sanitizedId);
     } else {
-      log(
-        'Socket not connected yet. Waiting for connect to join $restaurantId',
-      );
+      log('Socket not connected yet. Waiting for connect to join $sanitizedId');
       // Using off to avoid duplicate listeners if called multiple times before connect
       _socket!.onConnect((_) {
-        log('Connected to socket, now joining restaurant room: $restaurantId');
-        _socket!.emit('join_restaurant', restaurantId);
+        log('Connected to socket, now joining restaurant room: $sanitizedId');
+        _socket!.emit('join_restaurant', sanitizedId);
       });
     }
   }
 
-  void joinGroup(String groupId) {
+  void joinTable(String restaurantId, String tableNumber) {
     if (_socket == null) {
       connect();
     }
 
+    final sanitizedRestaurantId = _sanitizeId(restaurantId);
+    final data = {
+      'restaurantId': sanitizedRestaurantId,
+      'tableNumber': tableNumber,
+    };
+
     if (_socket!.connected) {
-      log('Joining group room: $groupId');
-      _socket!.emit('join_group', groupId);
+      log('Joining table room: $data');
+      _socket!.emit('join_table', data);
     } else {
       _socket!.onConnect((_) {
-        log('Connected to socket, now joining group room: $groupId');
-        _socket!.emit('join_group', groupId);
+        log('Connected to socket, now joining table room: $data');
+        _socket!.emit('join_table', data);
+      });
+    }
+  }
+
+  void joinGroup(String restaurantId, String tableNumber) {
+    if (_socket == null) {
+      connect();
+    }
+
+    final sanitizedRestaurantId = _sanitizeId(restaurantId);
+    final data = {
+      'restaurantId': sanitizedRestaurantId,
+      'tableNumber': tableNumber,
+    };
+
+    if (_socket!.connected) {
+      log('Joining group room: $data');
+      _socket!.emit('join_group', data);
+    } else {
+      _socket!.onConnect((_) {
+        log('Connected to socket, now joining group room: $data');
+        _socket!.emit('join_group', data);
       });
     }
   }
@@ -97,6 +157,9 @@ class SocketService {
     log('Does meee');
     _kdsUpdateController.close();
     _groupCartUpdateController.close();
+    _tableStatusUpdateController.close();
+    _tableOrderUpdateController.close();
+    _orderDeletedController.close();
     disconnect();
   }
 }
