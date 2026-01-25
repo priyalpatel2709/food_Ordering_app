@@ -28,6 +28,7 @@ import '../../features/restaurant/presentation/pages/staff_orders_page.dart';
 import '../features/rbac/presentation/pages/role_management_page.dart';
 import '../features/rbac/presentation/pages/user_management_page.dart';
 import '../features/rbac/presentation/pages/permission_management_page.dart';
+import '../features/pos/presentation/screens/pos_screen.dart';
 
 class AppRouter {
   // Route paths and names are now centralized in RouteConstants
@@ -243,6 +244,11 @@ class AppRouter {
         path: RouteConstants.permissionManagement,
         name: RouteConstants.permissionManagementName,
         builder: (context, state) => const PermissionManagementPage(),
+      ),
+      GoRoute(
+        path: RouteConstants.pos,
+        name: RouteConstants.posName,
+        builder: (context, state) => const PosScreen(),
       ),
     ],
   );

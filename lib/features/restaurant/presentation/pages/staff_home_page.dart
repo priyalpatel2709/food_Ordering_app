@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'dart:ui';
 import '../../../../core/constants/route_constants.dart';
 import '../../../../core/constants/permission_constants.dart';
 import '../../../../core/services/storage_service.dart';
 import '../../../../features/authentication/presentation/providers/auth_provider.dart';
 import '../../../../shared/theme/app_colors.dart';
-import '../../../menu/presentation/widgets/user_header_card.dart';
 
 class _DashboardItem {
   final String title;
@@ -14,6 +14,7 @@ class _DashboardItem {
   final Color color;
   final String route;
   final String permission;
+  final String description;
 
   _DashboardItem({
     required this.title,
@@ -21,6 +22,7 @@ class _DashboardItem {
     required this.color,
     required this.route,
     required this.permission,
+    required this.description,
   });
 }
 
@@ -35,102 +37,76 @@ class StaffHomePage extends ConsumerWidget {
 
     final List<_DashboardItem> allItems = [
       _DashboardItem(
-        title: 'Tables & Orders',
-        icon: Icons.table_restaurant,
-        color: AppColors.primary,
-        route: RouteConstants.dineInTables,
+        title: 'POS Terminal',
+        icon: Icons.point_of_sale_rounded,
+        color: const Color(0xFF6366F1),
+        route: RouteConstants.pos,
         permission: PermissionConstants.orderCreate,
+        description: 'New billing & fast checkout',
       ),
       _DashboardItem(
-        title: 'All Orders (History)',
-        icon: Icons.history,
-        color: Colors.brown,
+        title: 'Orders',
+        icon: Icons.receipt_long_rounded,
+        color: const Color(0xFF10B981),
         route: RouteConstants.staffOrders,
         permission: PermissionConstants.orderRead,
+        description: 'Manage & track live orders',
       ),
       _DashboardItem(
         title: 'Kitchen (KDS)',
-        icon: Icons.restaurant,
-        color: AppColors.secondary,
+        icon: Icons.restaurant_menu_rounded,
+        color: const Color(0xFFF59E0B),
         route: RouteConstants.kds,
         permission: PermissionConstants.kdsView,
+        description: 'Monitor kitchen preparations',
       ),
       _DashboardItem(
-        title: 'Menu Management',
-        icon: Icons.menu_book,
-        color: AppColors.accent,
-        route: RouteConstants.menuManagement,
-        permission: PermissionConstants.menuRead,
-      ),
-      _DashboardItem(
-        title: 'Reports',
-        icon: Icons.bar_chart,
-        color: Colors.blue,
-        route: RouteConstants.reports,
-        permission: PermissionConstants.reportRead,
-      ),
-      _DashboardItem(
-        title: 'Items',
-        icon: Icons.fastfood,
-        color: Colors.orange,
+        title: 'Inventory',
+        icon: Icons.inventory_2_rounded,
+        color: const Color(0xFFEC4899),
         route: RouteConstants.itemsManagement,
         permission: PermissionConstants.itemRead,
+        description: 'Stock & menu item control',
       ),
       _DashboardItem(
         title: 'Categories',
-        icon: Icons.category,
-        color: Colors.teal,
+        icon: Icons.category_rounded,
+        color: const Color(0xFF8B5CF6),
         route: RouteConstants.categoriesManagement,
         permission: PermissionConstants.categoryRead,
+        description: 'Organize your menu structure',
       ),
       _DashboardItem(
-        title: 'Customizations',
-        icon: Icons.tune,
-        color: Colors.purple,
-        route: RouteConstants.customizationManagement,
-        permission: PermissionConstants.customizationRead,
+        title: 'Reports',
+        icon: Icons.analytics_rounded,
+        color: const Color(0xFF3B82F6),
+        route: RouteConstants.reports,
+        permission: PermissionConstants.reportRead,
+        description: 'Sales & performance analytics',
       ),
       _DashboardItem(
         title: 'Discounts',
-        icon: Icons.local_offer,
-        color: Colors.redAccent,
+        icon: Icons.confirmation_number_rounded,
+        color: const Color(0xFFEF4444),
         route: RouteConstants.discountsManagement,
         permission: PermissionConstants.discountRead,
-      ),
-      _DashboardItem(
-        title: 'Taxes',
-        icon: Icons.receipt_long,
-        color: Colors.green,
-        route: RouteConstants.taxesManagement,
-        permission: PermissionConstants.taxRead,
-      ),
-      _DashboardItem(
-        title: 'Settings',
-        icon: Icons.store,
-        color: Colors.blueGrey,
-        route: RouteConstants.restaurantSettings,
-        permission: PermissionConstants.restaurantRead,
+        description: 'Promo codes & special offers',
       ),
       _DashboardItem(
         title: 'Staff & Roles',
-        icon: Icons.admin_panel_settings,
-        color: Colors.indigo,
+        icon: Icons.admin_panel_settings_rounded,
+        color: const Color(0xFF0F172A),
         route: RouteConstants.userManagement,
         permission: PermissionConstants.userRead,
+        description: 'Team management & security',
       ),
       _DashboardItem(
-        title: 'Role Mgmt',
-        icon: Icons.security,
-        color: Colors.deepPurple,
-        route: RouteConstants.roleManagement,
-        permission: PermissionConstants.roleRead,
-      ),
-      _DashboardItem(
-        title: 'Permission',
-        icon: Icons.security,
-        color: Colors.deepPurple,
-        route: RouteConstants.permissionManagement,
-        permission: PermissionConstants.roleRead,
+        title: 'Settings',
+        icon: Icons.settings_suggest_rounded,
+        color: const Color(0xFF64748B),
+        route: RouteConstants.restaurantSettings,
+        permission: PermissionConstants.restaurantRead,
+        description: 'Store profile & configurations',
       ),
     ];
 
@@ -142,127 +118,335 @@ class StaffHomePage extends ConsumerWidget {
     }).toList();
 
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              AppColors.grey50,
-              AppColors.white,
-              AppColors.primaryContainer,
-            ],
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
-            children: [
-              UserHeaderCard(
-                user: user,
-                onLogout: () async {
-                  await storageService.clearUser();
-                  if (context.mounted) {
-                    context.go(RouteConstants.login);
-                  }
-                },
+      backgroundColor: const Color(0xFFF8FAFC),
+      body: Stack(
+        children: [
+          // Background decorative elements
+          Positioned(
+            top: -100,
+            right: -100,
+            child: Container(
+              width: 300,
+              height: 300,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: AppColors.primary.withOpacity(0.05),
               ),
-              const SizedBox(height: 24),
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 24),
-                child: Row(
-                  children: [
-                    Text(
-                      'Staff Dashboard',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
-                      ),
+            ),
+          ),
+
+          SafeArea(
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                _buildAppBar(context, user, storageService),
+
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const SizedBox(height: 16),
+                        _buildGreeting(user?.name ?? 'Admin'),
+                        const SizedBox(height: 24),
+                        _buildQuickStats(context),
+                        const SizedBox(height: 32),
+                        const Text(
+                          'Business Management',
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF1E293B),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 24),
-              Expanded(
-                child: GridView.builder(
-                  padding: const EdgeInsets.all(24),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    mainAxisSpacing: 20,
-                    crossAxisSpacing: 20,
                   ),
-                  itemCount: filteredItems.length,
-                  itemBuilder: (context, index) {
-                    final item = filteredItems[index];
-                    return _DashboardCard(
-                      title: item.title,
-                      icon: item.icon,
-                      color: item.color,
-                      onTap: () => context.push(item.route),
-                    );
-                  },
+                ),
+
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+                  sliver: SliverGrid(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          crossAxisSpacing: 16,
+                          mainAxisSpacing: 16,
+                          childAspectRatio: 1.1,
+                        ),
+                    delegate: SliverChildBuilderDelegate((context, index) {
+                      final item = filteredItems[index];
+                      return _ManagementCard(item: item);
+                    }, childCount: filteredItems.length),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppBar(
+    BuildContext context,
+    dynamic user,
+    StorageService storage,
+  ) {
+    return SliverPadding(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      sliver: SliverToBoxAdapter(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: Image.asset(
+                'assets/images/logo.png', // Fallback to icon if asset missing
+                height: 32,
+                errorBuilder: (context, error, stackTrace) => const Icon(
+                  Icons.restaurant_rounded,
+                  color: AppColors.primary,
+                  size: 32,
                 ),
               ),
-            ],
+            ),
+            Row(
+              children: [
+                _buildAppBarAction(
+                  icon: Icons.notifications_none_rounded,
+                  onTap: () {},
+                ),
+                const SizedBox(width: 12),
+                _buildAppBarAction(
+                  icon: Icons.logout_rounded,
+                  onTap: () => _showLogoutDialog(context, storage),
+                  color: const Color(0xFFEF4444),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAppBarAction({
+    required IconData icon,
+    required VoidCallback onTap,
+    Color color = const Color(0xFF64748B),
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFF1F5F9)),
+        ),
+        child: Icon(icon, size: 24, color: color),
+      ),
+    );
+  }
+
+  Widget _buildGreeting(String name) {
+    final hour = DateTime.now().hour;
+    String greeting = 'Good Morning';
+    if (hour >= 12 && hour < 17) greeting = 'Good Afternoon';
+    if (hour >= 17) greeting = 'Good Evening';
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          greeting,
+          style: const TextStyle(
+            fontSize: 16,
+            color: Color(0xFF64748B),
+            fontWeight: FontWeight.w500,
           ),
         ),
+        Text(
+          'Welcome back, $name!',
+          style: const TextStyle(
+            fontSize: 26,
+            fontWeight: FontWeight.bold,
+            letterSpacing: -0.5,
+            color: Color(0xFF0F172A),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQuickStats(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0F172A),
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF0F172A).withOpacity(0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          _buildStatItem(
+            'Today\'s Sales',
+            '\$420.50',
+            Icons.trending_up,
+            Colors.greenAccent,
+          ),
+          Container(height: 40, width: 1, color: Colors.white24),
+          _buildStatItem('Orders', '24', Icons.receipt_long, Colors.blueAccent),
+          Container(height: 40, width: 1, color: Colors.white24),
+          _buildStatItem('Active', '6', Icons.timelapse, Colors.orangeAccent),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(
+    String label,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
+    return Expanded(
+      child: Column(
+        children: [
+          Icon(icon, color: color, size: 20),
+          const SizedBox(height: 8),
+          Text(
+            value,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white.withOpacity(0.6),
+              fontSize: 12,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLogoutDialog(BuildContext context, StorageService storage) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to exit?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              await storage.clearUser();
+              if (context.mounted) {
+                context.go(RouteConstants.login);
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFEF4444),
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Logout'),
+          ),
+        ],
       ),
     );
   }
 }
 
-class _DashboardCard extends StatelessWidget {
-  final String title;
-  final IconData icon;
-  final Color color;
-  final VoidCallback onTap;
+class _ManagementCard extends StatelessWidget {
+  final _DashboardItem item;
 
-  const _DashboardCard({
-    required this.title,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
+  const _ManagementCard({required this.item});
 
   @override
   Widget build(BuildContext context) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(20),
+        onTap: () => context.push(item.route),
+        borderRadius: BorderRadius.circular(24),
         child: Container(
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: AppColors.white,
-            borderRadius: BorderRadius.circular(20),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: const Color(0xFFF1F5F9)),
             boxShadow: [
               BoxShadow(
-                color: AppColors.shadowLight,
+                color: const Color(0xFF64748B).withOpacity(0.03),
                 blurRadius: 10,
-                offset: const Offset(0, 5),
+                offset: const Offset(0, 4),
               ),
             ],
           ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  shape: BoxShape.circle,
+                  color: item.color.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(16),
                 ),
-                child: Icon(icon, size: 40, color: color),
+                child: Icon(item.icon, color: item.color, size: 28),
               ),
-              const SizedBox(height: 16),
-              Text(
-                title,
-                textAlign: TextAlign.center,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFF1E293B),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    item.description,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: const Color(0xFF64748B).withOpacity(0.8),
+                      height: 1.2,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
               ),
             ],
           ),
