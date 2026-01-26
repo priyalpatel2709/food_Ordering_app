@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../core/constants/route_constants.dart';
 import '../../../../core/services/auth_service.dart';
 import '../../../../core/services/storage_service.dart';
@@ -137,20 +138,20 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24.0),
+              padding: EdgeInsets.all(5.w),
               child: FadeTransition(
                 opacity: _fadeAnimation,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _buildLogo(),
-                    const SizedBox(height: 40),
-                    // _buildWelcomeText(),
-                    const SizedBox(height: 40),
+                    SizedBox(height: 3.h),
+                    _buildWelcomeText(),
+                    SizedBox(height: 4.h),
                     _buildLoginForm(),
-                    const SizedBox(height: 24),
+                    SizedBox(height: 3.h),
                     _buildLoginButton(),
-                    const SizedBox(height: 20),
+                    SizedBox(height: 1.5.h),
                     _buildForgotPassword(),
                   ],
                 ),
@@ -163,14 +164,15 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
   }
 
   Widget _buildLogo() {
+    final bool isDesktop = Device.width > 900;
     return Hero(
       tag: 'app_logo',
       child: Container(
-        width: 120,
-        height: 120,
+        width: isDesktop ? 8.w : 10.h,
+        height: isDesktop ? 8.w : 10.h,
         decoration: BoxDecoration(
           gradient: AppColors.primaryGradient,
-          borderRadius: BorderRadius.circular(30),
+          borderRadius: BorderRadius.circular(3.w),
           boxShadow: [
             BoxShadow(
               color: AppColors.primary.withValues(alpha: 0.3),
@@ -179,9 +181,9 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
             ),
           ],
         ),
-        child: const Icon(
+        child: Icon(
           Icons.restaurant_menu,
-          size: 60,
+          size: 8.w > 60 ? 60 : 8.w,
           color: AppColors.white,
         ),
       ),
@@ -191,18 +193,18 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
   Widget _buildWelcomeText() {
     return Column(
       children: [
-        const Text(
-          'Welcome Back!',
+        Text(
+          'Create Account',
           style: TextStyle(
-            fontSize: 32,
+            fontSize: 24.sp,
             fontWeight: FontWeight.bold,
             color: AppColors.textPrimary,
           ),
         ),
-        const SizedBox(height: 8),
-        const Text(
-          'Sign in to continue',
-          style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
+        SizedBox(height: 1.h),
+        Text(
+          'Join us today!',
+          style: TextStyle(fontSize: 16.sp, color: AppColors.textSecondary),
         ),
       ],
     );
@@ -224,6 +226,7 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
   }
 
   Widget _buildNameField() {
+    final bool isDesktop = Device.width > 900;
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -241,10 +244,13 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
         keyboardType: TextInputType.name,
         decoration: InputDecoration(
           labelText: 'Name',
+          labelStyle: TextStyle(fontSize: 14.sp),
           hintText: 'Enter your name',
-          prefixIcon: const Icon(
+          hintStyle: TextStyle(fontSize: 14.sp),
+          prefixIcon: Icon(
             Icons.person_outline,
             color: AppColors.primary,
+            size: 20.sp,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
@@ -252,7 +258,7 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
           ),
           filled: true,
           fillColor: AppColors.white,
-          contentPadding: const EdgeInsets.all(20),
+          contentPadding: EdgeInsets.all(isDesktop ? 1.w : 20),
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
@@ -268,6 +274,7 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
   }
 
   Widget _buildEmailField() {
+    final bool isDesktop = Device.width > 900;
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -285,10 +292,13 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
         keyboardType: TextInputType.emailAddress,
         decoration: InputDecoration(
           labelText: 'Email',
+          labelStyle: TextStyle(fontSize: 14.sp),
           hintText: 'Enter your email',
-          prefixIcon: const Icon(
+          hintStyle: TextStyle(fontSize: 14.sp),
+          prefixIcon: Icon(
             Icons.email_outlined,
             color: AppColors.primary,
+            size: 20.sp,
           ),
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
@@ -296,7 +306,7 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
           ),
           filled: true,
           fillColor: AppColors.white,
-          contentPadding: const EdgeInsets.all(20),
+          contentPadding: EdgeInsets.all(isDesktop ? 1.w : 20),
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
@@ -312,6 +322,7 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
   }
 
   Widget _buildPasswordField() {
+    final bool isDesktop = Device.width > 900;
     return Container(
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -329,14 +340,21 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
         obscureText: _obscurePassword,
         decoration: InputDecoration(
           labelText: 'Password',
+          labelStyle: TextStyle(fontSize: 14.sp),
           hintText: 'Enter your password',
-          prefixIcon: const Icon(Icons.lock_outline, color: AppColors.primary),
+          hintStyle: TextStyle(fontSize: 14.sp),
+          prefixIcon: Icon(
+            Icons.lock_outline,
+            color: AppColors.primary,
+            size: 20.sp,
+          ),
           suffixIcon: IconButton(
             icon: Icon(
               _obscurePassword
                   ? Icons.visibility_outlined
                   : Icons.visibility_off_outlined,
               color: AppColors.textSecondary,
+              size: 20.sp,
             ),
             onPressed: () {
               setState(() {
@@ -350,7 +368,7 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
           ),
           filled: true,
           fillColor: Colors.white,
-          contentPadding: const EdgeInsets.all(20),
+          contentPadding: EdgeInsets.all(isDesktop ? 1.w : 20),
         ),
         validator: (value) {
           if (value == null || value.isEmpty) {
@@ -366,9 +384,10 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
   }
 
   Widget _buildLoginButton() {
+    final bool isDesktop = Device.width > 900;
     return SizedBox(
       width: double.infinity,
-      height: 56,
+      height: isDesktop ? 6.h : 6.5.h,
       child: ElevatedButton(
         onPressed: _isLoading ? null : _handleLogin,
         style: ElevatedButton.styleFrom(
@@ -381,18 +400,18 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
           shadowColor: AppColors.primary.withValues(alpha: 0.5),
         ),
         child: _isLoading
-            ? const SizedBox(
-                height: 24,
-                width: 24,
-                child: CircularProgressIndicator(
+            ? SizedBox(
+                height: 3.h,
+                width: 3.h,
+                child: const CircularProgressIndicator(
                   strokeWidth: 2.5,
                   valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
                 ),
               )
-            : const Text(
+            : Text(
                 'Sign Up',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
                   letterSpacing: 1,
                 ),
@@ -406,11 +425,11 @@ class _SignInPageState extends State<SignInPage> with TickerProviderStateMixin {
       onPressed: () {
         // TODO: Implement forgot password
       },
-      child: const Text(
+      child: Text(
         'Forgot Password?',
         style: TextStyle(
           color: AppColors.primary,
-          fontSize: 15,
+          fontSize: 15.sp,
           fontWeight: FontWeight.w600,
         ),
       ),

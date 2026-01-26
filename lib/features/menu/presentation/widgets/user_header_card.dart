@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../core/models/user.dart';
 import '../../../../shared/theme/app_colors.dart';
 
@@ -10,8 +11,10 @@ class UserHeaderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDesktop = Device.width > 900;
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(isDesktop ? 1.5.w : 20),
       decoration: BoxDecoration(
         color: AppColors.white,
         boxShadow: [
@@ -25,15 +28,19 @@ class UserHeaderCard extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 60,
-            height: 60,
+            width: isDesktop ? 4.w : 60,
+            height: isDesktop ? 4.w : 60,
             decoration: BoxDecoration(
               gradient: AppColors.primaryGradient,
               borderRadius: BorderRadius.circular(15),
             ),
-            child: const Icon(Icons.person, color: AppColors.white, size: 30),
+            child: Icon(
+              Icons.person,
+              color: AppColors.white,
+              size: isDesktop ? 2.w : 30,
+            ),
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: isDesktop ? 1.w : 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -41,15 +48,15 @@ class UserHeaderCard extends StatelessWidget {
                 Text(
                   'Welcome Back,',
                   style: TextStyle(
-                    fontSize: 14,
+                    fontSize: isDesktop ? 12.sp : 14.sp,
                     color: AppColors.textSecondary,
                   ),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 0.5.h),
                 Text(
                   user?.name ?? 'User',
-                  style: const TextStyle(
-                    fontSize: 20,
+                  style: TextStyle(
+                    fontSize: isDesktop ? 15.sp : 18.sp,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
                   ),
@@ -59,9 +66,8 @@ class UserHeaderCard extends StatelessWidget {
           ),
           IconButton(
             onPressed: onLogout,
-            icon: const Icon(Icons.logout),
+            icon: Icon(Icons.logout, size: isDesktop ? 1.8.w : 28),
             color: AppColors.primary,
-            iconSize: 28,
           ),
         ],
       ),

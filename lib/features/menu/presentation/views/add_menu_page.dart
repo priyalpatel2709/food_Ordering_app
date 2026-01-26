@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../domain/entities/menu_entity.dart';
 import '../../presentation/viewmodels/menu_view_model.dart';
@@ -141,12 +142,15 @@ class _AddMenuPageState extends ConsumerState<AddMenuPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.menu != null ? 'Edit Menu' : 'Create Menu'),
+        title: Text(
+          widget.menu != null ? 'Edit Menu' : 'Create Menu',
+          style: TextStyle(fontSize: 18.sp),
+        ),
       ),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(4.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -157,10 +161,11 @@ class _AddMenuPageState extends ConsumerState<AddMenuPage> {
                   labelText: 'Menu Name',
                   border: OutlineInputBorder(),
                 ),
+                style: TextStyle(fontSize: 16.sp),
                 validator: (val) =>
                     val == null || val.isEmpty ? 'Required' : null,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 2.h),
               TextFormField(
                 controller: _descriptionController,
                 decoration: const InputDecoration(
@@ -168,50 +173,62 @@ class _AddMenuPageState extends ConsumerState<AddMenuPage> {
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 3,
+                style: TextStyle(fontSize: 16.sp),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 2.h),
               SwitchListTile(
-                title: const Text('Is Active'),
+                title: Text('Is Active', style: TextStyle(fontSize: 16.sp)),
                 value: _isActive,
                 onChanged: (val) => setState(() => _isActive = val),
               ),
 
-              const SizedBox(height: 24),
+              SizedBox(height: 3.h),
               _buildSectionTitle('Relations'),
               _buildCategorySelector(),
-              const SizedBox(height: 16),
+              SizedBox(height: 2.h),
               _buildItemSelector(),
-              const SizedBox(height: 16),
+              SizedBox(height: 2.h),
               _buildTaxSelector(),
-              const SizedBox(height: 16),
+              SizedBox(height: 2.h),
               _buildDiscountSelector(),
 
-              const SizedBox(height: 24),
+              SizedBox(height: 3.h),
               _buildSectionTitle('Availability'),
               _buildAvailabilityEditor(),
 
-              const SizedBox(height: 24),
+              SizedBox(height: 3.h),
               _buildSectionTitle('Meta Data'),
               _buildMetaDataEditor(),
 
-              const SizedBox(height: 32),
+              SizedBox(height: 4.h),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: _isSubmitting ? null : _submit,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    padding: EdgeInsets.symmetric(vertical: 2.h),
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
                   ),
                   child: _isSubmitting
-                      ? const CircularProgressIndicator(color: Colors.white)
+                      ? SizedBox(
+                          height: 3.h,
+                          width: 3.h,
+                          child: const CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
                       : Text(
                           widget.menu != null ? 'Update Menu' : 'Create Menu',
+                          style: TextStyle(
+                            fontSize: 17.sp,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                 ),
               ),
-              const SizedBox(height: 48),
+              SizedBox(height: 6.h),
             ],
           ),
         ),
@@ -221,10 +238,10 @@ class _AddMenuPageState extends ConsumerState<AddMenuPage> {
 
   Widget _buildSectionTitle(String title) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: 1.h),
       child: Text(
         title,
-        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+        style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
       ),
     );
   }

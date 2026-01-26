@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../domain/entities/cart_entity.dart';
 import '../../../../shared/theme/app_colors.dart';
 
@@ -9,9 +10,11 @@ class CartSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDesktop = Device.width > 900;
+
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(20),
+      margin: EdgeInsets.all(isDesktop ? 1.w : 16),
+      padding: EdgeInsets.all(isDesktop ? 1.5.w : 20),
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -40,36 +43,36 @@ class CartSummaryCard extends StatelessWidget {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: EdgeInsets.all(isDesktop ? 0.6.w : 8),
                 decoration: BoxDecoration(
                   gradient: AppColors.primaryGradient,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.receipt_long,
                   color: AppColors.white,
-                  size: 20,
+                  size: isDesktop ? 1.5.w : 20,
                 ),
               ),
-              const SizedBox(width: 12),
-              const Text(
+              SizedBox(width: 1.w),
+              Text(
                 'Order Summary',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: isDesktop ? 15.sp : 18.sp,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          SizedBox(height: 2.h),
           _buildSummaryRow(
             'Subtotal',
             '\$${summary.subtotal.toStringAsFixed(2)}',
             false,
             Icons.shopping_basket_outlined,
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 1.2.h),
           _buildSummaryRow(
             'Tax (included)',
             '\$${summary.totalTax.toStringAsFixed(2)}',
@@ -77,7 +80,7 @@ class CartSummaryCard extends StatelessWidget {
             Icons.receipt_outlined,
           ),
           if (summary.discountAmount > 0) ...[
-            const SizedBox(height: 12),
+            SizedBox(height: 1.2.h),
             _buildSummaryRow(
               'Discount',
               '-\$${summary.discountAmount.toStringAsFixed(2)}',
@@ -87,7 +90,7 @@ class CartSummaryCard extends StatelessWidget {
             ),
           ],
           Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: EdgeInsets.symmetric(vertical: 1.5.h),
             child: Container(
               height: 1,
               decoration: BoxDecoration(
@@ -119,6 +122,7 @@ class CartSummaryCard extends StatelessWidget {
     IconData icon, {
     Color? valueColor,
   }) {
+    final bool isDesktop = Device.width > 900;
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -126,14 +130,16 @@ class CartSummaryCard extends StatelessWidget {
           children: [
             Icon(
               icon,
-              size: isTotal ? 20 : 16,
+              size: isTotal
+                  ? (isDesktop ? 1.5.w : 20.sp)
+                  : (isDesktop ? 1.2.w : 16.sp),
               color: isTotal ? AppColors.primary : AppColors.textSecondary,
             ),
-            const SizedBox(width: 8),
+            SizedBox(width: 2.w),
             Text(
               label,
               style: TextStyle(
-                fontSize: isTotal ? 16 : 14,
+                fontSize: isTotal ? 16.sp : 14.sp,
                 fontWeight: isTotal ? FontWeight.bold : FontWeight.normal,
                 color: isTotal
                     ? AppColors.textPrimary
@@ -144,8 +150,8 @@ class CartSummaryCard extends StatelessWidget {
         ),
         Container(
           padding: EdgeInsets.symmetric(
-            horizontal: isTotal ? 12 : 0,
-            vertical: isTotal ? 6 : 0,
+            horizontal: isTotal ? (isDesktop ? 1.w : 12) : 0,
+            vertical: isTotal ? (isDesktop ? 0.4.h : 6) : 0,
           ),
           decoration: isTotal
               ? BoxDecoration(
@@ -156,7 +162,7 @@ class CartSummaryCard extends StatelessWidget {
           child: Text(
             value,
             style: TextStyle(
-              fontSize: isTotal ? 20 : 16,
+              fontSize: isTotal ? 18.sp : 15.sp,
               fontWeight: FontWeight.bold,
               color: isTotal
                   ? AppColors.white

@@ -54,4 +54,29 @@ class DineInRepositoryImpl implements DineInRepository {
   ) async {
     return await _remoteDataSource.deleteDineInOrderItem(orderId, itemId);
   }
+
+  @override
+  Future<TableEntity> createTable(String tableNumber, int capacity) async {
+    return await _remoteDataSource.createTable(tableNumber, capacity);
+  }
+
+  @override
+  Future<TableEntity> updateTable(
+    String id,
+    String tableNumber,
+    int capacity,
+    TableStatus status,
+  ) async {
+    return await _remoteDataSource.updateTable(
+      id,
+      tableNumber,
+      capacity,
+      status,
+    );
+  }
+
+  @override
+  Future<void> deleteTable(String id) async {
+    await _remoteDataSource.deleteTable(id);
+  }
 }

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../domain/entities/dine_in_order_entity.dart';
@@ -116,5 +114,52 @@ class DineInRemoteDataSource {
       '${ApiConstants.v1}${ApiConstants.orders}${ApiConstants.dineIn}/$orderId/item/$itemId',
     );
     return DineInOrderEntity.fromJson(response.data);
+  }
+
+  Future<TableEntity> createTable(String tableNumber, int capacity) async {
+    final body = {
+      'tableNumber': tableNumber,
+      'capacity': capacity,
+      'status': 'available',
+    };
+    final response = await _dioClient.post(
+      ApiConstants.v1 + ApiConstants.orders + ApiConstants.tables,
+      data: body,
+    );
+
+    final data = response.data;
+    if (data is Map && data['data'] != null) {
+      return TableEntity.fromJson(data['data']);
+    }
+    return TableEntity.fromJson(data);
+  }
+
+  Future<TableEntity> updateTable(
+    String id,
+    String tableNumber,
+    int capacity,
+    TableStatus status,
+  ) async {
+    final body = {
+      'tableNumber': tableNumber,
+      'capacity': capacity,
+      'status': status.name,
+    };
+    final response = await _dioClient.put(
+      '${ApiConstants.v1}${ApiConstants.orders}${ApiConstants.tables}/$id',
+      data: body,
+    );
+
+    final data = response.data;
+    if (data is Map && data['data'] != null) {
+      return TableEntity.fromJson(data['data']);
+    }
+    return TableEntity.fromJson(data);
+  }
+
+  Future<void> deleteTable(String id) async {
+    await _dioClient.delete(
+      '${ApiConstants.v1}${ApiConstants.orders}${ApiConstants.tables}/$id',
+    );
   }
 }

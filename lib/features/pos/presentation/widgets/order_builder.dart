@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../providers/pos_provider.dart';
 
@@ -10,12 +11,13 @@ class OrderBuilder extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(posNotifierProvider);
     final items = state.cartItems;
+    final bool isDesktop = Device.width > 900;
 
     return Column(
       children: [
         // Order Header
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(isDesktop ? 1.w : 16),
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(color: AppColors.border, width: 1),
@@ -24,10 +26,10 @@ class OrderBuilder extends ConsumerWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Current Order',
                 style: TextStyle(
-                  fontSize: 18,
+                  fontSize: isDesktop ? 15.sp : 18.sp,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
@@ -35,7 +37,7 @@ class OrderBuilder extends ConsumerWidget {
               Text(
                 '#ORD-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
                 style: TextStyle(
-                  fontSize: 12,
+                  fontSize: isDesktop ? 12.sp : 13.sp,
                   color: AppColors.textSecondary,
                   fontWeight: FontWeight.w600,
                 ),
@@ -49,118 +51,132 @@ class OrderBuilder extends ConsumerWidget {
           child: items.isEmpty
               ? _buildEmptyState()
               : ListView.separated(
-                  padding: const EdgeInsets.all(16),
+                  padding: EdgeInsets.all(isDesktop ? 1.w : 16),
                   itemCount: items.length,
                   separatorBuilder: (context, index) =>
-                      const Divider(height: 24),
+                      const Divider(height: 1),
                   itemBuilder: (context, index) {
                     final item = items[index];
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Quantity & Controls
-                        Column(
-                          children: [
-                            _buildSquareButton(
-                              icon: Icons.add,
-                              color: AppColors.primary,
-                              onTap: () => ref
-                                  .read(posNotifierProvider.notifier)
-                                  .incrementQuantity(item.id),
-                            ),
-                            const SizedBox(height: 4),
-                            Container(
-                              width: 32,
-                              height: 32,
-                              alignment: Alignment.center,
-                              child: Text(
-                                item.quantity.toString(),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            _buildSquareButton(
-                              icon: Icons.remove,
-                              color: AppColors.textSecondary,
-                              onTap: () => ref
-                                  .read(posNotifierProvider.notifier)
-                                  .decrementQuantity(item.id),
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(width: 16),
-
-                        // Item Details
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                    return Padding(
+                      padding: EdgeInsets.symmetric(vertical: 1.5.h),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Quantity & Controls
+                          Column(
                             children: [
-                              Text(
-                                item.menuItemName,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                ),
+                              _buildSquareButton(
+                                icon: Icons.add,
+                                color: AppColors.primary,
+                                isDesktop: isDesktop,
+                                onTap: () => ref
+                                    .read(posNotifierProvider.notifier)
+                                    .incrementQuantity(item.id),
                               ),
-                              const SizedBox(height: 4),
-                              if (item.selectedCustomizations.isNotEmpty)
-                                ...item.selectedCustomizations.map(
-                                  (c) => Text(
-                                    '+ ${c.name} (\$${c.price.toStringAsFixed(2)})',
-                                    style: TextStyle(
-                                      fontSize: 12,
-                                      color: AppColors.textSecondary,
-                                    ),
+                              SizedBox(height: 0.5.h),
+                              Container(
+                                width: isDesktop ? 2.w : 32,
+                                height: isDesktop ? 2.w : 32,
+                                alignment: Alignment.center,
+                                child: Text(
+                                  item.quantity.toString(),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: isDesktop ? 14.sp : 16.sp,
                                   ),
                                 ),
-                              TextButton.icon(
-                                onPressed: () {},
-                                icon: const Icon(Icons.edit_note, size: 14),
-                                label: const Text(
-                                  'Add Note',
-                                  style: TextStyle(fontSize: 12),
-                                ),
-                                style: TextButton.styleFrom(
-                                  padding: EdgeInsets.zero,
-                                  minimumSize: const Size(0, 0),
-                                  tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
-                                ),
+                              ),
+                              SizedBox(height: 0.5.h),
+                              _buildSquareButton(
+                                icon: Icons.remove,
+                                color: AppColors.textSecondary,
+                                isDesktop: isDesktop,
+                                onTap: () => ref
+                                    .read(posNotifierProvider.notifier)
+                                    .decrementQuantity(item.id),
                               ),
                             ],
                           ),
-                        ),
 
-                        // Price & Remove
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              '\$${(item.pricePerItem * item.quantity).toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 16,
-                              ),
+                          SizedBox(width: 1.w),
+
+                          // Item Details
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  item.menuItemName,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: isDesktop ? 14.sp : 15.sp,
+                                  ),
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                                SizedBox(height: 0.2.h),
+                                if (item.selectedCustomizations.isNotEmpty)
+                                  ...item.selectedCustomizations.map(
+                                    (c) => Text(
+                                      '+ ${c.name} (\$${c.price.toStringAsFixed(2)})',
+                                      style: TextStyle(
+                                        fontSize: isDesktop ? 12.sp : 13.sp,
+                                        color: AppColors.textSecondary,
+                                      ),
+                                    ),
+                                  ),
+                                TextButton.icon(
+                                  onPressed: () {},
+                                  icon: Icon(
+                                    Icons.edit_note,
+                                    size: isDesktop ? 1.2.w : 14,
+                                  ),
+                                  label: Text(
+                                    'Add Note',
+                                    style: TextStyle(
+                                      fontSize: isDesktop ? 12.sp : 13.sp,
+                                    ),
+                                  ),
+                                  style: TextButton.styleFrom(
+                                    padding: EdgeInsets.zero,
+                                    minimumSize: const Size(0, 0),
+                                    tapTargetSize:
+                                        MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                ),
+                              ],
                             ),
-                            IconButton(
-                              onPressed: () => ref
-                                  .read(posNotifierProvider.notifier)
-                                  .removeItem(item.id),
-                              icon: const Icon(
-                                Icons.delete_outline,
-                                size: 20,
-                                color: AppColors.error,
+                          ),
+
+                          SizedBox(width: 1.w),
+
+                          // Price & Remove
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                '\$${(item.pricePerItem * item.quantity).toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: isDesktop ? 14.sp : 16.sp,
+                                ),
                               ),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                            ),
-                          ],
-                        ),
-                      ],
+                              IconButton(
+                                onPressed: () => ref
+                                    .read(posNotifierProvider.notifier)
+                                    .removeItem(item.id),
+                                icon: Icon(
+                                  Icons.delete_outline,
+                                  size: isDesktop ? 1.5.w : 20,
+                                  color: AppColors.error,
+                                ),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     );
                   },
                 ),
@@ -172,18 +188,19 @@ class OrderBuilder extends ConsumerWidget {
   Widget _buildSquareButton({
     required IconData icon,
     required Color color,
+    required bool isDesktop,
     required VoidCallback onTap,
   }) {
     return InkWell(
       onTap: onTap,
       child: Container(
-        width: 30,
-        height: 30,
+        width: isDesktop ? 2.w : 30,
+        height: isDesktop ? 2.w : 30,
         decoration: BoxDecoration(
           border: Border.all(color: AppColors.border),
           borderRadius: BorderRadius.circular(4),
         ),
-        child: Icon(icon, size: 16, color: color),
+        child: Icon(icon, size: isDesktop ? 1.2.w : 16, color: color),
       ),
     );
   }
@@ -195,21 +212,22 @@ class OrderBuilder extends ConsumerWidget {
         children: [
           Icon(
             Icons.shopping_basket_outlined,
-            size: 48,
+            size: 8.w,
             color: AppColors.grey300,
           ),
           const SizedBox(height: 16),
-          const Text(
+          Text(
             'Order is empty',
             style: TextStyle(
               color: AppColors.textSecondary,
               fontWeight: FontWeight.w600,
+              fontSize: 15.sp,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Select products to start building',
-            style: TextStyle(color: AppColors.textHint, fontSize: 12),
+            style: TextStyle(color: AppColors.textHint, fontSize: 13.sp),
           ),
         ],
       ),

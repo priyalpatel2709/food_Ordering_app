@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../providers/pos_provider.dart';
 
@@ -8,106 +9,121 @@ class PosFooter extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final state = ref.watch(posNotifierProvider);
-    final hasItems = state.cartItems.isNotEmpty;
+    final bool isDesktop = Device.width > 900;
+    final bool isTablet = Device.width > 600 && Device.width <= 900;
 
-    return Container(
-      height: 90,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.white,
-        border: Border(top: BorderSide(color: AppColors.border, width: 1)),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Left Side Actions
-          _buildActionButton(
-            label: 'Hold Order',
-            icon: Icons.pause_circle_outline,
-            color: AppColors.secondary,
-            onPressed: hasItems ? () {} : null,
-          ),
-          const SizedBox(width: 12),
-          _buildActionButton(
-            label: 'Clear Cart',
-            icon: Icons.delete_sweep_outlined,
-            color: AppColors.error,
-            onPressed: hasItems
-                ? () => ref.read(posNotifierProvider.notifier).clearCart()
-                : null,
-          ),
-          const SizedBox(width: 12),
-          _buildActionButton(
-            label: 'Discount',
-            icon: Icons.local_offer_outlined,
-            color: AppColors.grey700,
-            onPressed: hasItems ? () {} : null,
-          ),
-          const SizedBox(width: 12),
-          _buildActionButton(
-            label: 'Split Bill',
-            icon: Icons.call_split,
-            color: AppColors.grey700,
-            onPressed: hasItems ? () {} : null,
-          ),
+    return Consumer(
+      builder: (context, ref, child) {
+        final state = ref.watch(posNotifierProvider);
+        final hasItems = state.cartItems.isNotEmpty;
 
-          const Spacer(),
-
-          // Primary Action: Pay Now
-          SizedBox(
-            height: double.infinity,
-            width: 280,
-            child: ElevatedButton(
-              onPressed: hasItems
-                  ? () => _showPaymentDialog(context, ref, state.summary.total)
-                  : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.success,
-                foregroundColor: AppColors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
+        return Container(
+          height: isDesktop ? 10.h : 90,
+          padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.2.h),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            border: Border(top: BorderSide(color: AppColors.border, width: 1)),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.black.withOpacity(0.05),
+                blurRadius: 4,
+                offset: const Offset(0, -2),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Icon(Icons.payments_outlined, size: 28),
-                  const SizedBox(width: 12),
-                  Column(
+            ],
+          ),
+          child: Row(
+            children: [
+              // Left Side Actions
+              _buildActionButton(
+                label: 'Hold',
+                icon: Icons.pause_circle_outline,
+                color: AppColors.secondary,
+                onPressed: hasItems ? () {} : null,
+              ),
+              SizedBox(width: 1.w),
+              _buildActionButton(
+                label: 'Clear',
+                icon: Icons.delete_sweep_outlined,
+                color: AppColors.error,
+                onPressed: hasItems
+                    ? () => ref.read(posNotifierProvider.notifier).clearCart()
+                    : null,
+              ),
+              SizedBox(width: 1.w),
+              _buildActionButton(
+                label: 'Discount',
+                icon: Icons.local_offer_outlined,
+                color: AppColors.grey700,
+                onPressed: hasItems ? () {} : null,
+              ),
+              SizedBox(width: 1.w),
+              if (isDesktop || isTablet)
+                _buildActionButton(
+                  label: 'Split',
+                  icon: Icons.call_split,
+                  color: AppColors.grey700,
+                  onPressed: hasItems ? () {} : null,
+                ),
+
+              const Spacer(),
+
+              // Primary Action: Pay Now
+              SizedBox(
+                height: double.infinity,
+                width: isDesktop ? 15.w : 220,
+                child: ElevatedButton(
+                  onPressed: hasItems
+                      ? () => _showPaymentDialog(
+                          context,
+                          ref,
+                          state.summary.total,
+                        )
+                      : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.success,
+                    foregroundColor: AppColors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'PAY NOW',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          letterSpacing: 1,
-                        ),
-                      ),
-                      Text(
-                        'Total: \$${state.summary.total.toStringAsFixed(2)}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: AppColors.white.withOpacity(0.9),
+                      Icon(Icons.payments_outlined, size: isDesktop ? 2.w : 24),
+                      SizedBox(width: 0.8.w),
+                      Flexible(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'PAY NOW',
+                              style: TextStyle(
+                                fontSize: isDesktop ? 15.sp : 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: 1,
+                              ),
+                            ),
+                            Text(
+                              'Total: \$${state.summary.total.toStringAsFixed(2)}',
+                              style: TextStyle(
+                                fontSize: isDesktop ? 12.sp : 11,
+                                color: AppColors.white.withOpacity(0.9),
+                              ),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -117,9 +133,10 @@ class PosFooter extends ConsumerWidget {
     required Color color,
     VoidCallback? onPressed,
   }) {
+    final bool isDesktop = Device.width > 900;
     return SizedBox(
       height: double.infinity,
-      width: 110,
+      width: isDesktop ? 7.w : 80,
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
@@ -127,7 +144,7 @@ class PosFooter extends ConsumerWidget {
             color: onPressed != null ? color : AppColors.grey300,
           ),
           foregroundColor: color,
-          padding: const EdgeInsets.symmetric(vertical: 8),
+          padding: EdgeInsets.symmetric(vertical: 0.5.h, horizontal: 0.5.w),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -140,16 +157,19 @@ class PosFooter extends ConsumerWidget {
           children: [
             Icon(
               icon,
-              size: 24,
+              size: isDesktop ? 1.5.w : 20,
               color: onPressed != null ? color : AppColors.grey400,
             ),
-            const SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.bold,
-                color: onPressed != null ? color : AppColors.grey500,
+            SizedBox(height: 0.2.h),
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: isDesktop ? 12.sp : 10,
+                  fontWeight: FontWeight.bold,
+                  color: onPressed != null ? color : AppColors.grey500,
+                ),
               ),
             ),
           ],
@@ -184,34 +204,32 @@ class PaymentDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDesktop = Device.width > 900;
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
-        width: 500,
-        padding: const EdgeInsets.all(32),
+        width: isDesktop ? 30.w : 400,
+        padding: EdgeInsets.all(isDesktop ? 2.w : 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Select Payment Method',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 0.5.h),
             Text(
               'Amount Payable: \$${totalAmount.toStringAsFixed(2)}',
-              style: const TextStyle(
-                fontSize: 16,
-                color: AppColors.textSecondary,
-              ),
+              style: TextStyle(fontSize: 15.sp, color: AppColors.textSecondary),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: 3.h),
 
             GridView.count(
               shrinkWrap: true,
               crossAxisCount: 2,
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 2.5,
+              mainAxisSpacing: 1.5.h,
+              crossAxisSpacing: 1.5.w,
+              childAspectRatio: 2.8,
               children: [
                 _buildPaymentOption(
                   Icons.money,
@@ -227,37 +245,38 @@ class PaymentDialog extends StatelessWidget {
                 ),
                 _buildPaymentOption(
                   Icons.qr_code,
-                  'UPI / Wallet',
+                  'UPI',
                   AppColors.secondary,
                   onConfirm,
                 ),
                 _buildPaymentOption(
                   Icons.call_split,
-                  'Split Pay',
+                  'Split',
                   AppColors.grey700,
                   onConfirm,
                 ),
               ],
             ),
 
-            const SizedBox(height: 32),
+            SizedBox(height: 3.h),
 
             SizedBox(
               width: double.infinity,
-              height: 54,
+              height: 6.h,
               child: ElevatedButton(
                 onPressed: () => Navigator.pop(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.grey700,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: const Text(
+                child: Text(
                   'CANCEL',
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    fontSize: 15.sp,
                   ),
                 ),
               ),
@@ -274,6 +293,7 @@ class PaymentDialog extends StatelessWidget {
     Color color,
     VoidCallback onTap,
   ) {
+    final bool isDesktop = Device.width > 900;
     return InkWell(
       onTap: onTap,
       child: Container(
@@ -284,11 +304,14 @@ class PaymentDialog extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color),
-            const SizedBox(width: 12),
-            Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            Icon(icon, color: color, size: isDesktop ? 1.5.w : 20),
+            SizedBox(width: 0.8.w),
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp),
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
           ],
         ),

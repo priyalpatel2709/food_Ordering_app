@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../core/constants/route_constants.dart';
 import '../../../../core/services/storage_service.dart';
 import '../../../../shared/theme/app_colors.dart';
@@ -73,6 +74,7 @@ class _CartPageState extends ConsumerState<CartPage> {
           SnackBar(
             content: Text(
               'Order placed successfully! Order ID: ${next.order.id}',
+              style: TextStyle(fontSize: 14.sp),
             ),
             duration: const Duration(seconds: 3),
             behavior: SnackBarBehavior.floating,
@@ -80,8 +82,12 @@ class _CartPageState extends ConsumerState<CartPage> {
           ),
         );
 
-        // Navigate back to menu
-        // context.pop();
+        // Redirect staff back to dashboard, customers stay/go to home
+        final storageService = StorageService();
+        final user = storageService.getUser();
+        if (user != null && user.role != 'customer') {
+          context.go(RouteConstants.staffHome);
+        }
       } else if (next is OrderError) {
         setState(() {
           _isProcessingCheckout = false;
@@ -90,7 +96,7 @@ class _CartPageState extends ConsumerState<CartPage> {
         // Show error message
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(next.message),
+            content: Text(next.message, style: TextStyle(fontSize: 14.sp)),
             duration: const Duration(seconds: 3),
             behavior: SnackBarBehavior.floating,
             backgroundColor: AppColors.error,
@@ -99,23 +105,41 @@ class _CartPageState extends ConsumerState<CartPage> {
       }
     });
 
+    final bool isDesktop = Device.width > 900;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           'My Cart',
           style: TextStyle(
             fontWeight: FontWeight.bold,
+            fontSize: isDesktop ? 15.sp : 18.sp,
             color: AppColors.textPrimary,
           ),
         ),
         backgroundColor: AppColors.white,
         elevation: 0,
+        leading: isDesktop
+            ? null
+            : IconButton(
+                icon: Icon(
+                  Icons.arrow_back,
+                  color: AppColors.textPrimary,
+                  size: 6.w,
+                ),
+                onPressed: () => context.pop(),
+              ),
         actions: [
           if (cartState is CartLoaded && cartState.isNotEmpty)
             IconButton(
-              icon: const Icon(Icons.delete_outline, color: AppColors.error),
+              icon: Icon(
+                Icons.delete_outline,
+                color: AppColors.error,
+                size: isDesktop ? 1.5.w : 6.w,
+              ),
               onPressed: () => _showClearCartDialog(context, ref),
             ),
+          if (isDesktop) SizedBox(width: 1.w),
         ],
       ),
       body: Container(
@@ -132,12 +156,13 @@ class _CartPageState extends ConsumerState<CartPage> {
         ),
         child: _buildContent(context, ref, cartState, discountedSummary),
       ),
-      bottomNavigationBar:
-          cartState is CartLoaded &&
-              cartState.isNotEmpty &&
-              discountedSummary != null
-          ? _buildCheckoutButton(context, ref, discountedSummary)
-          : null,
+      bottomNavigationBar: isDesktop
+          ? null
+          : (cartState is CartLoaded &&
+                    cartState.isNotEmpty &&
+                    discountedSummary != null
+                ? _buildCheckoutButton(context, ref, discountedSummary)
+                : null),
     );
   }
 
@@ -159,60 +184,134 @@ class _CartPageState extends ConsumerState<CartPage> {
     CartState state,
     CartSummary? discountedSummary,
   ) {
-    return Column(
-      children: [
-        _buildDineInBanner(ref),
-        Expanded(
-          child: switch (state) {
-            CartEmpty() => const EmptyCartWidget(),
-            CartLoaded(:final summary) => SingleChildScrollView(
+    final bool isDesktop = Device.width > 900;
+
+    if (state is CartEmpty) {
+      return const EmptyCartWidget();
+    }
+
+    if (state is CartLoaded) {
+      if (isDesktop) {
+        return Column(
+          children: [
+            _buildDineInBanner(ref),
+            Expanded(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Cart Items List
+                  Expanded(
+                    flex: 6,
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.all(2.w),
+                      child: Column(
+                        children: [
+                          ...state.summary.items.map(
+                            (item) => _buildCartItem(context, ref, item),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Sidebar: Summary & Checkout
+                  Container(
+                    width: 30.w,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border(
+                        left: BorderSide(color: Colors.grey.shade200),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.02),
+                          blurRadius: 10,
+                          offset: const Offset(-5, 0),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Expanded(
+                          child: SingleChildScrollView(
+                            padding: EdgeInsets.all(1.5.w),
+                            child: Column(
+                              children: [
+                                if (ref.watch(dineInSessionProvider) == null)
+                                  _buildDiscountSection(
+                                    context,
+                                    ref,
+                                    state.summary,
+                                  ),
+                                if (discountedSummary != null)
+                                  CartSummaryCard(summary: discountedSummary),
+                              ],
+                            ),
+                          ),
+                        ),
+                        if (discountedSummary != null)
+                          _buildCheckoutButton(context, ref, discountedSummary),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      }
+
+      return Column(
+        children: [
+          _buildDineInBanner(ref),
+          Expanded(
+            child: SingleChildScrollView(
+              padding: EdgeInsets.symmetric(vertical: 2.h),
               child: Column(
                 children: [
-                  // Cart items list
-                  ...summary.items.map((item) {
-                    return CartItemCard(
-                      item: item,
-                      onIncrement: () {
-                        ref
-                            .read(cartNotifierProvider.notifier)
-                            .incrementQuantity(item.id);
-                      },
-                      onDecrement: () {
-                        ref
-                            .read(cartNotifierProvider.notifier)
-                            .decrementQuantity(item.id);
-                      },
-                      onRemove: () {
-                        ref
-                            .read(cartNotifierProvider.notifier)
-                            .removeItem(item.id);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              '${item.menuItemName} removed from cart',
-                            ),
-                            duration: const Duration(seconds: 2),
-                            behavior: SnackBarBehavior.floating,
-                          ),
-                        );
-                      },
-                    );
-                  }),
-
-                  // Discount section - Only show for pickup/delivery (not dine-in)
-                  // For dine-in, discounts are applied at table payment
+                  ...state.summary.items.map(
+                    (item) => _buildCartItem(context, ref, item),
+                  ),
                   if (ref.watch(dineInSessionProvider) == null)
-                    _buildDiscountSection(context, ref, summary),
-
-                  // Summary card appears after all items
+                    _buildDiscountSection(context, ref, state.summary),
                   if (discountedSummary != null)
                     CartSummaryCard(summary: discountedSummary),
                 ],
               ),
             ),
-          },
-        ),
-      ],
+          ),
+        ],
+      );
+    }
+
+    return const SizedBox.shrink();
+  }
+
+  Widget _buildCartItem(
+    BuildContext context,
+    WidgetRef ref,
+    CartItemEntity item,
+  ) {
+    return CartItemCard(
+      item: item,
+      onIncrement: () {
+        ref.read(cartNotifierProvider.notifier).incrementQuantity(item.id);
+      },
+      onDecrement: () {
+        ref.read(cartNotifierProvider.notifier).decrementQuantity(item.id);
+      },
+      onRemove: () {
+        ref.read(cartNotifierProvider.notifier).removeItem(item.id);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              '${item.menuItemName} removed from cart',
+              style: TextStyle(fontSize: Device.width > 900 ? 11.sp : 14.sp),
+            ),
+            duration: const Duration(seconds: 2),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      },
     );
   }
 
@@ -220,24 +319,30 @@ class _CartPageState extends ConsumerState<CartPage> {
     final session = ref.watch(dineInSessionProvider);
     if (session == null) return const SizedBox.shrink();
 
+    final bool isDesktop = Device.width > 900;
+
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 2.w : 4.w,
+        vertical: isDesktop ? 0.8.h : 1.h,
+      ),
       color: AppColors.primary.withOpacity(0.1),
       child: Row(
         children: [
-          const Icon(
+          Icon(
             Icons.table_restaurant,
             color: AppColors.primary,
-            size: 20,
+            size: isDesktop ? 1.5.w : 5.w,
           ),
-          const SizedBox(width: 8),
+          SizedBox(width: 2.w),
           Expanded(
             child: Text(
               'Ordering for Table ${session.tableNumber}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,
+                fontSize: isDesktop ? 12.sp : 15.sp,
               ),
             ),
           ),
@@ -245,7 +350,10 @@ class _CartPageState extends ConsumerState<CartPage> {
             onPressed: () {
               ref.read(dineInSessionProvider.notifier).state = null;
             },
-            child: const Text('Cancel'),
+            child: Text(
+              'Cancel',
+              style: TextStyle(fontSize: isDesktop ? 11.sp : 14.sp),
+            ),
           ),
         ],
       ),
@@ -257,17 +365,24 @@ class _CartPageState extends ConsumerState<CartPage> {
     WidgetRef ref,
     CartSummary summary,
   ) {
+    final bool isDesktop = Device.width > 900;
+
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(isDesktop ? 1.w : 4.w),
       decoration: BoxDecoration(
         color: AppColors.white,
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.shadowLight,
-            blurRadius: 10,
-            offset: const Offset(0, -5),
-          ),
-        ],
+        border: isDesktop
+            ? Border(top: BorderSide(color: Colors.grey.shade200))
+            : null,
+        boxShadow: isDesktop
+            ? null
+            : [
+                BoxShadow(
+                  color: AppColors.shadowLight,
+                  blurRadius: 10,
+                  offset: const Offset(0, -5),
+                ),
+              ],
       ),
       child: SafeArea(
         child: ElevatedButton(
@@ -276,17 +391,18 @@ class _CartPageState extends ConsumerState<CartPage> {
               : () => _handleCheckout(context, ref, summary),
           style: ElevatedButton.styleFrom(
             backgroundColor: AppColors.primary,
-            padding: const EdgeInsets.symmetric(vertical: 16),
+            padding: EdgeInsets.symmetric(vertical: isDesktop ? 1.5.h : 2.h),
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(12),
             ),
             disabledBackgroundColor: AppColors.grey300,
+            elevation: isDesktop ? 0 : 2,
           ),
           child: _isProcessingCheckout
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
+              ? SizedBox(
+                  height: isDesktop ? 2.h : 3.h,
+                  width: isDesktop ? 2.h : 3.h,
+                  child: const CircularProgressIndicator(
                     strokeWidth: 2,
                     valueColor: AlwaysStoppedAnimation<Color>(AppColors.white),
                   ),
@@ -294,14 +410,21 @@ class _CartPageState extends ConsumerState<CartPage> {
               : Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.shopping_bag, color: AppColors.white),
-                    const SizedBox(width: 8),
-                    Text(
-                      _getCheckoutButtonText(ref, summary),
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.white,
+                    Icon(
+                      Icons.shopping_bag,
+                      color: AppColors.white,
+                      size: isDesktop ? 1.2.w : 5.w,
+                    ),
+                    SizedBox(width: 2.w),
+                    Flexible(
+                      child: Text(
+                        _getCheckoutButtonText(ref, summary),
+                        style: TextStyle(
+                          fontSize: isDesktop ? 12.sp : 16.sp,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.white,
+                        ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ],
@@ -327,33 +450,29 @@ class _CartPageState extends ConsumerState<CartPage> {
       _isProcessingCheckout = true;
     });
 
-    // Convert cart items to order items
+    // ... existing logic for pickup/delivery checkout
     final orderItems = summary.items.map((cartItem) {
       return OrderItemRequest(
         item: cartItem.menuItemId,
         quantity: cartItem.quantity,
         price: cartItem.basePrice,
-
         customizationOptions: cartItem.selectedCustomizations
             .map((c) => DineInModifier(name: c.name, price: c.price))
             .toList(),
       );
     }).toList();
 
-    // Collect unique tax IDs from cart items
     final taxIds = summary.items
         .where((item) => item.taxRate != null)
         .map((item) => item.taxRate!.id)
         .toSet()
         .toList();
 
-    // Get selected discount
     final selectedDiscount = ref.read(selectedDiscountProvider);
     final discountIds = selectedDiscount != null
         ? <String>[selectedDiscount.id!]
         : <String>[];
 
-    // Create order request
     final orderRequest = CreateOrderRequest(
       orderItems: orderItems,
       tax: taxIds,
@@ -361,10 +480,8 @@ class _CartPageState extends ConsumerState<CartPage> {
       restaurantTipCharge: 0,
       deliveryCharge: 0,
       deliveryTipCharge: 0,
-      // restaurantId: _storageService.getRestaurantId() ?? '',
     );
 
-    // Call API
     ref.read(orderNotifierProvider.notifier).createOrder(orderRequest);
   }
 
@@ -386,56 +503,53 @@ class _CartPageState extends ConsumerState<CartPage> {
           name: cartItem.menuItemName,
           quantity: cartItem.quantity,
           price: cartItem.basePrice,
-
           modifiers: cartItem.selectedCustomizations
               .map((c) => DineInModifier(name: c.name, price: c.price))
               .toList(),
-          specialInstructions:
-              null, // TODO Add special instructions to cart from user input
+          specialInstructions: null,
         );
       }).toList();
 
       if (session.orderId == null) {
-        // Create new dine-in order
         await ref
             .read(createDineInOrderUseCaseProvider)
             .call(session.tableNumber, items: dineInItems);
       } else {
-        // Add items to existing order
         await ref
             .read(addItemsToDineInOrderUseCaseProvider)
             .call(session.orderId!, dineInItems);
       }
 
-      // Success
       ref.read(cartNotifierProvider.notifier).clearCart();
       ref.read(dineInSessionProvider.notifier).state = null;
       ref.invalidate(tablesProvider);
 
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Dine-In order updated successfully!'),
+          SnackBar(
+            content: Text(
+              'Dine-In order updated successfully!',
+              style: TextStyle(fontSize: 14.sp),
+            ),
             backgroundColor: AppColors.success,
           ),
         );
-        // Get user role
         final storageService = StorageService();
         final user = storageService.getUser();
-
-        if (user?.role == 'staff') {
+        if (user != null && user.role != 'customer') {
           context.go(RouteConstants.staffHome);
         } else {
-          // For customers, go back to order list or home
-          ref.read(bottomNavIndexProvider.notifier).state = 2; // Orders Tab
+          ref.read(bottomNavIndexProvider.notifier).state = 2;
           context.go(RouteConstants.home);
         }
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error: $e', style: TextStyle(fontSize: 14.sp)),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -454,9 +568,11 @@ class _CartPageState extends ConsumerState<CartPage> {
     final discountState = ref.watch(discountNotifierProvider);
     final selectedDiscount = ref.watch(selectedDiscountProvider);
 
+    final bool isDesktop = Device.width > 900;
+
     return Container(
-      margin: const EdgeInsets.all(16),
-      padding: const EdgeInsets.all(16),
+      margin: EdgeInsets.all(isDesktop ? 1.w : 4.w),
+      padding: EdgeInsets.all(isDesktop ? 1.w : 4.w),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
@@ -473,39 +589,48 @@ class _CartPageState extends ConsumerState<CartPage> {
         children: [
           Row(
             children: [
-              Icon(Icons.local_offer, color: AppColors.primary, size: 20),
-              const SizedBox(width: 8),
-              const Text(
+              Icon(
+                Icons.local_offer,
+                color: AppColors.primary,
+                size: isDesktop ? 1.5.w : 5.w,
+              ),
+              SizedBox(width: 2.w),
+              Text(
                 'Available Discounts',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: isDesktop ? 13.sp : 16.sp,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
-
-          // Discount list or loading/error state
+          SizedBox(height: 1.5.h),
           switch (discountState) {
-            DiscountLoading() => const Center(
+            DiscountLoading() => Center(
               child: Padding(
-                padding: EdgeInsets.all(8.0),
-                child: CircularProgressIndicator(),
+                padding: EdgeInsets.all(2.h),
+                child: SizedBox(
+                  height: isDesktop ? 2.h : 4.h,
+                  width: isDesktop ? 2.h : 4.h,
+                  child: const CircularProgressIndicator(strokeWidth: 2),
+                ),
               ),
             ),
             DiscountError(:final message) => Text(
               message,
-              style: const TextStyle(color: AppColors.error, fontSize: 12),
+              style: TextStyle(
+                color: AppColors.error,
+                fontSize: isDesktop ? 11.sp : 13.sp,
+              ),
             ),
             DiscountLoaded(:final discounts) =>
               discounts.isEmpty
-                  ? const Text(
+                  ? Text(
                       'No discounts available',
                       style: TextStyle(
                         color: AppColors.textSecondary,
-                        fontSize: 14,
+                        fontSize: isDesktop ? 11.sp : 14.sp,
                       ),
                     )
                   : Column(
@@ -516,7 +641,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                         );
 
                         return Container(
-                          margin: const EdgeInsets.only(bottom: 8),
+                          margin: EdgeInsets.only(bottom: 1.h),
                           decoration: BoxDecoration(
                             border: Border.all(
                               color: isSelected
@@ -532,29 +657,31 @@ class _CartPageState extends ConsumerState<CartPage> {
                           child: ListTile(
                             dense: true,
                             leading: Container(
-                              padding: const EdgeInsets.all(8),
+                              padding: EdgeInsets.all(isDesktop ? 1.w : 2.w),
                               decoration: BoxDecoration(
                                 color: AppColors.primary,
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(
+                              child: Icon(
                                 Icons.percent,
                                 color: AppColors.white,
-                                size: 20,
+                                size: isDesktop ? 1.w : 4.w,
                               ),
                             ),
                             title: Text(
                               discount.discountCode ?? '',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 14,
+                                fontSize: isDesktop ? 11.sp : 14.sp,
                               ),
                             ),
                             subtitle: Text(
                               discount.type == 'percentage'
                                   ? '${discount.value?.toInt()}% off'
                                   : '\$${discount.value?.toStringAsFixed(2)} off',
-                              style: const TextStyle(fontSize: 12),
+                              style: TextStyle(
+                                fontSize: isDesktop ? 10.sp : 13.sp,
+                              ),
                             ),
                             trailing: isSelected
                                 ? Row(
@@ -562,16 +689,17 @@ class _CartPageState extends ConsumerState<CartPage> {
                                     children: [
                                       Text(
                                         '-\$${discountAmount.toStringAsFixed(2)}',
-                                        style: const TextStyle(
+                                        style: TextStyle(
                                           color: AppColors.success,
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 14,
+                                          fontSize: isDesktop ? 11.sp : 14.sp,
                                         ),
                                       ),
-                                      const SizedBox(width: 8),
-                                      const Icon(
+                                      SizedBox(width: 1.w),
+                                      Icon(
                                         Icons.check_circle,
                                         color: AppColors.success,
+                                        size: isDesktop ? 1.w : 5.w,
                                       ),
                                     ],
                                   )
@@ -585,20 +713,19 @@ class _CartPageState extends ConsumerState<CartPage> {
                                               .state =
                                           discount;
                                     },
-                                    child: const Text('Apply'),
+                                    child: Text(
+                                      'Apply',
+                                      style: TextStyle(
+                                        fontSize: isDesktop ? 11.sp : 14.sp,
+                                      ),
+                                    ),
                                   ),
                             onTap: () {
-                              if (isSelected) {
-                                ref
-                                        .read(selectedDiscountProvider.notifier)
-                                        .state =
-                                    null;
-                              } else {
-                                ref
-                                        .read(selectedDiscountProvider.notifier)
-                                        .state =
-                                    discount;
-                              }
+                              ref
+                                  .read(selectedDiscountProvider.notifier)
+                                  .state = isSelected
+                                  ? null
+                                  : discount;
                             },
                           ),
                         );
@@ -615,15 +742,16 @@ class _CartPageState extends ConsumerState<CartPage> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Clear Cart'),
-        content: const Text(
+        title: Text('Clear Cart', style: TextStyle(fontSize: 18.sp)),
+        content: Text(
           'Are you sure you want to remove all items from your cart?',
+          style: TextStyle(fontSize: 16.sp),
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+            child: Text('Cancel', style: TextStyle(fontSize: 15.sp)),
           ),
           ElevatedButton(
             onPressed: () {
@@ -631,9 +759,12 @@ class _CartPageState extends ConsumerState<CartPage> {
               ref.read(selectedDiscountProvider.notifier).state = null;
               Navigator.of(context).pop();
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text('Cart cleared'),
-                  duration: Duration(seconds: 2),
+                SnackBar(
+                  content: Text(
+                    'Cart cleared',
+                    style: TextStyle(fontSize: 14.sp),
+                  ),
+                  duration: const Duration(seconds: 2),
                   behavior: SnackBarBehavior.floating,
                 ),
               );
@@ -644,7 +775,7 @@ class _CartPageState extends ConsumerState<CartPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text('Clear'),
+            child: Text('Clear', style: TextStyle(fontSize: 15.sp)),
           ),
         ],
       ),

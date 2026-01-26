@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../shared/theme/app_colors.dart';
 
 class EmptyCartWidget extends StatelessWidget {
@@ -7,56 +8,65 @@ class EmptyCartWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDesktop = Device.width > 900;
+
     return Center(
       child: Padding(
-        padding: const EdgeInsets.all(40),
+        padding: EdgeInsets.all(isDesktop ? 5.w : 40),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              padding: const EdgeInsets.all(40),
-              decoration: BoxDecoration(
+              padding: EdgeInsets.all(isDesktop ? 3.w : 40),
+              decoration: const BoxDecoration(
                 color: AppColors.primaryContainer,
                 shape: BoxShape.circle,
               ),
               child: Icon(
                 Icons.shopping_cart_outlined,
-                size: 80,
+                size: isDesktop ? 6.w : 80,
                 color: AppColors.primary,
               ),
             ),
-            const SizedBox(height: 32),
-            const Text(
+            SizedBox(height: 4.h),
+            Text(
               'Your cart is empty',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: isDesktop ? 18.sp : 24.sp,
                 fontWeight: FontWeight.bold,
                 color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 12),
-            const Text(
+            SizedBox(height: 1.5.h),
+            Text(
               'Add some delicious items to get started!',
-              style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
+              style: TextStyle(
+                fontSize: isDesktop ? 12.sp : 16.sp,
+                color: AppColors.textSecondary,
+              ),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: 4.h),
             ElevatedButton.icon(
               onPressed: () => context.pop(),
-              icon: const Icon(Icons.restaurant_menu, color: AppColors.white),
-              label: const Text(
+              icon: Icon(
+                Icons.restaurant_menu,
+                color: AppColors.white,
+                size: isDesktop ? 1.5.w : 20.sp,
+              ),
+              label: Text(
                 'Browse Menu',
                 style: TextStyle(
-                  fontSize: 16,
+                  fontSize: isDesktop ? 11.sp : 16.sp,
                   fontWeight: FontWeight.bold,
                   color: AppColors.white,
                 ),
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 32,
-                  vertical: 16,
+                padding: EdgeInsets.symmetric(
+                  horizontal: isDesktop ? 2.w : 32,
+                  vertical: isDesktop ? 1.5.h : 16,
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

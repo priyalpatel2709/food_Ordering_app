@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../core/constants/route_constants.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../../features/rbac/presentation/widgets/permission_guard.dart';
@@ -46,30 +47,34 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Menu Management'),
+        title: Text('Menu Management', style: TextStyle(fontSize: 18.sp)),
         backgroundColor: AppColors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: Icon(Icons.arrow_back, size: 6.w),
           onPressed: () => context.pop(),
         ),
       ),
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: EdgeInsets.all(4.w),
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: 'Search menus...',
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: Icon(Icons.search, size: 5.w),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 4.w,
+                  vertical: 1.5.h,
+                ),
               ),
               onChanged: _onSearchChanged,
+              style: TextStyle(fontSize: 16.sp),
             ),
           ),
           Expanded(
@@ -77,7 +82,10 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
               MenuInitial() ||
               MenuLoading() => const Center(child: CircularProgressIndicator()),
               MenuError(:final message) => Center(
-                child: Text('Error: $message'),
+                child: Text(
+                  'Error: $message',
+                  style: TextStyle(fontSize: 16.sp),
+                ),
               ),
               MenuLoaded(:final menus) => _buildMenuList(menus),
             },
@@ -89,7 +97,7 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
         child: FloatingActionButton(
           onPressed: () => context.push(RouteConstants.addMenu),
           backgroundColor: AppColors.primary,
-          child: const Icon(Icons.add),
+          child: Icon(Icons.add, size: 7.w),
         ),
       ),
     );
@@ -97,18 +105,20 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
 
   Widget _buildMenuList(List<MenuEntity> menus) {
     if (menus.isEmpty) {
-      return const Center(child: Text('No menus found.'));
+      return Center(
+        child: Text('No menus found.', style: TextStyle(fontSize: 16.sp)),
+      );
     }
 
     return ListView.builder(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(4.w),
       itemCount: menus.length,
       itemBuilder: (context, index) {
         final menu = menus[index];
         final isActiveNow = _isMenuCurrent(menu);
 
         return Card(
-          margin: const EdgeInsets.only(bottom: 16),
+          margin: EdgeInsets.only(bottom: 2.h),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
             side: isActiveNow
@@ -116,12 +126,18 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
                 : BorderSide.none,
           ),
           child: ListTile(
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 4.w,
+              vertical: 1.h,
+            ),
             leading: CircleAvatar(
+              radius: 6.w,
               backgroundColor: isActiveNow
                   ? Colors.green.shade100
                   : Colors.grey.shade100,
               child: Icon(
                 Icons.menu_book,
+                size: 6.w,
                 color: isActiveNow ? Colors.green : Colors.grey,
               ),
             ),
@@ -130,24 +146,27 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
                 Expanded(
                   child: Text(
                     menu.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16.sp,
+                    ),
                   ),
                 ),
                 if (isActiveNow)
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 2.w,
+                      vertical: 0.5.h,
                     ),
                     decoration: BoxDecoration(
                       color: Colors.green,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Text(
+                    child: Text(
                       'ACTIVE',
                       style: TextStyle(
                         color: Colors.white,
-                        fontSize: 10,
+                        fontSize: 12.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -157,17 +176,19 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
             subtitle: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                SizedBox(height: 0.5.h),
                 Text(
                   menu.description,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
+                  style: TextStyle(fontSize: 14.sp),
                 ),
-                const SizedBox(height: 4),
+                SizedBox(height: 1.h),
                 Text(
                   menu.isActive ? 'Enabled' : 'Disabled',
                   style: TextStyle(
                     color: menu.isActive ? Colors.green : Colors.red,
-                    fontSize: 12,
+                    fontSize: 13.sp,
                   ),
                 ),
               ],
@@ -175,7 +196,7 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
             trailing: PermissionGuard(
               permission: PermissionConstants.menuDelete,
               child: IconButton(
-                icon: const Icon(Icons.delete, color: Colors.red),
+                icon: Icon(Icons.delete, color: Colors.red, size: 6.w),
                 onPressed: () => _confirmDelete(menu.id),
               ),
             ),
@@ -192,11 +213,6 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
               // So, we can just check permission before pushing?
               // Or standard PermissionGuard usage: "If you don't have permission, the child is not shown".
               // So we can wrap the onTap logic? No.
-              // Let's assume we want to prevent navigation.
-              // Actually, simply hiding the "Edit" implication is better.
-              // Users can just view. But wait, clicking the tile opens 'AddMenuPage' with 'menu' extra, which is the Edit form.
-              // So this IS the edit button.
-              // We can wrap the onTap callback? No, PermissionGuard is a Widget.
               // We can wrap the ListTile with a Widget that conditionally enables onTap?
               // Or better, we wrap the whole ListTile in a specific way?
               // Let's try wrapping the trailing DELETE button (done).
@@ -204,8 +220,7 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
               // If we want to strictly use PermissionGuard widget, we'd have to wrap something visual.
               // Maybe we show a "View" icon if they can only READ, and the tapping opens read-only?
               // The Edit Page might handle read-only state?
-              // For now, let's wrap the entire ListTile in a PermissionCheck? No, that hides it.
-              // I will leave onTap as is for now, assuming the Edit Page will be guarded or the user shouldn't be here if they can't manage.
+              // For now, let's leave onTap as is, assuming the Edit Page will be guarded or the user shouldn't be here if they can't manage.
               // Ideally, we'd check refs permission manually.
               // But I am instructed to use PermissionGuard.
               // Let's stick to wrapping the buttons we can see.

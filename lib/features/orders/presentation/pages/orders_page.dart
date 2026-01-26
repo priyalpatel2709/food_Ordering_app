@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../order/presentation/providers/order_provider.dart';
 import '../../../order/domain/entities/order_entity.dart';
 
@@ -26,14 +27,19 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
     final ordersState = ref.watch(ordersListNotifierProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('My Orders'), elevation: 0),
+      appBar: AppBar(
+        title: Text('My Orders', style: TextStyle(fontSize: 18.sp)),
+        elevation: 0,
+      ),
       body: _buildBody(ordersState),
     );
   }
 
   Widget _buildBody(OrdersListState state) {
     return switch (state) {
-      OrdersListInitial() => const Center(child: Text('Loading orders...')),
+      OrdersListInitial() => Center(
+        child: Text('Loading orders...', style: TextStyle(fontSize: 16.sp)),
+      ),
       OrdersListLoading() => const Center(child: CircularProgressIndicator()),
       OrdersListSuccess(:final orders) =>
         orders.isEmpty ? _buildEmptyState() : _buildOrdersList(orders),
@@ -46,20 +52,24 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.receipt_long_outlined, size: 80, color: Colors.grey[400]),
-          const SizedBox(height: 16),
+          Icon(
+            Icons.receipt_long_outlined,
+            size: 20.w,
+            color: Colors.grey[400],
+          ),
+          SizedBox(height: 2.h),
           Text(
             'No orders yet',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 18.sp,
               fontWeight: FontWeight.bold,
               color: Colors.grey[600],
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 1.h),
           Text(
             'Your orders will appear here',
-            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+            style: TextStyle(fontSize: 14.sp, color: Colors.grey[500]),
           ),
         ],
       ),
@@ -71,29 +81,32 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.error_outline, size: 80, color: Colors.red[300]),
-          const SizedBox(height: 16),
+          Icon(Icons.error_outline, size: 20.w, color: Colors.red[300]),
+          SizedBox(height: 2.h),
           Text(
             'Error loading orders',
             style: TextStyle(
-              fontSize: 20,
+              fontSize: 18.sp,
               fontWeight: FontWeight.bold,
               color: Colors.grey[600],
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 1.h),
           Text(
             message,
-            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+            style: TextStyle(fontSize: 14.sp, color: Colors.grey[500]),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
+          SizedBox(height: 3.h),
           ElevatedButton.icon(
             onPressed: () {
               ref.read(ordersListNotifierProvider.notifier).getMyOrders();
             },
-            icon: const Icon(Icons.refresh),
-            label: const Text('Retry'),
+            icon: Icon(Icons.refresh, size: 5.w),
+            label: Text('Retry', style: TextStyle(fontSize: 15.sp)),
+            style: ElevatedButton.styleFrom(
+              padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.5.h),
+            ),
           ),
         ],
       ),
@@ -106,7 +119,7 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
         ref.read(ordersListNotifierProvider.notifier).getMyOrders();
       },
       child: ListView.builder(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(4.w),
         itemCount: orders.length,
         itemBuilder: (context, index) {
           final order = orders[index];
@@ -120,7 +133,7 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
     final dateFormat = DateFormat('MMM dd, yyyy • hh:mm a');
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(bottom: 2.h),
       elevation: 2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
@@ -129,7 +142,7 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
           // TODO: Navigate to order details
         },
         child: Padding(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(4.w),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -143,16 +156,16 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
                       children: [
                         Text(
                           order.orderId,
-                          style: const TextStyle(
-                            fontSize: 16,
+                          style: TextStyle(
+                            fontSize: 16.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        SizedBox(height: 0.5.h),
                         Text(
                           dateFormat.format(order.createdAt),
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             color: Colors.grey[600],
                           ),
                         ),
@@ -162,12 +175,12 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
                   _buildStatusChip(order.orderStatus),
                 ],
               ),
-              const Divider(height: 24),
+              Divider(height: 3.h),
 
               // Order items
               ...order.orderItems.map(
                 (item) => Padding(
-                  padding: const EdgeInsets.only(bottom: 8),
+                  padding: EdgeInsets.only(bottom: 1.h),
                   child: Row(
                     children: [
                       // Item image
@@ -175,20 +188,20 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
                         borderRadius: BorderRadius.circular(8),
                         child: Image.network(
                           item.item.image ?? '',
-                          width: 50,
-                          height: 50,
+                          width: 12.w,
+                          height: 12.w,
                           fit: BoxFit.cover,
                           errorBuilder: (context, error, stackTrace) {
                             return Container(
-                              width: 50,
-                              height: 50,
+                              width: 12.w,
+                              height: 12.w,
                               color: Colors.grey[300],
-                              child: const Icon(Icons.fastfood),
+                              child: Icon(Icons.fastfood, size: 6.w),
                             );
                           },
                         ),
                       ),
-                      const SizedBox(width: 12),
+                      SizedBox(width: 3.w),
 
                       // Item details
                       Expanded(
@@ -197,15 +210,15 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
                           children: [
                             Text(
                               item.item.name ?? '',
-                              style: const TextStyle(
-                                fontSize: 14,
+                              style: TextStyle(
+                                fontSize: 14.sp,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                             Text(
                               'Qty: ${item.quantity}',
                               style: TextStyle(
-                                fontSize: 12,
+                                fontSize: 12.sp,
                                 color: Colors.grey[600],
                               ),
                             ),
@@ -216,8 +229,8 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
                       // Item price
                       Text(
                         '\$${item.price.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontSize: 14,
+                        style: TextStyle(
+                          fontSize: 14.sp,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -226,7 +239,7 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
                 ),
               ),
 
-              const Divider(height: 24),
+              Divider(height: 3.h),
 
               // Order summary
               Column(
@@ -239,7 +252,7 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
                     _buildSummaryRow('Delivery', order.deliveryCharge),
                   if (order.restaurantTipCharge > 0)
                     _buildSummaryRow('Tip', order.restaurantTipCharge),
-                  const Divider(height: 16),
+                  Divider(height: 2.h),
                   _buildSummaryRow(
                     'Total',
                     order.orderFinalCharge,
@@ -248,19 +261,19 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
                 ],
               ),
 
-              const SizedBox(height: 12),
+              SizedBox(height: 1.5.h),
               Row(
                 children: [
                   Icon(
                     _getPaymentIcon(order.payment.paymentStatus),
-                    size: 16,
+                    size: 4.w,
                     color: _getPaymentColor(order.payment.paymentStatus),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 2.w),
                   Text(
                     'Payment: ${order.payment.paymentStatus.toUpperCase()}',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       fontWeight: FontWeight.w500,
                       color: _getPaymentColor(order.payment.paymentStatus),
                     ),
@@ -309,7 +322,7 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
     }
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: EdgeInsets.symmetric(horizontal: 3.w, vertical: 0.5.h),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(20),
@@ -317,7 +330,7 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
       child: Text(
         status.toUpperCase(),
         style: TextStyle(
-          fontSize: 12,
+          fontSize: 12.sp,
           fontWeight: FontWeight.bold,
           color: textColor,
         ),
@@ -327,14 +340,14 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
 
   Widget _buildSummaryRow(String label, double amount, {bool isBold = false}) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: EdgeInsets.symmetric(vertical: 0.5.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label,
             style: TextStyle(
-              fontSize: isBold ? 16 : 14,
+              fontSize: isBold ? 16.sp : 14.sp,
               fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
               color: isBold ? Colors.black : Colors.grey[700],
             ),
@@ -342,7 +355,7 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
           Text(
             '\$${amount.toStringAsFixed(2)}',
             style: TextStyle(
-              fontSize: isBold ? 16 : 14,
+              fontSize: isBold ? 16.sp : 14.sp,
               fontWeight: isBold ? FontWeight.bold : FontWeight.w600,
               color: isBold ? Colors.black : Colors.grey[900],
             ),

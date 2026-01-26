@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../core/constants/route_constants.dart';
 import '../../../../core/services/storage_service.dart';
 import '../../../../core/models/user.dart';
@@ -49,13 +50,16 @@ class _MenuPageState extends ConsumerState<MenuPage> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        title: Text('Logout', style: TextStyle(fontSize: 18.sp)),
+        content: Text(
+          'Are you sure you want to logout?',
+          style: TextStyle(fontSize: 16.sp),
+        ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text('Cancel', style: TextStyle(fontSize: 15.sp)),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
@@ -65,7 +69,7 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                 borderRadius: BorderRadius.circular(8),
               ),
             ),
-            child: const Text('Logout'),
+            child: Text('Logout', style: TextStyle(fontSize: 15.sp)),
           ),
         ],
       ),
@@ -100,22 +104,19 @@ class _MenuPageState extends ConsumerState<MenuPage> {
 
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
       color: AppColors.primary.withOpacity(0.1),
       child: Row(
         children: [
-          const Icon(
-            Icons.table_restaurant,
-            color: AppColors.primary,
-            size: 20,
-          ),
-          const SizedBox(width: 8),
+          Icon(Icons.table_restaurant, color: AppColors.primary, size: 5.w),
+          SizedBox(width: 2.w),
           Expanded(
             child: Text(
               'Ordering for Table ${session.tableNumber}',
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.bold,
                 color: AppColors.primary,
+                fontSize: 15.sp,
               ),
             ),
           ),
@@ -123,7 +124,7 @@ class _MenuPageState extends ConsumerState<MenuPage> {
             onPressed: () {
               ref.read(dineInSessionProvider.notifier).state = null;
             },
-            child: const Text('Cancel'),
+            child: Text('Cancel', style: TextStyle(fontSize: 14.sp)),
           ),
         ],
       ),
@@ -138,28 +139,35 @@ class _MenuPageState extends ConsumerState<MenuPage> {
 
     final menuState = ref.watch(menuNotifierProvider);
     final canPop = ModalRoute.of(context)?.canPop ?? false;
+    final bool isDesktop = Device.width > 900;
 
     return Scaffold(
       appBar: canPop
           ? AppBar(
-              title: const Text('Select Items'),
+              title: Text(
+                'Select Items',
+                style: TextStyle(fontSize: isDesktop ? 14.sp : 18.sp),
+              ),
               backgroundColor: AppColors.white,
               elevation: 0,
               leading: IconButton(
-                icon: const Icon(
+                icon: Icon(
                   Icons.arrow_back,
                   color: AppColors.textPrimary,
+                  size: isDesktop ? 1.5.w : 6.w,
                 ),
                 onPressed: () => context.pop(),
               ),
               actions: [
                 IconButton(
-                  icon: const Icon(
+                  icon: Icon(
                     Icons.shopping_cart,
                     color: AppColors.primary,
+                    size: isDesktop ? 1.5.w : 6.w,
                   ),
                   onPressed: () => context.push(RouteConstants.cart),
                 ),
+                SizedBox(width: isDesktop ? 1.w : 0),
               ],
             )
           : null,
@@ -190,17 +198,20 @@ class _MenuPageState extends ConsumerState<MenuPage> {
   }
 
   Widget _buildContent(MenuState state) {
+    final bool isDesktop = Device.width > 900;
     return switch (state) {
-      MenuInitial() => const Center(child: Text('Initializing...')),
-      MenuLoading() => const Center(
+      MenuInitial() => Center(
+        child: Text('Initializing...', style: TextStyle(fontSize: 16.sp)),
+      ),
+      MenuLoading() => Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
+            const CircularProgressIndicator(),
+            SizedBox(height: 2.h),
             Text(
               'Loading menu...',
-              style: TextStyle(fontSize: 16, color: AppColors.textSecondary),
+              style: TextStyle(fontSize: 16.sp, color: AppColors.textSecondary),
             ),
           ],
         ),
@@ -209,25 +220,22 @@ class _MenuPageState extends ConsumerState<MenuPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: AppColors.error),
-            const SizedBox(height: 16),
+            Icon(Icons.error_outline, size: 15.w, color: AppColors.error),
+            SizedBox(height: 2.h),
             Text(
               message,
-              style: const TextStyle(fontSize: 16, color: AppColors.error),
+              style: TextStyle(fontSize: 16.sp, color: AppColors.error),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 24),
+            SizedBox(height: 3.h),
             ElevatedButton.icon(
               onPressed: () =>
                   ref.read(menuNotifierProvider.notifier).refreshCurrentMenu(),
-              icon: const Icon(Icons.refresh),
-              label: const Text('Retry'),
+              icon: Icon(Icons.refresh, size: 5.w),
+              label: Text('Retry', style: TextStyle(fontSize: 15.sp)),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
+                padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 1.5.h),
               ),
             ),
           ],
@@ -235,11 +243,11 @@ class _MenuPageState extends ConsumerState<MenuPage> {
       ),
       MenuLoaded(:final menus) =>
         menus.isEmpty
-            ? const Center(
+            ? Center(
                 child: Text(
                   'No menu available',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: isDesktop ? 13.sp : 16.sp,
                     color: AppColors.textSecondary,
                   ),
                 ),
@@ -250,14 +258,22 @@ class _MenuPageState extends ConsumerState<MenuPage> {
                     .refreshCurrentMenu(),
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // const MenuHeader(),
-                      // const SizedBox(height: 24),
-                      ...menus.map((menu) => _buildMenuSection(menu)),
-                    ],
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktop ? 3.w : 5.w,
+                    vertical: 2.h,
+                  ),
+                  child: Center(
+                    child: Container(
+                      constraints: BoxConstraints(
+                        maxWidth: isDesktop ? 90.w : double.infinity,
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          ...menus.map((menu) => _buildMenuSection(menu)),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
               ),
@@ -270,27 +286,28 @@ class _MenuPageState extends ConsumerState<MenuPage> {
       _selectedCategoryId,
     );
 
+    final bool isDesktop = Device.width > 900;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(vertical: 16),
+          padding: EdgeInsets.symmetric(vertical: 2.h),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 menu.name,
-                style: const TextStyle(
-                  fontSize: 22,
+                style: TextStyle(
+                  fontSize: isDesktop ? 16.sp : 20.sp,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
               ),
-              const SizedBox(height: 4),
+              SizedBox(height: 0.5.h),
               Text(
                 menu.description,
-                style: const TextStyle(
-                  fontSize: 14,
+                style: TextStyle(
+                  fontSize: isDesktop ? 11.sp : 14.sp,
                   color: AppColors.textSecondary,
                 ),
               ),
@@ -302,25 +319,35 @@ class _MenuPageState extends ConsumerState<MenuPage> {
           selectedCategoryId: _selectedCategoryId,
           onCategorySelected: _handleCategorySelected,
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 2.h),
         _buildMenuItems(filteredItems),
-        const SizedBox(height: 24),
+        SizedBox(height: 3.h),
       ],
     );
   }
 
   Widget _buildMenuItems(List<MenuItemEntity> items) {
+    final bool isDesktop = Device.width > 900;
+    final bool isTablet = Device.width > 600 && Device.width <= 900;
+
     if (items.isEmpty) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(40),
+          padding: EdgeInsets.all(isDesktop ? 5.w : 40),
           child: Column(
             children: [
-              Icon(Icons.search_off, size: 64, color: AppColors.grey400),
-              const SizedBox(height: 16),
-              const Text(
+              Icon(
+                Icons.search_off,
+                size: isDesktop ? 5.w : 64,
+                color: AppColors.grey400,
+              ),
+              SizedBox(height: 2.h),
+              Text(
                 'No items found in this category',
-                style: TextStyle(fontSize: 14, color: AppColors.textSecondary),
+                style: TextStyle(
+                  fontSize: isDesktop ? 11.sp : 14.sp,
+                  color: AppColors.textSecondary,
+                ),
               ),
             ],
           ),
@@ -334,9 +361,15 @@ class _MenuPageState extends ConsumerState<MenuPage> {
         ? cartState.items
         : <CartItemEntity>[];
 
-    return ListView.builder(
+    return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: isDesktop ? 4 : (isTablet ? 2 : 1),
+        crossAxisSpacing: isDesktop ? 1.5.w : 0,
+        mainAxisSpacing: isDesktop ? 1.5.w : 0,
+        mainAxisExtent: isDesktop ? 42.h : null,
+      ),
       itemCount: items.length,
       itemBuilder: (context, index) {
         final menuItem = items[index];

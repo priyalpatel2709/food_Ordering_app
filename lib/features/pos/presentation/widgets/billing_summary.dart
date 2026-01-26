@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../providers/pos_provider.dart';
 import '../providers/pos_state.dart';
@@ -11,18 +12,22 @@ class BillingSummary extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(posNotifierProvider);
     final summary = state.summary;
+    final bool isDesktop = Device.width > 900;
 
     return Padding(
-      padding: const EdgeInsets.all(20.0),
+      padding: EdgeInsets.all(isDesktop ? 1.5.w : 4.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Order Type Selector
-          const Text(
+          Text(
             'Order Type',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: isDesktop ? 15.sp : 17.sp,
+            ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 1.5.h),
           Row(
             children: [
               _buildTypeIcon(
@@ -33,7 +38,7 @@ class BillingSummary extends ConsumerWidget {
                 'Dine-in',
                 state.orderType,
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: isDesktop ? 0.8.w : 2.w),
               _buildTypeIcon(
                 context,
                 ref,
@@ -42,7 +47,7 @@ class BillingSummary extends ConsumerWidget {
                 'Takeaway',
                 state.orderType,
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: isDesktop ? 0.8.w : 2.w),
               _buildTypeIcon(
                 context,
                 ref,
@@ -54,16 +59,19 @@ class BillingSummary extends ConsumerWidget {
             ],
           ),
 
-          const SizedBox(height: 24),
+          SizedBox(height: 3.h),
 
           // Customer Details
-          const Text(
+          Text(
             'Customer Details',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: isDesktop ? 15.sp : 17.sp,
+            ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 1.5.h),
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(isDesktop ? 1.w : 3.w),
             decoration: BoxDecoration(
               color: AppColors.white,
               borderRadius: BorderRadius.circular(12),
@@ -71,16 +79,17 @@ class BillingSummary extends ConsumerWidget {
             ),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   Icons.person_add_alt_1,
                   color: AppColors.textSecondary,
-                  size: 20,
+                  size: isDesktop ? 1.5.w : 5.w,
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: isDesktop ? 0.8.w : 3.w),
                 Expanded(
                   child: Text(
                     state.customerName ?? 'Walk-in Customer',
                     style: TextStyle(
+                      fontSize: isDesktop ? 14.sp : 15.sp,
                       color: state.customerName != null
                           ? AppColors.textPrimary
                           : AppColors.textSecondary,
@@ -88,9 +97,14 @@ class BillingSummary extends ConsumerWidget {
                           ? FontWeight.bold
                           : FontWeight.normal,
                     ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                Icon(Icons.edit, size: 16, color: AppColors.primary),
+                Icon(
+                  Icons.edit,
+                  size: isDesktop ? 1.2.w : 4.w,
+                  color: AppColors.primary,
+                ),
               ],
             ),
           ),
@@ -98,45 +112,49 @@ class BillingSummary extends ConsumerWidget {
           const Spacer(),
 
           // Calculation
-          _buildSummaryRow('Subtotal', summary.subtotal),
-          _buildSummaryRow('Tax (GST 10%)', summary.totalTax),
+          _buildSummaryRow('Subtotal', summary.subtotal, isDesktop),
+          _buildSummaryRow('Tax (GST 10%)', summary.totalTax, isDesktop),
           _buildSummaryRow(
             'Discount',
             summary.discountAmount,
+            isDesktop,
             isDiscount: true,
           ),
-          _buildSummaryRow('Service Charge', 0.00),
+          _buildSummaryRow('Service Charge', 0.00, isDesktop),
 
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Divider(thickness: 1),
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: 2.h),
+            child: const Divider(thickness: 1),
           ),
 
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
+              Text(
                 'Grand Total',
                 style: TextStyle(
-                  fontSize: 20,
+                  fontSize: isDesktop ? 16.sp : 18.sp,
                   fontWeight: FontWeight.bold,
                   color: AppColors.textPrimary,
                 ),
               ),
               Text(
                 '\$${summary.total.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 24,
+                style: TextStyle(
+                  fontSize: isDesktop ? 18.sp : 20.sp,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primary,
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 1.h),
           Text(
             '${summary.totalItems} Items selected',
-            style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+            style: TextStyle(
+              fontSize: isDesktop ? 13.sp : 14.sp,
+              color: AppColors.textSecondary,
+            ),
           ),
         ],
       ),
@@ -151,12 +169,14 @@ class BillingSummary extends ConsumerWidget {
     String label,
     OrderType currentType,
   ) {
+    final bool isDesktop = Device.width > 900;
     final isSelected = type == currentType;
+
     return Expanded(
       child: InkWell(
         onTap: () => ref.read(posNotifierProvider.notifier).setOrderType(type),
         child: Container(
-          padding: const EdgeInsets.symmetric(vertical: 12),
+          padding: EdgeInsets.symmetric(vertical: 1.5.h, horizontal: 0.5.w),
           decoration: BoxDecoration(
             color: isSelected
                 ? AppColors.primary.withOpacity(0.1)
@@ -168,21 +188,27 @@ class BillingSummary extends ConsumerWidget {
             ),
           ),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(
                 icon,
                 color: isSelected ? AppColors.primary : AppColors.textSecondary,
-                size: 20,
+                size: isDesktop ? 2.w : 6.w,
               ),
-              const SizedBox(height: 6),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 11,
-                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                  color: isSelected
-                      ? AppColors.primary
-                      : AppColors.textSecondary,
+              SizedBox(height: 0.8.h),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: isDesktop ? 13.sp : 14.sp,
+                    fontWeight: isSelected
+                        ? FontWeight.bold
+                        : FontWeight.normal,
+                    color: isSelected
+                        ? AppColors.primary
+                        : AppColors.textSecondary,
+                  ),
                 ),
               ),
             ],
@@ -194,24 +220,28 @@ class BillingSummary extends ConsumerWidget {
 
   Widget _buildSummaryRow(
     String label,
-    double amount, {
+    double amount,
+    bool isDesktop, {
     bool isDiscount = false,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
+      padding: EdgeInsets.only(bottom: 1.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Text(
             label,
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+            style: TextStyle(
+              color: AppColors.textSecondary,
+              fontSize: isDesktop ? 14.sp : 15.sp,
+            ),
           ),
           Text(
             '${isDiscount ? "-" : ""}\$${amount.toStringAsFixed(2)}',
             style: TextStyle(
               fontWeight: FontWeight.w600,
               color: isDiscount ? AppColors.error : AppColors.textPrimary,
-              fontSize: 14,
+              fontSize: isDesktop ? 14.sp : 15.sp,
             ),
           ),
         ],

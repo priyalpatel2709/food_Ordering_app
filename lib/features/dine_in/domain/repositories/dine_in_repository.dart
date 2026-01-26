@@ -21,4 +21,14 @@ abstract class DineInRepository {
     String orderId,
     String itemId,
   );
+
+  // Table CRUD
+  Future<TableEntity> createTable(String tableNumber, int capacity);
+  Future<TableEntity> updateTable(
+    String id,
+    String tableNumber,
+    int capacity,
+    TableStatus status,
+  );
+  Future<void> deleteTable(String id);
 }

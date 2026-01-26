@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../widgets/pos_header.dart';
 import '../widgets/category_selector.dart';
@@ -16,6 +17,8 @@ class PosScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(posNotifierProvider);
+    final bool isDesktop = Device.width > 900;
+    final bool isTablet = Device.width > 600 && Device.width <= 900;
 
     // Listen to order state changes
     ref.listen<OrderState>(orderNotifierProvider, (previous, next) {
@@ -51,21 +54,21 @@ class PosScreen extends ConsumerWidget {
                   Container(
                     width: double.infinity,
                     color: AppColors.error.withOpacity(0.1),
-                    padding: const EdgeInsets.all(8),
+                    padding: EdgeInsets.all(1.w),
                     child: Row(
                       children: [
-                        const Icon(
+                        Icon(
                           Icons.error_outline,
                           color: AppColors.error,
-                          size: 20,
+                          size: isDesktop ? 1.5.w : 5.w,
                         ),
-                        const SizedBox(width: 8),
+                        SizedBox(width: 1.w),
                         Expanded(
                           child: Text(
                             'Error loading data: ${state.error}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: AppColors.error,
-                              fontSize: 13,
+                              fontSize: isDesktop ? 13.sp : 14.sp,
                             ),
                           ),
                         ),
@@ -73,7 +76,10 @@ class PosScreen extends ConsumerWidget {
                           onPressed: () => ref
                               .read(posNotifierProvider.notifier)
                               .fetchProductsAndCategories(),
-                          child: const Text('Retry'),
+                          child: Text(
+                            'Retry',
+                            style: TextStyle(fontSize: 14.sp),
+                          ),
                         ),
                       ],
                     ),
@@ -86,7 +92,7 @@ class PosScreen extends ConsumerWidget {
                     children: [
                       // Left Panel: Category & Product Grid
                       Expanded(
-                        flex: 5,
+                        flex: isDesktop ? 50 : (isTablet ? 45 : 100),
                         child: Container(
                           decoration: BoxDecoration(
                             border: Border(
@@ -106,25 +112,26 @@ class PosScreen extends ConsumerWidget {
                       ),
 
                       // Center Panel: Order Builder
-                      Expanded(
-                        flex: 3,
-                        child: Container(
-                          decoration: BoxDecoration(
-                            color: AppColors.white,
-                            border: Border(
-                              right: BorderSide(
-                                color: AppColors.border,
-                                width: 1,
+                      if (!isTablet || isDesktop)
+                        Expanded(
+                          flex: isDesktop ? 28 : (isTablet ? 30 : 0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.white,
+                              border: Border(
+                                right: BorderSide(
+                                  color: AppColors.border,
+                                  width: 1,
+                                ),
                               ),
                             ),
+                            child: const OrderBuilder(),
                           ),
-                          child: const OrderBuilder(),
                         ),
-                      ),
 
                       // Right Panel: Billing Summary
                       Expanded(
-                        flex: 2,
+                        flex: isDesktop ? 22 : (isTablet ? 25 : 0),
                         child: Container(
                           color: AppColors.grey50,
                           child: const BillingSummary(),

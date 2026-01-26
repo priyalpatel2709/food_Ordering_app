@@ -67,6 +67,12 @@ class PermissionConstants {
   static const String taxUpdate = "TAX.UPDATE";
   static const String taxDelete = "TAX.DELETE";
 
+  //table
+  static const String tableCreate = "TABLE.CREATE";
+  static const String tableRead = "TABLE.READ";
+  static const String tableUpdate = "TABLE.UPDATE";
+  static const String tableDelete = "TABLE.DELETE";
+
   static const List<String> values = [
     userCreate,
     userRead,
@@ -111,6 +117,10 @@ class PermissionConstants {
     taxRead,
     taxUpdate,
     taxDelete,
+    tableCreate,
+    tableRead,
+    tableUpdate,
+    tableDelete,
   ];
 
   static const Map<String, String> modules = {

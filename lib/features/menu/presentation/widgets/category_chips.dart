@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../domain/entities/menu_entity.dart';
 import '../../../../shared/theme/app_colors.dart';
 
@@ -16,23 +17,27 @@ class CategoryChips extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDesktop = Device.width > 900;
     // Sort categories by display order
     final sortedCategories = List<CategoryEntity>.from(categories)
       ..sort((a, b) => a.displayOrder.compareTo(b.displayOrder));
 
     return SizedBox(
-      height: 50,
+      height: isDesktop ? 6.h : 6.5.h,
       child: ListView(
         scrollDirection: Axis.horizontal,
         physics: const BouncingScrollPhysics(),
         children: [
           // "All" chip
           Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: EdgeInsets.only(right: 1.w),
             child: FilterChip(
-              label: const Text(
+              label: Text(
                 'All',
-                style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                style: TextStyle(
+                  fontSize: isDesktop ? 12.sp : 14.sp,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               selected: selectedCategoryId == null,
               onSelected: (selected) {
@@ -48,20 +53,26 @@ class CategoryChips extends StatelessWidget {
                     : AppColors.textPrimary,
               ),
               checkmarkColor: AppColors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: EdgeInsets.symmetric(
+                horizontal: isDesktop ? 1.w : 12,
+                vertical: isDesktop ? 0.5.h : 8,
+              ),
               side: BorderSide.none,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
             ),
           ),
           // Category chips
           ...sortedCategories.map((category) {
             final isSelected = selectedCategoryId == category.id;
             return Padding(
-              padding: const EdgeInsets.only(right: 8),
+              padding: EdgeInsets.only(right: 1.w),
               child: FilterChip(
                 label: Text(
                   category.name,
-                  style: const TextStyle(
-                    fontSize: 13,
+                  style: TextStyle(
+                    fontSize: isDesktop ? 12.sp : 14.sp,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
@@ -79,11 +90,14 @@ class CategoryChips extends StatelessWidget {
                   color: isSelected ? AppColors.white : AppColors.textPrimary,
                 ),
                 checkmarkColor: AppColors.white,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 8,
+                padding: EdgeInsets.symmetric(
+                  horizontal: isDesktop ? 1.w : 12,
+                  vertical: isDesktop ? 0.5.h : 8,
                 ),
                 side: BorderSide.none,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
               ),
             );
           }),

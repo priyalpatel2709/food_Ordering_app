@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../menu/domain/entities/menu_entity.dart';
 import '../providers/pos_provider.dart';
@@ -11,31 +12,38 @@ class ProductGrid extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(posNotifierProvider);
     final products = state.filteredProducts;
+    final bool isDesktop = Device.width > 900;
+    final bool isTablet = Device.width > 600 && Device.width <= 900;
 
     return Column(
       children: [
         // Search Bar
         Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: EdgeInsets.all(isDesktop ? 1.w : 2.w),
           child: TextField(
             onChanged: (value) =>
                 ref.read(posNotifierProvider.notifier).setSearchQuery(value),
             decoration: InputDecoration(
               hintText: 'Search product or scan barcode...',
-              prefixIcon: const Icon(
+              prefixIcon: Icon(
                 Icons.search,
                 color: AppColors.textSecondary,
+                size: isDesktop ? 1.4.w : 22,
               ),
               suffixIcon: IconButton(
                 onPressed: () {},
-                icon: const Icon(
+                icon: Icon(
                   Icons.qr_code_scanner,
                   color: AppColors.primary,
+                  size: isDesktop ? 1.4.w : 22,
                 ),
               ),
               filled: true,
               fillColor: AppColors.grey50,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+              contentPadding: EdgeInsets.symmetric(
+                horizontal: 2.w,
+                vertical: isDesktop ? 1.h : 1.5.h,
+              ),
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(12),
                 borderSide: BorderSide(color: AppColors.border),
@@ -45,6 +53,7 @@ class ProductGrid extends ConsumerWidget {
                 borderSide: BorderSide(color: AppColors.border),
               ),
             ),
+            style: TextStyle(fontSize: isDesktop ? 12.sp : 14.sp),
           ),
         ),
 
@@ -53,12 +62,12 @@ class ProductGrid extends ConsumerWidget {
           child: products.isEmpty
               ? _buildEmptyState()
               : GridView.builder(
-                  padding: const EdgeInsets.all(16),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    childAspectRatio: 0.8,
-                    crossAxisSpacing: 16,
-                    mainAxisSpacing: 16,
+                  padding: EdgeInsets.all(isDesktop ? 1.w : 2.w),
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: isDesktop ? 4 : (isTablet ? 3 : 2),
+                    childAspectRatio: isDesktop ? 0.72 : 0.78,
+                    crossAxisSpacing: isDesktop ? 1.w : 2.w,
+                    mainAxisSpacing: isDesktop ? 1.w : 2.w,
                   ),
                   itemCount: products.length,
                   itemBuilder: (context, index) {
@@ -75,12 +84,12 @@ class ProductGrid extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search_off, size: 64, color: AppColors.grey300),
+          Icon(Icons.search_off, size: 6.w, color: AppColors.grey300),
           const SizedBox(height: 16),
           Text(
             'No products found',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16.sp,
               fontWeight: FontWeight.bold,
               color: AppColors.textSecondary,
             ),
@@ -98,6 +107,8 @@ class ProductCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final bool isDesktop = Device.width > 900;
+
     return Card(
       elevation: 0,
       clipBehavior: Clip.antiAlias,
@@ -121,9 +132,10 @@ class ProductCard extends ConsumerWidget {
                     fit: BoxFit.cover,
                     errorBuilder: (context, error, stackTrace) => Container(
                       color: AppColors.primaryContainer,
-                      child: const Icon(
+                      child: Icon(
                         Icons.restaurant,
                         color: AppColors.primary,
+                        size: isDesktop ? 2.5.w : 30,
                       ),
                     ),
                   ),
@@ -140,11 +152,11 @@ class ProductCard extends ConsumerWidget {
                           color: AppColors.error,
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: const Text(
+                        child: Text(
                           'OUT OF STOCK',
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: 10,
+                            fontSize: 9.sp,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
@@ -158,7 +170,7 @@ class ProductCard extends ConsumerWidget {
             Expanded(
               flex: 4,
               child: Padding(
-                padding: const EdgeInsets.all(12.0),
+                padding: EdgeInsets.all(isDesktop ? 0.8.w : 3.w),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -167,10 +179,11 @@ class ProductCard extends ConsumerWidget {
                       product.name,
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 14,
+                        fontSize: isDesktop ? 13.sp : 14.sp,
                         color: AppColors.textPrimary,
+                        height: 1.1,
                       ),
                     ),
                     Row(
@@ -178,21 +191,21 @@ class ProductCard extends ConsumerWidget {
                       children: [
                         Text(
                           '\$${product.price.toStringAsFixed(2)}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 16,
+                            fontSize: isDesktop ? 13.sp : 15.sp,
                             color: AppColors.primary,
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.all(4),
+                          padding: EdgeInsets.all(isDesktop ? 0.3.w : 1.w),
                           decoration: BoxDecoration(
                             color: AppColors.primary.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
+                          child: Icon(
                             Icons.add,
-                            size: 16,
+                            size: isDesktop ? 1.w : 4.w,
                             color: AppColors.primary,
                           ),
                         ),

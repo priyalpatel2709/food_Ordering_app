@@ -11,6 +11,9 @@ import '../../domain/usecases/complete_dine_in_payment_usecase.dart';
 import '../../domain/usecases/get_order_details_usecase.dart';
 import '../../domain/usecases/remove_dine_in_order_usecase.dart';
 import '../../domain/usecases/remove_dine_in_item_usecase.dart';
+import '../../domain/usecases/create_table_usecase.dart';
+import '../../domain/usecases/update_table_usecase.dart';
+import '../../domain/usecases/delete_table_usecase.dart';
 import '../../domain/entities/table_entity.dart';
 import '../../domain/entities/dine_in_order_entity.dart';
 import '../../domain/entities/dine_in_session.dart';
@@ -61,6 +64,18 @@ final removeDineInItemUseCaseProvider = Provider<RemoveDineInItemUseCase>((
   ref,
 ) {
   return RemoveDineInItemUseCase(ref.watch(dineInRepositoryProvider));
+});
+
+final createTableUseCaseProvider = Provider<CreateTableUseCase>((ref) {
+  return CreateTableUseCase(ref.watch(dineInRepositoryProvider));
+});
+
+final updateTableUseCaseProvider = Provider<UpdateTableUseCase>((ref) {
+  return UpdateTableUseCase(ref.watch(dineInRepositoryProvider));
+});
+
+final deleteTableUseCaseProvider = Provider<DeleteTableUseCase>((ref) {
+  return DeleteTableUseCase(ref.watch(dineInRepositoryProvider));
 });
 
 // Controllers/State

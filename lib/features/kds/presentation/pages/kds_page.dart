@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../providers/kds_providers.dart';
 import '../../../../features/rbac/presentation/widgets/permission_guard.dart';
@@ -61,27 +62,36 @@ class KdsPage extends ConsumerWidget {
     WidgetRef ref,
     KdsConfig config,
   ) {
+    final bool isDesktop = Device.width > 900;
     final stations = config.stations.keys.toList();
 
     if (stations.isEmpty) {
-      return const Center(child: Text('No stations configured.'));
+      return Center(
+        child: Text(
+          'No stations configured.',
+          style: TextStyle(fontSize: 16.sp),
+        ),
+      );
     }
 
     return Center(
       child: Container(
-        constraints: const BoxConstraints(maxWidth: 600),
-        padding: const EdgeInsets.all(24),
+        constraints: BoxConstraints(maxWidth: isDesktop ? 60.w : 600),
+        padding: EdgeInsets.all(isDesktop ? 2.w : 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
+            Text(
               'Select Station',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: isDesktop ? 20.sp : 24.sp,
+                fontWeight: FontWeight.bold,
+              ),
             ),
-            const SizedBox(height: 32),
+            SizedBox(height: 4.h),
             Wrap(
-              spacing: 16,
-              runSpacing: 16,
+              spacing: isDesktop ? 1.5.w : 16,
+              runSpacing: isDesktop ? 1.5.w : 16,
               alignment: WrapAlignment.center,
               children: stations.map((station) {
                 return InkWell(
@@ -90,8 +100,8 @@ class KdsPage extends ConsumerWidget {
                   },
                   borderRadius: BorderRadius.circular(16),
                   child: Container(
-                    width: 200,
-                    height: 150,
+                    width: isDesktop ? 12.w : 200,
+                    height: isDesktop ? 10.w : 150,
                     decoration: BoxDecoration(
                       color: AppColors.white,
                       borderRadius: BorderRadius.circular(16),
@@ -109,21 +119,25 @@ class KdsPage extends ConsumerWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(Icons.kitchen, size: 48, color: AppColors.primary),
-                        const SizedBox(height: 16),
+                        Icon(
+                          Icons.kitchen,
+                          size: isDesktop ? 3.w : 48.sp,
+                          color: AppColors.primary,
+                        ),
+                        SizedBox(height: 1.5.h),
                         Text(
                           station,
-                          style: const TextStyle(
-                            fontSize: 18,
+                          style: TextStyle(
+                            fontSize: isDesktop ? 13.sp : 18.sp,
                             fontWeight: FontWeight.bold,
                             color: AppColors.textPrimary,
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        SizedBox(height: 0.8.h),
                         Text(
                           '${config.stations[station]?.length ?? 0} Categories',
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: isDesktop ? 11.sp : 14.sp,
                             color: Colors.grey[600],
                           ),
                         ),
@@ -242,9 +256,11 @@ class KdsPage extends ConsumerWidget {
     List<String> workflow,
     List<String> allowedCategories,
   ) {
+    final bool isDesktop = Device.width > 900;
+
     return Container(
-      width: 320,
-      margin: const EdgeInsets.only(right: 16),
+      width: isDesktop ? 22.w : 320,
+      margin: EdgeInsets.only(right: isDesktop ? 1.w : 16),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(12),
@@ -260,7 +276,7 @@ class KdsPage extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(isDesktop ? 1.w : 16),
             decoration: BoxDecoration(
               color: _getStatusColor(stage).withOpacity(0.1),
               borderRadius: const BorderRadius.vertical(
@@ -274,14 +290,14 @@ class KdsPage extends ConsumerWidget {
                   stage.toUpperCase(),
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: isDesktop ? 14.sp : 16.sp,
                     color: _getStatusColor(stage),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 4,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 0.8.w,
+                    vertical: 0.4.h,
                   ),
                   decoration: BoxDecoration(
                     color: AppColors.white,
@@ -292,6 +308,7 @@ class KdsPage extends ConsumerWidget {
                     style: TextStyle(
                       color: _getStatusColor(stage),
                       fontWeight: FontWeight.bold,
+                      fontSize: isDesktop ? 12.sp : 14.sp,
                     ),
                   ),
                 ),
@@ -300,9 +317,10 @@ class KdsPage extends ConsumerWidget {
           ),
           Expanded(
             child: ListView.separated(
-              padding: const EdgeInsets.all(12),
+              padding: EdgeInsets.all(isDesktop ? 0.8.w : 12),
               itemCount: orders.length,
-              separatorBuilder: (ctx, i) => const SizedBox(height: 12),
+              separatorBuilder: (ctx, i) =>
+                  SizedBox(height: isDesktop ? 0.8.h : 12),
               itemBuilder: (context, index) {
                 return _OrderCard(
                   order: orders[index],
@@ -349,17 +367,10 @@ class _OrderCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final bool isDesktop = Device.width > 900;
     final timeElapsed = DateTime.now().difference(order.createdAt).inMinutes;
 
-    // Filter items to show only those in this stage AND allowed categories
-    // Actually, usually in KDS one wants to see ALL relevant items for context, but HIGHLIGHT the ones in this stage?
-    // Or just show the ones in this stage?
-    // If we only show items in 'new', and the order has 'prepared' items, the chef might get confused.
-    // Better approach: Show ALL items relevant to this Station, but clearly mark their status.
-    // BUT we are in a column for `currentStage`. Showing items for other stages might be confusing if they look actionable.
-
-    // Let's show ONLY items that belong to `allowedCategories`.
-    // And visually emphasize items that are in `currentStage`.
+    // ... (logic remains same)
 
     final stationItems = order.items.where((i) {
       return allowedCategories.any(
@@ -374,7 +385,7 @@ class _OrderCard extends ConsumerWidget {
         side: BorderSide(color: Colors.grey.shade200),
       ),
       child: Padding(
-        padding: const EdgeInsets.all(12),
+        padding: EdgeInsets.all(isDesktop ? 0.8.w : 12),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -385,15 +396,15 @@ class _OrderCard extends ConsumerWidget {
                   order.tableNumber != null
                       ? 'T-${order.tableNumber}'
                       : '#${order.orderId.substring(order.orderId.length - 4)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: 16,
+                    fontSize: isDesktop ? 13.sp : 16.sp,
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 0.6.w,
+                    vertical: 0.2.h,
                   ),
                   decoration: BoxDecoration(
                     color: timeElapsed > 15
@@ -411,15 +422,15 @@ class _OrderCard extends ConsumerWidget {
                     style: TextStyle(
                       color: timeElapsed > 15 ? Colors.red : Colors.grey[700],
                       fontWeight: FontWeight.bold,
-                      fontSize: 12,
+                      fontSize: isDesktop ? 10.sp : 12.sp,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 0.8.h),
             const Divider(height: 1),
-            const SizedBox(height: 8),
+            SizedBox(height: 0.8.h),
             ...stationItems.map((item) => _buildItemRow(context, ref, item)),
           ],
         ),
@@ -428,20 +439,21 @@ class _OrderCard extends ConsumerWidget {
   }
 
   Widget _buildItemRow(BuildContext context, WidgetRef ref, KdsOrderItem item) {
+    final bool isDesktop = Device.width > 900;
     final isCurrentStage = item.status == currentStage;
 
     return Opacity(
       opacity: isCurrentStage ? 1.0 : 0.5,
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: EdgeInsets.symmetric(vertical: 0.4.h),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
               children: [
                 Container(
-                  width: 24,
-                  height: 24,
+                  width: isDesktop ? 1.5.w : 24,
+                  height: isDesktop ? 1.5.w : 24,
                   alignment: Alignment.center,
                   decoration: BoxDecoration(
                     color: isCurrentStage
@@ -459,15 +471,16 @@ class _OrderCard extends ConsumerWidget {
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: isCurrentStage ? AppColors.primary : Colors.grey,
-                      fontSize: 12,
+                      fontSize: isDesktop ? 11.sp : 13.sp,
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                SizedBox(width: 0.8.w),
                 Expanded(
                   child: Text(
                     item.name,
                     style: TextStyle(
+                      fontSize: isDesktop ? 12.sp : 14.sp,
                       fontWeight: isCurrentStage
                           ? FontWeight.w600
                           : FontWeight.normal,

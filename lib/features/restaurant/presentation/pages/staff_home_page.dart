@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'dart:ui';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../core/constants/route_constants.dart';
 import '../../../../core/constants/permission_constants.dart';
 import '../../../../core/services/storage_service.dart';
@@ -45,6 +45,14 @@ class StaffHomePage extends ConsumerWidget {
         description: 'New billing & fast checkout',
       ),
       _DashboardItem(
+        title: 'Dine In Tables',
+        icon: Icons.table_bar_outlined,
+        color: const Color.fromARGB(255, 222, 241, 99),
+        route: RouteConstants.dineInTables,
+        permission: PermissionConstants.orderCreate,
+        description: 'New billing & fast checkout',
+      ),
+      _DashboardItem(
         title: 'Orders',
         icon: Icons.receipt_long_rounded,
         color: const Color(0xFF10B981),
@@ -53,12 +61,28 @@ class StaffHomePage extends ConsumerWidget {
         description: 'Manage & track live orders',
       ),
       _DashboardItem(
+        title: 'Tables',
+        icon: Icons.table_bar_rounded,
+        color: const Color(0xFF14B8A6),
+        route: RouteConstants.tableManagement,
+        permission: PermissionConstants.kdsView,
+        description: 'Manage dining area & layout',
+      ),
+      _DashboardItem(
         title: 'Kitchen (KDS)',
         icon: Icons.restaurant_menu_rounded,
         color: const Color(0xFFF59E0B),
         route: RouteConstants.kds,
         permission: PermissionConstants.kdsView,
         description: 'Monitor kitchen preparations',
+      ),
+      _DashboardItem(
+        title: 'Menu Management',
+        icon: Icons.menu_book_rounded,
+        color: const Color(0xFFF97316),
+        route: RouteConstants.menuManagement,
+        permission: PermissionConstants.menuRead,
+        description: 'Manage active menus & schedules',
       ),
       _DashboardItem(
         title: 'Inventory',
@@ -77,6 +101,22 @@ class StaffHomePage extends ConsumerWidget {
         description: 'Organize your menu structure',
       ),
       _DashboardItem(
+        title: 'Customizations',
+        icon: Icons.tune_rounded,
+        color: const Color(0xFF6366F1),
+        route: RouteConstants.customizationManagement,
+        permission: PermissionConstants.customizationRead,
+        description: 'Manage add-ons & extras',
+      ),
+      _DashboardItem(
+        title: 'Taxes',
+        icon: Icons.account_balance_rounded,
+        color: const Color(0xFF14B8A6),
+        route: RouteConstants.taxesManagement,
+        permission: PermissionConstants.taxRead,
+        description: 'Configure tax rates & rules',
+      ),
+      _DashboardItem(
         title: 'Reports',
         icon: Icons.analytics_rounded,
         color: const Color(0xFF3B82F6),
@@ -93,12 +133,20 @@ class StaffHomePage extends ConsumerWidget {
         description: 'Promo codes & special offers',
       ),
       _DashboardItem(
-        title: 'Staff & Roles',
-        icon: Icons.admin_panel_settings_rounded,
-        color: const Color(0xFF0F172A),
+        title: 'Users & Staff',
+        icon: Icons.people_alt_rounded,
+        color: const Color(0xFF475569),
         route: RouteConstants.userManagement,
         permission: PermissionConstants.userRead,
-        description: 'Team management & security',
+        description: 'Team member accounts',
+      ),
+      _DashboardItem(
+        title: 'Roles & Access',
+        icon: Icons.admin_panel_settings_rounded,
+        color: const Color(0xFF0F172A),
+        route: RouteConstants.roleManagement,
+        permission: PermissionConstants.roleRead,
+        description: 'RBAC & security permissions',
       ),
       _DashboardItem(
         title: 'Settings',
@@ -117,17 +165,23 @@ class StaffHomePage extends ConsumerWidget {
       return false;
     }).toList();
 
+    // Responsive grid column count and ratio
+    final bool isDesktop = Device.width > 900;
+    final bool isTablet = Device.width > 600 && Device.width <= 900;
+
+    final int crossAxisCount = isDesktop ? 5 : (isTablet ? 3 : 2);
+    final double childAspectRatio = isDesktop ? 1.2 : 1.1;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       body: Stack(
         children: [
-          // Background decorative elements
           Positioned(
-            top: -100,
-            right: -100,
+            top: -10.h,
+            right: -10.h,
             child: Container(
-              width: 300,
-              height: 300,
+              width: 30.h,
+              height: 30.h,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.primary.withOpacity(0.05),
@@ -143,39 +197,43 @@ class StaffHomePage extends ConsumerWidget {
 
                 SliverToBoxAdapter(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: isDesktop ? 3.w : 5.w,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const SizedBox(height: 16),
+                        SizedBox(height: 2.h),
                         _buildGreeting(user?.name ?? 'Admin'),
-                        const SizedBox(height: 24),
-                        _buildQuickStats(context),
-                        const SizedBox(height: 32),
-                        const Text(
+                        SizedBox(height: 3.h),
+                        Text(
                           'Business Management',
                           style: TextStyle(
-                            fontSize: 18,
+                            fontSize: 18.sp,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF1E293B),
+                            color: const Color(0xFF1E293B),
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        SizedBox(height: 1.5.h),
                       ],
                     ),
                   ),
                 ),
 
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+                  padding: EdgeInsets.fromLTRB(
+                    isDesktop ? 3.w : 5.w,
+                    0,
+                    isDesktop ? 3.w : 5.w,
+                    5.h,
+                  ),
                   sliver: SliverGrid(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          childAspectRatio: 1.1,
-                        ),
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: crossAxisCount,
+                      crossAxisSpacing: isDesktop ? 1.5.w : 3.w,
+                      mainAxisSpacing: isDesktop ? 1.5.w : 3.w,
+                      childAspectRatio: childAspectRatio,
+                    ),
                     delegate: SliverChildBuilderDelegate((context, index) {
                       final item = filteredItems[index];
                       return _ManagementCard(item: item);
@@ -195,14 +253,18 @@ class StaffHomePage extends ConsumerWidget {
     dynamic user,
     StorageService storage,
   ) {
+    final bool isDesktop = Device.width > 900;
     return SliverPadding(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: EdgeInsets.symmetric(
+        horizontal: isDesktop ? 3.w : 5.w,
+        vertical: 2.h,
+      ),
       sliver: SliverToBoxAdapter(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
-              padding: const EdgeInsets.all(8),
+              padding: EdgeInsets.all(isDesktop ? 0.8.w : 2.w),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -215,12 +277,12 @@ class StaffHomePage extends ConsumerWidget {
                 ],
               ),
               child: Image.asset(
-                'assets/images/logo.png', // Fallback to icon if asset missing
-                height: 32,
-                errorBuilder: (context, error, stackTrace) => const Icon(
+                'assets/images/logo.png',
+                height: isDesktop ? 4.h : 3.5.h,
+                errorBuilder: (context, error, stackTrace) => Icon(
                   Icons.restaurant_rounded,
                   color: AppColors.primary,
-                  size: 32,
+                  size: isDesktop ? 2.5.w : 5.w,
                 ),
               ),
             ),
@@ -230,7 +292,7 @@ class StaffHomePage extends ConsumerWidget {
                   icon: Icons.notifications_none_rounded,
                   onTap: () {},
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: isDesktop ? 1.w : 2.w),
                 _buildAppBarAction(
                   icon: Icons.logout_rounded,
                   onTap: () => _showLogoutDialog(context, storage),
@@ -249,17 +311,18 @@ class StaffHomePage extends ConsumerWidget {
     required VoidCallback onTap,
     Color color = const Color(0xFF64748B),
   }) {
+    final bool isDesktop = Device.width > 900;
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: const EdgeInsets.all(10),
+        padding: EdgeInsets.all(isDesktop ? 0.8.w : 2.5.w),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFFF1F5F9)),
         ),
-        child: Icon(icon, size: 24, color: color),
+        child: Icon(icon, size: isDesktop ? 1.5.w : 5.w, color: color),
       ),
     );
   }
@@ -275,84 +338,22 @@ class StaffHomePage extends ConsumerWidget {
       children: [
         Text(
           greeting,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Color(0xFF64748B),
+          style: TextStyle(
+            fontSize: 15.sp,
+            color: const Color(0xFF64748B),
             fontWeight: FontWeight.w500,
           ),
         ),
         Text(
           'Welcome back, $name!',
-          style: const TextStyle(
-            fontSize: 26,
+          style: TextStyle(
+            fontSize: 20.sp,
             fontWeight: FontWeight.bold,
             letterSpacing: -0.5,
-            color: Color(0xFF0F172A),
+            color: const Color(0xFF0F172A),
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildQuickStats(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: const Color(0xFF0F172A),
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: const Color(0xFF0F172A).withOpacity(0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          _buildStatItem(
-            'Today\'s Sales',
-            '\$420.50',
-            Icons.trending_up,
-            Colors.greenAccent,
-          ),
-          Container(height: 40, width: 1, color: Colors.white24),
-          _buildStatItem('Orders', '24', Icons.receipt_long, Colors.blueAccent),
-          Container(height: 40, width: 1, color: Colors.white24),
-          _buildStatItem('Active', '6', Icons.timelapse, Colors.orangeAccent),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatItem(
-    String label,
-    String value,
-    IconData icon,
-    Color color,
-  ) {
-    return Expanded(
-      child: Column(
-        children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.6),
-              fontSize: 12,
-            ),
-          ),
-        ],
-      ),
     );
   }
 
@@ -360,12 +361,16 @@ class StaffHomePage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to exit?'),
+        title: Text('Logout', style: TextStyle(fontSize: 18.sp)),
+        content: Text(
+          'Are you sure you want to exit?',
+          style: TextStyle(fontSize: 16.sp),
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text('Cancel', style: TextStyle(fontSize: 15.sp)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -378,7 +383,7 @@ class StaffHomePage extends ConsumerWidget {
               backgroundColor: const Color(0xFFEF4444),
               foregroundColor: Colors.white,
             ),
-            child: const Text('Logout'),
+            child: Text('Logout', style: TextStyle(fontSize: 15.sp)),
           ),
         ],
       ),
@@ -393,13 +398,15 @@ class _ManagementCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDesktop = Device.width > 900;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () => context.push(item.route),
         borderRadius: BorderRadius.circular(24),
         child: Container(
-          padding: const EdgeInsets.all(20),
+          padding: EdgeInsets.all(isDesktop ? 1.2.w : 3.w),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
@@ -417,36 +424,38 @@ class _ManagementCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(isDesktop ? 0.8.w : 2.5.w),
                 decoration: BoxDecoration(
                   color: item.color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Icon(item.icon, color: item.color, size: 28),
+                child: Icon(
+                  item.icon,
+                  color: item.color,
+                  size: isDesktop ? 1.8.w : 6.w,
+                ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    item.title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF1E293B),
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    item.description,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: const Color(0xFF64748B).withOpacity(0.8),
-                      height: 1.2,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+              const Spacer(),
+              Text(
+                item.title,
+                style: TextStyle(
+                  fontSize: 15.sp,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF1E293B),
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              SizedBox(height: 0.5.h),
+              Text(
+                item.description,
+                style: TextStyle(
+                  fontSize: 13.sp,
+                  color: const Color(0xFF64748B).withOpacity(0.8),
+                  height: 1.2,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
               ),
             ],
           ),

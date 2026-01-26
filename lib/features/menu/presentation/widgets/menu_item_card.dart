@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../domain/entities/menu_entity.dart';
 import '../../../cart/domain/entities/cart_entity.dart';
 import '../../../../shared/theme/app_colors.dart';
@@ -122,9 +123,14 @@ class _MenuItemCardState extends State<MenuItemCard>
     final totalPrice = _calculateTotalPrice();
     final hasCustomizations = widget.item.customizationOptions.isNotEmpty;
     final hasSelectedCustomizations = _selectedCustomizationIds.isNotEmpty;
+    final bool isDesktop = Device.width > 900;
+    final bool isTablet = Device.width > 600 && Device.width <= 900;
+    final bool useVerticalLayout = isDesktop || isTablet;
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: useVerticalLayout
+          ? EdgeInsets.zero
+          : EdgeInsets.only(bottom: 2.h),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
@@ -142,152 +148,36 @@ class _MenuItemCardState extends State<MenuItemCard>
             onTap: hasCustomizations ? _toggleExpand : null,
             borderRadius: BorderRadius.circular(16),
             child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  // Item Image
-                  Container(
-                    width: 100,
-                    height: 100,
-                    decoration: BoxDecoration(
-                      color: AppColors.grey100,
-                      borderRadius: BorderRadius.circular(12),
-                      image: widget.item.image.isNotEmpty
-                          ? DecorationImage(
-                              image: NetworkImage(widget.item.image),
-                              fit: BoxFit.cover,
-                            )
-                          : null,
-                    ),
-                    child: widget.item.image.isEmpty
-                        ? const Icon(
-                            Icons.restaurant,
-                            size: 40,
-                            color: AppColors.grey400,
-                          )
-                        : null,
-                  ),
-                  const SizedBox(width: 12),
-                  // Item Details
-                  Expanded(
-                    child: Column(
+              padding: EdgeInsets.all(isDesktop ? 1.w : 12),
+              child: useVerticalLayout
+                  ? Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                widget.item.name,
-                                style: const TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            if (!widget.item.isAvailable)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.error.withValues(alpha: 0.1),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: const Text(
-                                  'Unavailable',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.error,
-                                  ),
-                                ),
-                              ),
-                          ],
+                        _buildImage(isDesktop),
+                        SizedBox(height: 1.h),
+                        _buildDetails(
+                          isDesktop,
+                          hasCustomizations,
+                          hasSelectedCustomizations,
+                          totalPrice,
                         ),
-                        const SizedBox(height: 4),
-                        Text(
-                          widget.item.description,
-                          style: const TextStyle(
-                            fontSize: 13,
-                            color: AppColors.textSecondary,
+                      ],
+                    )
+                  : Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _buildImage(isDesktop),
+                        SizedBox(width: isDesktop ? 1.w : 12),
+                        Expanded(
+                          child: _buildDetails(
+                            isDesktop,
+                            hasCustomizations,
+                            hasSelectedCustomizations,
+                            totalPrice,
                           ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          children: [
-                            Icon(
-                              Icons.star,
-                              size: 16,
-                              color: Colors.amber[700],
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              widget.item.averageRating.toStringAsFixed(1),
-                              style: const TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(width: 12),
-                            const Icon(
-                              Icons.access_time,
-                              size: 16,
-                              color: AppColors.textSecondary,
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              '${widget.item.preparationTime} min',
-                              style: const TextStyle(
-                                fontSize: 12,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  '\$${totalPrice.toStringAsFixed(2)}',
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                                if (_selectedCustomizationIds.isNotEmpty)
-                                  Text(
-                                    'Base: \$${widget.item.price.toStringAsFixed(2)}',
-                                    style: const TextStyle(
-                                      fontSize: 10,
-                                      color: AppColors.textSecondary,
-                                    ),
-                                  ),
-                              ],
-                            ),
-                            _buildActionButtons(
-                              hasCustomizations,
-                              hasSelectedCustomizations,
-                            ),
-                          ],
                         ),
                       ],
                     ),
-                  ),
-                ],
-              ),
             ),
           ),
           // Expandable section for customization options
@@ -301,10 +191,10 @@ class _MenuItemCardState extends State<MenuItemCard>
                   children: [
                     const Divider(),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'Customization Options',
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: isDesktop ? 12.sp : 15.sp,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
                       ),
@@ -349,7 +239,7 @@ class _MenuItemCardState extends State<MenuItemCard>
                                   Text(
                                     option.name,
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      fontSize: isDesktop ? 11.sp : 14.sp,
                                       fontWeight: isSelected
                                           ? FontWeight.w600
                                           : FontWeight.normal,
@@ -363,7 +253,7 @@ class _MenuItemCardState extends State<MenuItemCard>
                               Text(
                                 '+\$${option.price.toStringAsFixed(2)}',
                                 style: TextStyle(
-                                  fontSize: 14,
+                                  fontSize: isDesktop ? 11.sp : 14.sp,
                                   fontWeight: FontWeight.w600,
                                   color: isSelected
                                       ? AppColors.primary
@@ -377,10 +267,10 @@ class _MenuItemCardState extends State<MenuItemCard>
                     }),
                     if (widget.item.allergens.isNotEmpty) ...[
                       const SizedBox(height: 12),
-                      const Text(
+                      Text(
                         'Allergens',
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: isDesktop ? 12.sp : 14.sp,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
                         ),
@@ -402,8 +292,8 @@ class _MenuItemCardState extends State<MenuItemCard>
                                 ),
                                 child: Text(
                                   allergen,
-                                  style: const TextStyle(
-                                    fontSize: 11,
+                                  style: TextStyle(
+                                    fontSize: isDesktop ? 10.sp : 11.sp,
                                     color: AppColors.error,
                                   ),
                                 ),
@@ -464,10 +354,155 @@ class _MenuItemCardState extends State<MenuItemCard>
     );
   }
 
+  Widget _buildImage(bool isDesktop) {
+    final bool useVerticalLayout = Device.width > 600;
+    return Container(
+      width: useVerticalLayout ? double.infinity : (isDesktop ? 6.w : 100),
+      height: useVerticalLayout ? 18.h : (isDesktop ? 6.w : 100),
+      decoration: BoxDecoration(
+        color: AppColors.grey100,
+        borderRadius: BorderRadius.circular(12),
+        image: widget.item.image.isNotEmpty
+            ? DecorationImage(
+                image: NetworkImage(widget.item.image),
+                fit: BoxFit.cover,
+              )
+            : null,
+      ),
+      child: widget.item.image.isEmpty
+          ? Icon(
+              Icons.restaurant,
+              size: isDesktop ? 2.w : 40,
+              color: AppColors.grey400,
+            )
+          : null,
+    );
+  }
+
+  Widget _buildDetails(
+    bool isDesktop,
+    bool hasCustomizations,
+    bool hasSelectedCustomizations,
+    double totalPrice,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                widget.item.name,
+                style: TextStyle(
+                  fontSize: isDesktop ? 14.sp : 16.sp,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            if (!widget.item.isAvailable)
+              Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: 0.8.w,
+                  vertical: 0.4.h,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  'Unavailable',
+                  style: TextStyle(
+                    fontSize: isDesktop ? 10.sp : 12.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.error,
+                  ),
+                ),
+              ),
+          ],
+        ),
+        SizedBox(height: 0.5.h),
+        Text(
+          widget.item.description,
+          style: TextStyle(
+            fontSize: isDesktop ? 12.sp : 14.sp,
+            color: AppColors.textSecondary,
+          ),
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
+        SizedBox(height: 1.h),
+        Row(
+          children: [
+            Icon(
+              Icons.star,
+              size: isDesktop ? 1.w : 16.sp,
+              color: Colors.amber[700],
+            ),
+            SizedBox(width: 0.4.w),
+            Text(
+              widget.item.averageRating.toStringAsFixed(1),
+              style: TextStyle(
+                fontSize: isDesktop ? 11.sp : 13.sp,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            SizedBox(width: 1.2.w),
+            Icon(
+              Icons.access_time,
+              size: isDesktop ? 1.w : 16.sp,
+              color: AppColors.textSecondary,
+            ),
+            SizedBox(width: 0.4.w),
+            Text(
+              '${widget.item.preparationTime} min',
+              style: TextStyle(
+                fontSize: isDesktop ? 11.sp : 13.sp,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 1.h),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '\$${totalPrice.toStringAsFixed(2)}',
+                  style: TextStyle(
+                    fontSize: isDesktop ? 15.sp : 18.sp,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
+                if (_selectedCustomizationIds.isNotEmpty)
+                  Text(
+                    'Base: \$${widget.item.price.toStringAsFixed(2)}',
+                    style: TextStyle(
+                      fontSize: isDesktop ? 10.sp : 12.sp,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+              ],
+            ),
+            _buildActionButtons(hasCustomizations, hasSelectedCustomizations),
+          ],
+        ),
+      ],
+    );
+  }
+
   Widget _buildActionButtons(
     bool hasCustomizations,
     bool hasSelectedCustomizations,
   ) {
+    final bool isDesktop = Device.width > 900;
     // If item is in cart and has no customizations, show quantity controls
     if (widget.hasItemInCart && !hasCustomizations) {
       return _buildQuantityControls();
@@ -487,10 +522,10 @@ class _MenuItemCardState extends State<MenuItemCard>
               child: Icon(
                 Icons.expand_more,
                 color: AppColors.primary,
-                size: 24,
+                size: isDesktop ? 1.5.w : 24,
               ),
             ),
-          const SizedBox(width: 8),
+          SizedBox(width: 1.w),
           _buildQuantityControls(),
         ],
       );
@@ -503,13 +538,20 @@ class _MenuItemCardState extends State<MenuItemCard>
           AnimatedRotation(
             turns: _isExpanded ? 0.5 : 0,
             duration: const Duration(milliseconds: 300),
-            child: Icon(Icons.expand_more, color: AppColors.primary, size: 24),
+            child: Icon(
+              Icons.expand_more,
+              color: AppColors.primary,
+              size: isDesktop ? 1.5.w : 24,
+            ),
           ),
-        const SizedBox(width: 8),
+        SizedBox(width: 1.w),
         InkWell(
           onTap: widget.item.isAvailable ? _handleAddToCart : null,
           child: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: EdgeInsets.symmetric(
+              horizontal: isDesktop ? 1.w : 12,
+              vertical: isDesktop ? 0.6.h : 6,
+            ),
             decoration: BoxDecoration(
               gradient: widget.item.isAvailable
                   ? AppColors.primaryGradient
@@ -521,16 +563,16 @@ class _MenuItemCardState extends State<MenuItemCard>
               children: [
                 Icon(
                   Icons.add_shopping_cart,
-                  size: 16,
+                  size: isDesktop ? 12.sp : 16.sp,
                   color: widget.item.isAvailable
                       ? AppColors.white
                       : AppColors.grey600,
                 ),
-                const SizedBox(width: 4),
+                SizedBox(width: 0.5.w),
                 Text(
                   'Add',
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: isDesktop ? 12.sp : 14.sp,
                     fontWeight: FontWeight.bold,
                     color: widget.item.isAvailable
                         ? AppColors.white
@@ -546,6 +588,7 @@ class _MenuItemCardState extends State<MenuItemCard>
   }
 
   Widget _buildQuantityControls() {
+    final bool isDesktop = Device.width > 900;
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: AppColors.primary, width: 2),
@@ -562,16 +605,20 @@ class _MenuItemCardState extends State<MenuItemCard>
               bottomLeft: Radius.circular(6),
             ),
             child: Container(
-              padding: const EdgeInsets.all(6),
-              child: const Icon(Icons.remove, size: 16, color: AppColors.white),
+              padding: EdgeInsets.all(isDesktop ? 0.6.w : 6),
+              child: Icon(
+                Icons.remove,
+                size: isDesktop ? 1.2.w : 16.sp,
+                color: AppColors.white,
+              ),
             ),
           ),
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
+            padding: EdgeInsets.symmetric(horizontal: isDesktop ? 1.w : 12),
             child: Text(
               '${widget.currentQuantity ?? 0}',
-              style: const TextStyle(
-                fontSize: 14,
+              style: TextStyle(
+                fontSize: isDesktop ? 12.sp : 14.sp,
                 fontWeight: FontWeight.bold,
                 color: AppColors.white,
               ),
@@ -584,8 +631,12 @@ class _MenuItemCardState extends State<MenuItemCard>
               bottomRight: Radius.circular(6),
             ),
             child: Container(
-              padding: const EdgeInsets.all(6),
-              child: const Icon(Icons.add, size: 16, color: AppColors.white),
+              padding: EdgeInsets.all(isDesktop ? 0.6.w : 6),
+              child: Icon(
+                Icons.add,
+                size: isDesktop ? 1.2.w : 16.sp,
+                color: AppColors.white,
+              ),
             ),
           ),
         ],

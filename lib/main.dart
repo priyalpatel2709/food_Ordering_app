@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:food_order_app/core/services/storage_service.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import 'core/di/providers.dart';
 import 'routes/app_router.dart';
 import 'shared/theme/app_theme.dart';
@@ -41,13 +42,17 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp.router(
-      title: 'Food Order App',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: ThemeMode.light,
-      routerConfig: AppRouter.router,
+    return ResponsiveSizer(
+      builder: (context, orientation, screenType) {
+        return MaterialApp.router(
+          title: 'Food Order App',
+          debugShowCheckedModeBanner: false,
+          theme: AppTheme.lightTheme,
+          darkTheme: AppTheme.darkTheme,
+          themeMode: ThemeMode.light,
+          routerConfig: AppRouter.router,
+        );
+      },
     );
   }
 }

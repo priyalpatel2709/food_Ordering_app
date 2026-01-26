@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../menu/domain/entities/menu_entity.dart';
 import '../providers/pos_provider.dart';
@@ -11,17 +12,18 @@ class CategorySelector extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(posNotifierProvider);
     final categories = state.categories;
+    final bool isDesktop = Device.width > 900;
 
     return Container(
-      height: 80,
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      height: isDesktop ? 8.h : 60,
+      padding: EdgeInsets.symmetric(vertical: 0.8.h),
       decoration: BoxDecoration(
         color: AppColors.white,
         border: Border(bottom: BorderSide(color: AppColors.border, width: 1)),
       ),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: EdgeInsets.symmetric(horizontal: isDesktop ? 1.5.w : 4.w),
         itemCount: categories.length + 1, // +1 for "All"
         itemBuilder: (context, index) {
           final isAll = index == 0;
@@ -31,7 +33,7 @@ class CategorySelector extends ConsumerWidget {
               : state.selectedCategory?.id == category?.id;
 
           return Padding(
-            padding: const EdgeInsets.only(right: 12),
+            padding: EdgeInsets.only(right: 1.w),
             child: Material(
               color: Colors.transparent,
               child: InkWell(
@@ -48,7 +50,6 @@ class CategorySelector extends ConsumerWidget {
                             displayOrder: 0,
                           ),
                         );
-                    // Actually, I'll update the selectCategory to handle null or special 'all'
                   } else if (category != null) {
                     ref
                         .read(posNotifierProvider.notifier)
@@ -57,7 +58,9 @@ class CategorySelector extends ConsumerWidget {
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: isDesktop ? 2.w : 6.w,
+                  ),
                   decoration: BoxDecoration(
                     color: isSelected ? AppColors.primary : AppColors.grey100,
                     borderRadius: BorderRadius.circular(12),
@@ -74,7 +77,7 @@ class CategorySelector extends ConsumerWidget {
                       color: isSelected
                           ? AppColors.white
                           : AppColors.textPrimary,
-                      fontSize: 14,
+                      fontSize: isDesktop ? 14.sp : 15.sp,
                     ),
                   ),
                 ),

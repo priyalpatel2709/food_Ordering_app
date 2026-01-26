@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../domain/entities/cart_entity.dart';
 import '../../../../shared/theme/app_colors.dart';
 
@@ -18,8 +19,10 @@ class CartItemCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDesktop = Device.width > 900;
+
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: EdgeInsets.only(bottom: 2.h),
       decoration: BoxDecoration(
         color: AppColors.white,
         borderRadius: BorderRadius.circular(16),
@@ -34,14 +37,14 @@ class CartItemCard extends StatelessWidget {
       child: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(isDesktop ? 1.w : 12),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Item Image
                 Container(
-                  width: 80,
-                  height: 80,
+                  width: isDesktop ? 6.w : 80,
+                  height: isDesktop ? 6.w : 80,
                   decoration: BoxDecoration(
                     color: AppColors.grey100,
                     borderRadius: BorderRadius.circular(12),
@@ -53,14 +56,14 @@ class CartItemCard extends StatelessWidget {
                         : null,
                   ),
                   child: item.menuItemImage.isEmpty
-                      ? const Icon(
+                      ? Icon(
                           Icons.restaurant,
-                          size: 32,
+                          size: isDesktop ? 2.w : 32,
                           color: AppColors.grey400,
                         )
                       : null,
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: isDesktop ? 1.w : 12),
                 // Item Details
                 Expanded(
                   child: Column(
@@ -72,8 +75,8 @@ class CartItemCard extends StatelessWidget {
                           Expanded(
                             child: Text(
                               item.menuItemName,
-                              style: const TextStyle(
-                                fontSize: 16,
+                              style: TextStyle(
+                                fontSize: isDesktop ? 14.sp : 16.sp,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.textPrimary,
                               ),
@@ -83,7 +86,10 @@ class CartItemCard extends StatelessWidget {
                           ),
                           IconButton(
                             onPressed: onRemove,
-                            icon: const Icon(Icons.close, size: 20),
+                            icon: Icon(
+                              Icons.close,
+                              size: isDesktop ? 1.2.w : 20,
+                            ),
                             color: AppColors.error,
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
@@ -91,9 +97,9 @@ class CartItemCard extends StatelessWidget {
                         ],
                       ),
                       if (item.selectedCustomizations.isNotEmpty) ...[
-                        const SizedBox(height: 6),
+                        SizedBox(height: 0.5.h),
                         Container(
-                          padding: const EdgeInsets.all(8),
+                          padding: EdgeInsets.all(isDesktop ? 0.6.w : 8),
                           decoration: BoxDecoration(
                             color: AppColors.primaryContainer.withValues(
                               alpha: 0.3,
@@ -110,31 +116,31 @@ class CartItemCard extends StatelessWidget {
                                 children: [
                                   Icon(
                                     Icons.add_circle_outline,
-                                    size: 14,
+                                    size: isDesktop ? 1.w : 14.sp,
                                     color: AppColors.primary,
                                   ),
-                                  const SizedBox(width: 4),
-                                  const Text(
+                                  SizedBox(width: 0.4.w),
+                                  Text(
                                     'Add-ons:',
                                     style: TextStyle(
-                                      fontSize: 11,
+                                      fontSize: isDesktop ? 11.sp : 13.sp,
                                       fontWeight: FontWeight.w600,
                                       color: AppColors.primary,
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 4),
+                              SizedBox(height: 0.4.h),
                               ...item.selectedCustomizations.map(
                                 (customization) => Padding(
-                                  padding: const EdgeInsets.only(
-                                    left: 18,
+                                  padding: EdgeInsets.only(
+                                    left: isDesktop ? 1.2.w : 18,
                                     top: 2,
                                   ),
                                   child: Text(
                                     '• ${customization.name} (+\$${customization.price.toStringAsFixed(2)})',
-                                    style: const TextStyle(
-                                      fontSize: 11,
+                                    style: TextStyle(
+                                      fontSize: isDesktop ? 10.sp : 12.sp,
                                       color: AppColors.textSecondary,
                                     ),
                                   ),
@@ -144,7 +150,7 @@ class CartItemCard extends StatelessWidget {
                           ),
                         ),
                       ],
-                      const SizedBox(height: 12),
+                      SizedBox(height: 1.2.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -173,22 +179,24 @@ class CartItemCard extends StatelessWidget {
                                     bottomLeft: Radius.circular(8),
                                   ),
                                   child: Container(
-                                    padding: const EdgeInsets.all(8),
-                                    child: const Icon(
+                                    padding: EdgeInsets.all(
+                                      isDesktop ? 0.6.w : 8,
+                                    ),
+                                    child: Icon(
                                       Icons.remove,
-                                      size: 16,
+                                      size: isDesktop ? 1.w : 16.sp,
                                       color: AppColors.white,
                                     ),
                                   ),
                                 ),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 12,
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: isDesktop ? 1.w : 12,
                                   ),
                                   child: Text(
                                     '${item.quantity}',
-                                    style: const TextStyle(
-                                      fontSize: 14,
+                                    style: TextStyle(
+                                      fontSize: isDesktop ? 13.sp : 15.sp,
                                       fontWeight: FontWeight.bold,
                                       color: AppColors.white,
                                     ),
@@ -201,10 +209,12 @@ class CartItemCard extends StatelessWidget {
                                     bottomRight: Radius.circular(8),
                                   ),
                                   child: Container(
-                                    padding: const EdgeInsets.all(8),
-                                    child: const Icon(
+                                    padding: EdgeInsets.all(
+                                      isDesktop ? 0.6.w : 8,
+                                    ),
+                                    child: Icon(
                                       Icons.add,
-                                      size: 16,
+                                      size: isDesktop ? 1.w : 16.sp,
                                       color: AppColors.white,
                                     ),
                                   ),
@@ -218,8 +228,8 @@ class CartItemCard extends StatelessWidget {
                             children: [
                               Text(
                                 '\$${item.totalPrice.toStringAsFixed(2)}',
-                                style: const TextStyle(
-                                  fontSize: 18,
+                                style: TextStyle(
+                                  fontSize: isDesktop ? 15.sp : 18.sp,
                                   fontWeight: FontWeight.bold,
                                   color: AppColors.primary,
                                 ),
@@ -227,8 +237,8 @@ class CartItemCard extends StatelessWidget {
                               if (item.quantity > 1)
                                 Text(
                                   '\$${item.pricePerItemWithTax.toStringAsFixed(2)} each',
-                                  style: const TextStyle(
-                                    fontSize: 11,
+                                  style: TextStyle(
+                                    fontSize: isDesktop ? 10.sp : 12.sp,
                                     color: AppColors.textSecondary,
                                   ),
                                 ),
@@ -245,7 +255,10 @@ class CartItemCard extends StatelessWidget {
           // Price breakdown
           if (item.selectedCustomizations.isNotEmpty || item.taxPerItem > 0)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              padding: EdgeInsets.symmetric(
+                horizontal: isDesktop ? 1.w : 12,
+                vertical: 0.8.h,
+              ),
               decoration: BoxDecoration(
                 color: AppColors.grey50,
                 borderRadius: const BorderRadius.only(
@@ -258,23 +271,23 @@ class CartItemCard extends StatelessWidget {
                 children: [
                   Text(
                     'Base: \$${item.basePrice.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontSize: 11,
+                    style: TextStyle(
+                      fontSize: isDesktop ? 10.sp : 12.sp,
                       color: AppColors.textSecondary,
                     ),
                   ),
                   if (item.selectedCustomizations.isNotEmpty)
                     Text(
                       'Add-ons: \$${item.selectedCustomizations.fold<double>(0, (sum, c) => sum + c.price).toStringAsFixed(2)}',
-                      style: const TextStyle(
-                        fontSize: 11,
+                      style: TextStyle(
+                        fontSize: isDesktop ? 10.sp : 12.sp,
                         color: AppColors.textSecondary,
                       ),
                     ),
                   Text(
                     'Tax: \$${item.taxPerItem.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontSize: 11,
+                    style: TextStyle(
+                      fontSize: isDesktop ? 10.sp : 12.sp,
                       color: AppColors.textSecondary,
                     ),
                   ),
