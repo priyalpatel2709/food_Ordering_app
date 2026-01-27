@@ -280,6 +280,25 @@ class _StaffOrdersPageState extends ConsumerState<StaffOrdersPage> {
                       ),
                     ],
                   ),
+                  // if (order.orderStatus.toLowerCase() == 'pending' ||
+                  //     order.orderStatus.toLowerCase() == 'confirmed')
+                    PermissionGuard(
+                      permission: PermissionConstants.orderUpdate,
+                      child: OutlinedButton(
+                        onPressed: () =>
+                            _showCancelDialog(context, ref, order.id),
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: Colors.red,
+                          side: const BorderSide(color: Colors.red),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 0,
+                          ),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        child: const Text('Cancel'),
+                      ),
+                    ),
                   if (order.payment.paymentStatus.toLowerCase() == 'paid' &&
                       order.orderStatus.toLowerCase() != 'cancelled')
                     PermissionGuard(
@@ -582,6 +601,51 @@ class _StaffOrdersPageState extends ConsumerState<StaffOrdersPage> {
                 child: const Text('Refund'),
               );
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCancelDialog(BuildContext context, WidgetRef ref, String orderId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Cancel Order'),
+        content: const Text('Are you sure you want to cancel this order?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('NO'),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await ref
+                  .read(staffOrdersListNotifierProvider.notifier)
+                  .cancelOrder(orderId);
+              if (context.mounted) {
+                if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Order cancelled successfully'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Failed to cancel order'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            child: const Text(
+              'YES, CANCEL',
+              style: TextStyle(color: Colors.red),
+            ),
           ),
         ],
       ),

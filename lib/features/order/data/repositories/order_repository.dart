@@ -28,6 +28,10 @@ class OrderRepository {
     return await _remoteDataSource.getOrderTypes();
   }
 
+  Future<void> cancelOrder(String orderId) async {
+    return await _remoteDataSource.cancelOrder(orderId);
+  }
+
   Future<void> refundOrder(String orderId, double amount, String reason) async {
     return await _remoteDataSource.refundOrder(orderId, amount, reason);
   }

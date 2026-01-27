@@ -263,21 +263,43 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
 
               SizedBox(height: 1.5.h),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Icon(
-                    _getPaymentIcon(order.payment.paymentStatus),
-                    size: 4.w,
-                    color: _getPaymentColor(order.payment.paymentStatus),
+                  Row(
+                    children: [
+                      Icon(
+                        _getPaymentIcon(order.payment.paymentStatus),
+                        size: 4.w,
+                        color: _getPaymentColor(order.payment.paymentStatus),
+                      ),
+                      SizedBox(width: 2.w),
+                      Text(
+                        'Payment: ${order.payment.paymentStatus.toUpperCase()}',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w500,
+                          color: _getPaymentColor(order.payment.paymentStatus),
+                        ),
+                      ),
+                    ],
                   ),
-                  SizedBox(width: 2.w),
-                  Text(
-                    'Payment: ${order.payment.paymentStatus.toUpperCase()}',
-                    style: TextStyle(
-                      fontSize: 12.sp,
-                      fontWeight: FontWeight.w500,
-                      color: _getPaymentColor(order.payment.paymentStatus),
+                  if (order.orderStatus.toLowerCase() == 'pending' ||
+                      order.orderStatus.toLowerCase() == 'confirmed')
+                    TextButton(
+                      onPressed: () =>
+                          _showCancelDialog(context, ref, order.id),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        padding: EdgeInsets.symmetric(horizontal: 2.w),
+                      ),
+                      child: Text(
+                        'CANCEL ORDER',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                  ),
                 ],
               ),
             ],
@@ -389,5 +411,53 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
       default:
         return Colors.grey;
     }
+  }
+
+  void _showCancelDialog(BuildContext context, WidgetRef ref, String orderId) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Cancel Order', style: TextStyle(fontSize: 18.sp)),
+        content: Text(
+          'Are you sure you want to cancel this order?',
+          style: TextStyle(fontSize: 16.sp),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('NO', style: TextStyle(fontSize: 15.sp)),
+          ),
+          TextButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              final success = await ref
+                  .read(ordersListNotifierProvider.notifier)
+                  .cancelOrder(orderId);
+              if (context.mounted) {
+                if (success) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Order cancelled successfully'),
+                      backgroundColor: Colors.green,
+                    ),
+                  );
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Failed to cancel order'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
+            },
+            child: Text(
+              'YES, CANCEL',
+              style: TextStyle(fontSize: 15.sp, color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

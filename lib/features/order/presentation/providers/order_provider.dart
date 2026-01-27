@@ -120,6 +120,18 @@ class OrdersListNotifier extends StateNotifier<OrdersListState> {
     }
   }
 
+  /// Cancel order
+  Future<bool> cancelOrder(String orderId) async {
+    try {
+      await _repository.cancelOrder(orderId);
+      await getMyOrders(); // Refresh list
+      return true;
+    } catch (e) {
+      log('cancel order error: $e');
+      return false;
+    }
+  }
+
   /// Refund order
   Future<bool> refundOrder(String orderId, double amount, String reason) async {
     try {
@@ -159,6 +171,18 @@ class StaffOrdersNotifier extends StateNotifier<OrdersListState> {
     } catch (e, st) {
       log('get all orders error: $e, $st');
       state = OrdersListError(e.toString());
+    }
+  }
+
+  /// Cancel order
+  Future<bool> cancelOrder(String orderId) async {
+    try {
+      await _repository.cancelOrder(orderId);
+      await getAllOrders(); // Refresh list
+      return true;
+    } catch (e) {
+      log('cancel order error: $e');
+      return false;
     }
   }
 

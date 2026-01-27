@@ -10,6 +10,7 @@ abstract class OrderRemoteDataSource {
   Future<List<OrderEntity>> getOrders();
   Future<List<OrderEntity>> getMyOrders();
   Future<List<OrderTypeEntity>> getOrderTypes();
+  Future<void> cancelOrder(String orderId);
   Future<void> refundOrder(String orderId, double amount, String reason);
 }
 
@@ -98,6 +99,18 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
       return list;
     } else {
       throw Exception(data['message'] ?? 'Failed to get order types');
+    }
+  }
+
+  @override
+  Future<void> cancelOrder(String orderId) async {
+    final response = await _dioClient.post(
+      '${ApiConstants.v1}${ApiConstants.orders}/cancel/$orderId',
+    );
+
+    final data = response.data as Map<String, dynamic>;
+    if (data['status'] != 'success') {
+      throw Exception(data['message'] ?? 'Failed to cancel order');
     }
   }
 
