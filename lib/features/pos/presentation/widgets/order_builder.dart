@@ -10,6 +10,8 @@ import '../providers/pos_state.dart';
 
 import './table_selection_dialog.dart';
 import './schedule_order_dialog.dart';
+import '../../../loyalty/presentation/widgets/customer_lookup_dialog.dart';
+import '../../../loyalty/presentation/widgets/redeem_points_dialog.dart';
 
 class OrderBuilder extends ConsumerWidget {
   const OrderBuilder({super.key});
@@ -82,6 +84,7 @@ class OrderBuilder extends ConsumerWidget {
                     ),
                   ),
                 ),
+              _buildCustomerSection(context, ref, state),
             ],
           ),
         ),
@@ -166,6 +169,12 @@ class OrderBuilder extends ConsumerWidget {
               if (items.isNotEmpty) ...[
                 _summaryRow('Cart Subtotal', summary.subtotal),
                 _summaryRow('Cart Tax', summary.totalTax),
+                if (state.loyaltyDiscount > 0)
+                  _summaryRow(
+                    'Loyalty Discount',
+                    state.loyaltyDiscount,
+                    isDiscount: true,
+                  ),
               ],
               if (ongoingOrder != null)
                 _summaryRow('Already Ordered', ongoingOrder.totalAmount),
@@ -185,7 +194,7 @@ class OrderBuilder extends ConsumerWidget {
                     ),
                   ),
                   Text(
-                    '\$${totalToPay.toStringAsFixed(2)}',
+                    '\$${(totalToPay - state.loyaltyDiscount).toStringAsFixed(2)}',
                     style: TextStyle(
                       fontSize: 16.sp,
                       fontWeight: FontWeight.w900,
@@ -323,6 +332,183 @@ class OrderBuilder extends ConsumerWidget {
     );
   }
 
+  Widget _buildCustomerSection(
+    BuildContext context,
+    WidgetRef ref,
+    PosState state,
+  ) {
+    final customer = state.loyaltyCustomer;
+
+    return Container(
+      margin: const EdgeInsets.only(top: 16),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: customer != null
+            ? AppColors.primary.withOpacity(0.05)
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: customer != null
+              ? AppColors.primary.withOpacity(0.2)
+              : AppColors.border.withOpacity(0.5),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                customer != null ? Icons.person : Icons.person_add_outlined,
+                size: 18,
+                color: customer != null ? AppColors.primary : AppColors.grey500,
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  customer != null ? customer.name : 'No Customer Selected',
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: customer != null
+                        ? FontWeight.bold
+                        : FontWeight.w500,
+                    color: customer != null
+                        ? AppColors.textPrimary
+                        : AppColors.textSecondary,
+                  ),
+                ),
+              ),
+              if (customer == null)
+                TextButton.icon(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => CustomerLookupDialog(
+                        onCustomerFound: (c) {
+                          ref
+                              .read(posNotifierProvider.notifier)
+                              .setLoyaltyCustomer(c);
+                        },
+                      ),
+                    );
+                  },
+                  icon: const Icon(Icons.search, size: 14),
+                  label: const Text('Lookup', style: TextStyle(fontSize: 12)),
+                  style: TextButton.styleFrom(
+                    visualDensity: VisualDensity.compact,
+                    foregroundColor: AppColors.primary,
+                  ),
+                )
+              else
+                Row(
+                  children: [
+                    if (state.cartItems.isNotEmpty)
+                      IconButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => RedeemPointsDialog(
+                              customer: customer,
+                              onPointsRedeemed: (discount, points) {
+                                ref
+                                    .read(posNotifierProvider.notifier)
+                                    .applyLoyaltyDiscount(discount, points);
+                              },
+                            ),
+                          );
+                        },
+                        icon: Icon(
+                          state.loyaltyDiscount > 0
+                              ? Icons.stars
+                              : Icons.stars_outlined,
+                          size: 20,
+                          color: state.loyaltyDiscount > 0
+                              ? AppColors.secondary
+                              : AppColors.primary,
+                        ),
+                        tooltip: 'Redeem Points',
+                        visualDensity: VisualDensity.compact,
+                      ),
+                    IconButton(
+                      onPressed: () {
+                        ref.read(posNotifierProvider.notifier).clearLoyalty();
+                      },
+                      icon: const Icon(Icons.close, size: 18),
+                      color: AppColors.error,
+                      visualDensity: VisualDensity.compact,
+                      tooltip: 'Clear Customer',
+                    ),
+                  ],
+                ),
+            ],
+          ),
+          if (customer != null) ...[
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Row(
+                    children: [
+                      Text(
+                        customer.tierEmoji,
+                        style: const TextStyle(fontSize: 10),
+                      ),
+                      const SizedBox(width: 4),
+                      Text(
+                        customer.loyaltyTier.toUpperCase(),
+                        style: TextStyle(
+                          fontSize: 9,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  '${customer.loyaltyPoints.current} pts available',
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const Spacer(),
+                if (state.loyaltyDiscount > 0)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 6,
+                      vertical: 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.success.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                    child: Text(
+                      '-\$${state.loyaltyDiscount.toStringAsFixed(2)}',
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.success,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
   void _handleSettle(
     BuildContext context,
     WidgetRef ref,
@@ -342,6 +528,23 @@ class OrderBuilder extends ConsumerWidget {
           ),
           ElevatedButton(
             onPressed: () {
+              final state = ref.read(posNotifierProvider);
+
+              // Prepare discount info if loyalty points used
+              Discount? loyaltyDiscount;
+              if (state.loyaltyDiscount > 0) {
+                loyaltyDiscount = Discount(
+                  discounts: [
+                    DiscountDetails(
+                      discountAmount: state.loyaltyDiscount,
+                      discountType: 'loyalty_points',
+                      pointsRedeemed: state.redeemedPoints,
+                    ),
+                  ],
+                  totalDiscountAmount: state.loyaltyDiscount,
+                );
+              }
+
               ref
                   .read(posNotifierProvider.notifier)
                   .settleOrder(
@@ -349,8 +552,14 @@ class OrderBuilder extends ConsumerWidget {
                     PaymentEntity(
                       payment: Payment(
                         method: 'cash',
-                        amount: double.tryParse(amount) ?? 0,
+                        amount:
+                            (double.tryParse(amount) ?? 0) -
+                            state.loyaltyDiscount,
+                        discount: loyaltyDiscount,
                       ),
+                      customerPhone: state.customerPhone,
+                      customerEmail: state.loyaltyCustomer?.email,
+                      customerName: state.customerName,
                     ),
                   );
               Navigator.pop(context);

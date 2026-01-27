@@ -19,11 +19,13 @@ class DineInRepositoryImpl implements DineInRepository {
     String tableNumber, {
     List<DineInOrderItem>? items,
     String? orderTypeId,
+    required String customerId,
   }) async {
     return await _remoteDataSource.createDineInOrder(
       tableNumber,
       items: items,
       orderTypeId: orderTypeId,
+      customerId: customerId,
     );
   }
 

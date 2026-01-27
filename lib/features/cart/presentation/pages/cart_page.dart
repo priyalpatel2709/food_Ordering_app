@@ -528,7 +528,11 @@ class _CartPageState extends ConsumerState<CartPage> {
       if (session.orderId == null) {
         await ref
             .read(createDineInOrderUseCaseProvider)
-            .call(session.tableNumber, items: dineInItems);
+            .call(
+              session.tableNumber,
+              items: dineInItems,
+              customerId: '',
+            ); //make changes
       } else {
         await ref
             .read(addItemsToDineInOrderUseCaseProvider)

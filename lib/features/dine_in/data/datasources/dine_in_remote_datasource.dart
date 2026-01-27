@@ -39,10 +39,12 @@ class DineInRemoteDataSource {
     String tableNumber, {
     List<DineInOrderItem>? items,
     String? orderTypeId,
+    required String customerId,
   }) async {
     final body = {
       'tableNumber': tableNumber,
       if (orderTypeId != null) 'orderType': orderTypeId,
+      if (customerId != null) 'customerId': customerId,
       if (items != null && items.isNotEmpty)
         'items': items
             .map(

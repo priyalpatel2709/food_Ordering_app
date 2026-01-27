@@ -149,6 +149,14 @@ class StaffHomePage extends ConsumerWidget {
         description: 'RBAC & security permissions',
       ),
       _DashboardItem(
+        title: 'Loyalty Members',
+        icon: Icons.star_rounded,
+        color: const Color(0xFFF59E0B),
+        route: RouteConstants.loyaltyManagement,
+        permission: PermissionConstants.roleRead,
+        description: 'Customer profiles & points',
+      ),
+      _DashboardItem(
         title: 'Settings',
         icon: Icons.settings_suggest_rounded,
         color: const Color(0xFF64748B),

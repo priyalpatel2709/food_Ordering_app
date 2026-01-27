@@ -18,6 +18,7 @@ import '../../../dine_in/domain/usecases/add_items_to_dine_in_order_usecase.dart
 import '../../../dine_in/domain/usecases/complete_dine_in_payment_usecase.dart';
 import '../../../dine_in/domain/usecases/get_order_details_usecase.dart';
 import '../../domain/entities/held_order.dart';
+import '../../../loyalty/domain/entities/customer_loyalty_entity.dart';
 import 'pos_state.dart';
 
 final posNotifierProvider = StateNotifierProvider<PosNotifier, PosState>((ref) {
@@ -31,6 +32,7 @@ final posNotifierProvider = StateNotifierProvider<PosNotifier, PosState>((ref) {
   final getOrderTypes = ref.watch(getOrderTypesUseCaseProvider);
 
   return PosNotifier(
+    ref: ref,
     getAllMenus: getAllMenus,
     getCurrentMenu: getCurrentMenu,
     orderNotifier: orderNotifier,
@@ -43,6 +45,7 @@ final posNotifierProvider = StateNotifierProvider<PosNotifier, PosState>((ref) {
 });
 
 class PosNotifier extends StateNotifier<PosState> {
+  final Ref _ref;
   final GetAllMenusUseCase _getAllMenus;
   final GetCurrentMenuUseCase _getCurrentMenu;
   final OrderNotifier _orderNotifier;
@@ -53,6 +56,7 @@ class PosNotifier extends StateNotifier<PosState> {
   final GetOrderTypesUseCase _getOrderTypes;
 
   PosNotifier({
+    required Ref ref,
     required GetAllMenusUseCase getAllMenus,
     required GetCurrentMenuUseCase getCurrentMenu,
     required OrderNotifier orderNotifier,
@@ -61,7 +65,8 @@ class PosNotifier extends StateNotifier<PosState> {
     required GetDineInOrderDetailsUseCase getDineInOrderDetails,
     required CompleteDineInPaymentUseCase completeDineInPayment,
     required GetOrderTypesUseCase getOrderTypes,
-  }) : _getAllMenus = getAllMenus,
+  }) : _ref = ref,
+       _getAllMenus = getAllMenus,
        _getCurrentMenu = getCurrentMenu,
        _orderNotifier = orderNotifier,
        _createDineInOrder = createDineInOrder,
@@ -275,6 +280,28 @@ class PosNotifier extends StateNotifier<PosState> {
     state = state.copyWith(clearScheduledOrder: true);
   }
 
+  void setLoyaltyCustomer(CustomerLoyaltyEntity? customer) {
+    state = state.copyWith(
+      loyaltyCustomer: customer,
+      customerName: customer?.name ?? state.customerName,
+      customerPhone: customer?.phone ?? state.customerPhone,
+      customerId: customer?.id ?? state.customerId,
+      clearLoyaltyCustomer: customer == null,
+    );
+  }
+
+  void applyLoyaltyDiscount(double amount, int points) {
+    state = state.copyWith(loyaltyDiscount: amount, redeemedPoints: points);
+  }
+
+  void clearLoyalty() {
+    state = state.copyWith(
+      clearLoyaltyCustomer: true,
+      loyaltyDiscount: 0.0,
+      redeemedPoints: 0,
+    );
+  }
+
   /// Hold/Park the current order
   void holdCurrentOrder() {
     if (state.cartItems.isEmpty) return;
@@ -284,6 +311,7 @@ class PosNotifier extends StateNotifier<PosState> {
       items: List.from(state.cartItems),
       orderType: state.orderType,
       customerName: state.customerName,
+      customerId: state.customerId,
       tableNumber: state.tableNumber,
       heldAt: DateTime.now(),
       totalAmount: state.summary.total,
@@ -295,6 +323,7 @@ class PosNotifier extends StateNotifier<PosState> {
       heldOrders: updatedHeldOrders,
       cartItems: [],
       customerName: null,
+      customerId: null,
       tableNumber: null,
       clearOngoingOrderId: true,
       clearOngoingOrder: true,
@@ -315,6 +344,7 @@ class PosNotifier extends StateNotifier<PosState> {
       cartItems: List.from(heldOrder.items),
       orderType: heldOrder.orderType,
       customerName: heldOrder.customerName,
+      customerId: heldOrder.customerId,
       tableNumber: heldOrder.tableNumber,
       heldOrders: updatedHeldOrders,
     );
@@ -394,6 +424,7 @@ class PosNotifier extends StateNotifier<PosState> {
             state.tableNumber!,
             items: dineInItems,
             orderTypeId: state.dynamicOrderType?.id,
+            customerId: state.customerId ?? "--", //make changes
           );
           state = state.copyWith(
             ongoingOrderId: order.id,
@@ -435,12 +466,29 @@ class PosNotifier extends StateNotifier<PosState> {
         orderType: state.dynamicOrderType?.id ?? '',
         scheduledFor: state.scheduledFor,
         isScheduledOrder: state.scheduledOrderTime != null,
+        contactPhone: state.customerPhone,
+        contactEmail: state.loyaltyCustomer?.email,
+        contactName: state.customerName,
+        customerId: state.customerId,
+        loyaltyDiscount: state.loyaltyDiscount > 0
+            ? state.loyaltyDiscount
+            : null,
+        pointsRedeemed: state.redeemedPoints > 0 ? state.redeemedPoints : null,
       );
 
       await _orderNotifier.createOrder(request);
+
+      // Invalidate staff orders list to refresh order history
+      _ref.invalidate(staffOrdersListNotifierProvider);
+
       state = state.copyWith(
         isLoading: false,
-        clearScheduledOrder: true, // Clear scheduled order after placing
+        cartItems: [],
+        clearScheduledOrder: true,
+        clearLoyaltyCustomer: true,
+        clearCustomerInfo: true,
+        loyaltyDiscount: 0.0,
+        redeemedPoints: 0,
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
@@ -470,12 +518,22 @@ class PosNotifier extends StateNotifier<PosState> {
       }
 
       await _completeDineInPayment.call(orderId, paymentData);
+
+      // Invalidate tables, order details and staff orders list to refresh UI across the app
+      _ref.invalidate(tablesProvider);
+      _ref.invalidate(orderDetailsProvider(orderId));
+      _ref.invalidate(staffOrdersListNotifierProvider);
+
       state = state.copyWith(
         isLoading: false,
         cartItems: [],
-        ongoingOrderId: null,
-        ongoingOrder: null,
-        tableNumber: null,
+        clearOngoingOrderId: true,
+        clearOngoingOrder: true,
+        clearTableNumber: true,
+        clearLoyaltyCustomer: true,
+        clearCustomerInfo: true,
+        loyaltyDiscount: 0.0,
+        redeemedPoints: 0,
       );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());

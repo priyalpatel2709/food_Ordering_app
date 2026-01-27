@@ -7,6 +7,7 @@ class HeldOrder {
   final List<CartItemEntity> items;
   final OrderType orderType;
   final String? customerName;
+  final String? customerId;
   final String? tableNumber;
   final DateTime heldAt;
   final double totalAmount;
@@ -16,6 +17,7 @@ class HeldOrder {
     required this.items,
     required this.orderType,
     this.customerName,
+    this.customerId,
     this.tableNumber,
     required this.heldAt,
     required this.totalAmount,
@@ -26,6 +28,7 @@ class HeldOrder {
     List<CartItemEntity>? items,
     OrderType? orderType,
     String? customerName,
+    String? customerId,
     String? tableNumber,
     DateTime? heldAt,
     double? totalAmount,
@@ -35,6 +38,7 @@ class HeldOrder {
       items: items ?? this.items,
       orderType: orderType ?? this.orderType,
       customerName: customerName ?? this.customerName,
+      customerId: customerId ?? this.customerId,
       tableNumber: tableNumber ?? this.tableNumber,
       heldAt: heldAt ?? this.heldAt,
       totalAmount: totalAmount ?? this.totalAmount,

@@ -39,6 +39,7 @@ class RouteConstants {
   static const String userManagement = '/staff/users';
   static const String pos = '/staff/pos';
   static const String tableManagement = '/staff/tables';
+  static const String loyaltyManagement = '/staff/loyalty';
 
   // Route Names (for named navigation)
   static const String splashName = 'splash';
@@ -72,4 +73,5 @@ class RouteConstants {
   static const String userManagementName = 'userManagement';
   static const String posName = 'pos';
   static const String tableManagementName = 'tableManagement';
+  static const String loyaltyManagementName = 'loyaltyManagement';
 }

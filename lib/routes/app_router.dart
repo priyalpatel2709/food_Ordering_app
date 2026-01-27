@@ -30,6 +30,7 @@ import '../features/rbac/presentation/pages/user_management_page.dart';
 import '../features/rbac/presentation/pages/permission_management_page.dart';
 import '../features/pos/presentation/screens/pos_screen.dart';
 import '../features/dine_in/presentation/pages/table_management_page.dart';
+import '../features/loyalty/presentation/pages/loyalty_management_page.dart';
 
 class AppRouter {
   // Route paths and names are now centralized in RouteConstants
@@ -255,6 +256,11 @@ class AppRouter {
         path: RouteConstants.tableManagement,
         name: RouteConstants.tableManagementName,
         builder: (context, state) => const TableManagementPage(),
+      ),
+      GoRoute(
+        path: RouteConstants.loyaltyManagement,
+        name: RouteConstants.loyaltyManagementName,
+        builder: (context, state) => const LoyaltyManagementPage(),
       ),
     ],
   );

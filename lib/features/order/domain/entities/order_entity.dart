@@ -35,6 +35,12 @@ class CreateOrderRequest {
   final String orderType; // ID from orderTypes API
   final DateTime? scheduledFor; // Scheduled date for the order
   final bool? isScheduledOrder; // Scheduled time in HH:mm format
+  final String? contactPhone; // Required for loyalty
+  final String? contactEmail; // Optional for loyalty
+  final String? contactName; // Optional for loyalty
+  final String? customerId; // Optional for loyalty
+  final double? loyaltyDiscount; // Optional: discount from points
+  final int? pointsRedeemed; // Optional: points used for this order
   // final String restaurantId;
 
   const CreateOrderRequest({
@@ -47,6 +53,12 @@ class CreateOrderRequest {
     required this.orderType,
     this.scheduledFor,
     this.isScheduledOrder,
+    this.contactPhone,
+    this.contactEmail,
+    this.contactName,
+    this.customerId,
+    this.loyaltyDiscount,
+    this.pointsRedeemed,
     // required this.restaurantId,
   });
 
@@ -68,6 +80,24 @@ class CreateOrderRequest {
     }
     if (isScheduledOrder != null) {
       json['isScheduledOrder'] = isScheduledOrder!;
+    }
+    if (contactPhone != null) {
+      json['contactPhone'] = contactPhone!;
+    }
+    if (contactEmail != null) {
+      json['contactEmail'] = contactEmail!;
+    }
+    if (contactName != null) {
+      json['contactName'] = contactName!;
+    }
+    if (customerId != null) {
+      json['customerId'] = customerId!;
+    }
+    if (loyaltyDiscount != null) {
+      json['loyaltyDiscount'] = loyaltyDiscount!;
+    }
+    if (pointsRedeemed != null) {
+      json['pointsRedeemed'] = pointsRedeemed!;
     }
 
     return json;

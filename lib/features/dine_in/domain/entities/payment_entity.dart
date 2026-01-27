@@ -1,10 +1,22 @@
 class PaymentEntity {
   final Payment payment;
+  final String? customerPhone;
+  final String? customerEmail;
+  final String? customerName;
 
-  PaymentEntity({required this.payment});
+  PaymentEntity({
+    required this.payment,
+    this.customerPhone,
+    this.customerEmail,
+    this.customerName,
+  });
 
   Map<String, dynamic> toMap() {
-    return {'payment': payment.toMap()};
+    final map = <String, dynamic>{'payment': payment.toMap()};
+    if (customerPhone != null) map['customerPhone'] = customerPhone!;
+    if (customerEmail != null) map['customerEmail'] = customerEmail!;
+    if (customerName != null) map['customerName'] = customerName!;
+    return map;
   }
 
   Map<String, dynamic> toJson() => toMap();
@@ -54,11 +66,24 @@ class Discount {
 class DiscountDetails {
   final String? discountId;
   final double? discountAmount;
+  final String? discountType; // "loyalty_points" or "manual"
+  final int? pointsRedeemed;
 
-  DiscountDetails({this.discountId, this.discountAmount});
+  DiscountDetails({
+    this.discountId,
+    this.discountAmount,
+    this.discountType,
+    this.pointsRedeemed,
+  });
 
   Map<String, dynamic> toMap() {
-    return {'discountId': discountId, 'discountAmount': discountAmount};
+    final map = <String, dynamic>{
+      'discountId': discountId,
+      'discountAmount': discountAmount,
+    };
+    if (discountType != null) map['discountType'] = discountType;
+    if (pointsRedeemed != null) map['pointsRedeemed'] = pointsRedeemed;
+    return map;
   }
 
   Map<String, dynamic> toJson() => toMap();
