@@ -2,6 +2,7 @@ import '../../../cart/domain/entities/cart_entity.dart';
 import '../../../menu/domain/entities/menu_entity.dart';
 import '../../../dine_in/domain/entities/dine_in_order_entity.dart';
 import '../../../order/domain/entities/order_type_entity.dart';
+import '../../domain/entities/held_order.dart';
 
 enum OrderType { dineIn, takeaway, delivery }
 
@@ -25,6 +26,7 @@ class PosState {
   final String? error;
   final DateTime? scheduledFor; // Scheduled date for the order
   final String? scheduledOrderTime; // Scheduled time in HH:mm format
+  final List<HeldOrder> heldOrders; // List of held/parked orders
 
   const PosState({
     this.availableMenus = const [],
@@ -46,6 +48,7 @@ class PosState {
     this.error,
     this.scheduledFor,
     this.scheduledOrderTime,
+    this.heldOrders = const [],
   });
 
   PosState copyWith({
@@ -68,6 +71,7 @@ class PosState {
     String? error,
     DateTime? scheduledFor,
     String? scheduledOrderTime,
+    List<HeldOrder>? heldOrders,
     bool clearSelectedCategory = false,
     bool clearOngoingOrderId = false,
     bool clearOngoingOrder = false,
@@ -103,6 +107,7 @@ class PosState {
       scheduledOrderTime: clearScheduledOrder
           ? null
           : (scheduledOrderTime ?? this.scheduledOrderTime),
+      heldOrders: heldOrders ?? this.heldOrders,
     );
   }
 

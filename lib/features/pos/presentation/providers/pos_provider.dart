@@ -17,6 +17,7 @@ import '../../../dine_in/domain/usecases/create_dine_in_order_usecase.dart';
 import '../../../dine_in/domain/usecases/add_items_to_dine_in_order_usecase.dart';
 import '../../../dine_in/domain/usecases/complete_dine_in_payment_usecase.dart';
 import '../../../dine_in/domain/usecases/get_order_details_usecase.dart';
+import '../../domain/entities/held_order.dart';
 import 'pos_state.dart';
 
 final posNotifierProvider = StateNotifierProvider<PosNotifier, PosState>((ref) {
@@ -272,6 +273,60 @@ class PosNotifier extends StateNotifier<PosState> {
 
   void clearScheduledOrder() {
     state = state.copyWith(clearScheduledOrder: true);
+  }
+
+  /// Hold/Park the current order
+  void holdCurrentOrder() {
+    if (state.cartItems.isEmpty) return;
+
+    final heldOrder = HeldOrder(
+      id: DateTime.now().millisecondsSinceEpoch.toString(),
+      items: List.from(state.cartItems),
+      orderType: state.orderType,
+      customerName: state.customerName,
+      tableNumber: state.tableNumber,
+      heldAt: DateTime.now(),
+      totalAmount: state.summary.total,
+    );
+
+    final updatedHeldOrders = [...state.heldOrders, heldOrder];
+
+    state = state.copyWith(
+      heldOrders: updatedHeldOrders,
+      cartItems: [],
+      customerName: null,
+      tableNumber: null,
+      clearOngoingOrderId: true,
+      clearOngoingOrder: true,
+    );
+  }
+
+  /// Retrieve a held order back to the cart
+  void retrieveHeldOrder(String heldOrderId) {
+    final heldOrder = state.heldOrders.firstWhere(
+      (order) => order.id == heldOrderId,
+    );
+
+    final updatedHeldOrders = state.heldOrders
+        .where((order) => order.id != heldOrderId)
+        .toList();
+
+    state = state.copyWith(
+      cartItems: List.from(heldOrder.items),
+      orderType: heldOrder.orderType,
+      customerName: heldOrder.customerName,
+      tableNumber: heldOrder.tableNumber,
+      heldOrders: updatedHeldOrders,
+    );
+  }
+
+  /// Remove a held order without retrieving it
+  void removeHeldOrder(String heldOrderId) {
+    final updatedHeldOrders = state.heldOrders
+        .where((order) => order.id != heldOrderId)
+        .toList();
+
+    state = state.copyWith(heldOrders: updatedHeldOrders);
   }
 
   void selectTable(String? tableNumber, {String? orderId}) async {

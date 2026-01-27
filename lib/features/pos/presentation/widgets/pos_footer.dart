@@ -6,6 +6,7 @@ import '../providers/pos_provider.dart';
 import '../providers/pos_state.dart';
 
 import '../widgets/table_selection_dialog.dart';
+import '../widgets/held_orders_dialog.dart';
 
 class PosFooter extends ConsumerWidget {
   const PosFooter({super.key});
@@ -58,15 +59,53 @@ class PosFooter extends ConsumerWidget {
             label: 'HOLD',
             icon: Icons.pause_circle_outline,
             color: Colors.orange,
-            onTap: () {},
+            onTap: () {
+              if (state.cartItems.isNotEmpty) {
+                ref.read(posNotifierProvider.notifier).holdCurrentOrder();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Order held successfully'),
+                    duration: Duration(seconds: 2),
+                    backgroundColor: Colors.orange,
+                  ),
+                );
+              }
+            },
           ),
           const SizedBox(width: 12),
 
-          _FooterActionButton(
-            label: 'OPEN ORDERS',
-            icon: Icons.receipt_long_outlined,
-            color: AppColors.secondary,
-            onTap: () {},
+          Stack(
+            children: [
+              _FooterActionButton(
+                label: 'OPEN ORDERS',
+                icon: Icons.receipt_long_outlined,
+                color: AppColors.secondary,
+                onTap: () => showDialog(
+                  context: context,
+                  builder: (context) => const HeldOrdersDialog(),
+                ),
+              ),
+              if (state.heldOrders.isNotEmpty)
+                Positioned(
+                  right: 8,
+                  top: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: BoxDecoration(
+                      color: AppColors.error,
+                      shape: BoxShape.circle,
+                    ),
+                    child: Text(
+                      '${state.heldOrders.length}',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+            ],
           ),
           const SizedBox(width: 12),
 
