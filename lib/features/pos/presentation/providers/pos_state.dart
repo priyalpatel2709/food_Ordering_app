@@ -11,6 +11,7 @@ class PosState {
   final List<CartItemEntity> cartItems;
   final OrderType orderType;
   final String? customerName;
+  final String? customerPhone;
   final bool isLoading;
   final String? error;
 
@@ -22,6 +23,7 @@ class PosState {
     this.cartItems = const [],
     this.orderType = OrderType.dineIn,
     this.customerName,
+    this.customerPhone,
     this.isLoading = false,
     this.error,
   });
@@ -34,6 +36,7 @@ class PosState {
     List<CartItemEntity>? cartItems,
     OrderType? orderType,
     String? customerName,
+    String? customerPhone,
     bool? isLoading,
     String? error,
   }) {
@@ -45,6 +48,7 @@ class PosState {
       cartItems: cartItems ?? this.cartItems,
       orderType: orderType ?? this.orderType,
       customerName: customerName ?? this.customerName,
+      customerPhone: customerPhone ?? this.customerPhone,
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
     );

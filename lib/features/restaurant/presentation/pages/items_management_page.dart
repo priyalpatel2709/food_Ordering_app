@@ -70,7 +70,7 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: const Text(
-          'Inventory Management',
+          'Item Management',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
         ),
         backgroundColor: Colors.white,

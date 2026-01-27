@@ -85,12 +85,12 @@ class StaffHomePage extends ConsumerWidget {
         description: 'Manage active menus & schedules',
       ),
       _DashboardItem(
-        title: 'Inventory',
+        title: 'Item Management',
         icon: Icons.inventory_2_rounded,
         color: const Color(0xFFEC4899),
         route: RouteConstants.itemsManagement,
         permission: PermissionConstants.itemRead,
-        description: 'Stock & menu item control',
+        description: 'Item control',
       ),
       _DashboardItem(
         title: 'Categories',

@@ -181,7 +181,7 @@ class ProductCard extends ConsumerWidget {
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: isDesktop ? 13.sp : 14.sp,
+                        fontSize: 12.sp,
                         color: AppColors.textPrimary,
                         height: 1.1,
                       ),
@@ -193,7 +193,7 @@ class ProductCard extends ConsumerWidget {
                           '\$${product.price.toStringAsFixed(2)}',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: isDesktop ? 13.sp : 15.sp,
+                            fontSize: 12.sp,
                             color: AppColors.primary,
                           ),
                         ),

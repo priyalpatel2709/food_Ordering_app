@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:auto_size_text/auto_size_text.dart';
+
 import '../../../../shared/theme/app_colors.dart';
 import '../providers/pos_provider.dart';
 
@@ -12,120 +14,124 @@ class PosFooter extends ConsumerWidget {
     final bool isDesktop = Device.width > 900;
     final bool isTablet = Device.width > 600 && Device.width <= 900;
 
-    return Consumer(
-      builder: (context, ref, child) {
-        final state = ref.watch(posNotifierProvider);
-        final hasItems = state.cartItems.isNotEmpty;
+    final state = ref.watch(posNotifierProvider);
+    final hasItems = state.cartItems.isNotEmpty;
 
-        return Container(
-          height: isDesktop ? 10.h : 90,
-          padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.2.h),
-          decoration: BoxDecoration(
-            color: AppColors.white,
-            border: Border(top: BorderSide(color: AppColors.border, width: 1)),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.black.withOpacity(0.05),
-                blurRadius: 4,
-                offset: const Offset(0, -2),
-              ),
-            ],
+    return Container(
+      height: 15.h,
+      padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.2.h),
+      decoration: BoxDecoration(
+        color: AppColors.white,
+        border: Border(top: BorderSide(color: AppColors.border)),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.black.withOpacity(0.05),
+            blurRadius: 4,
+            offset: const Offset(0, -2),
           ),
-          child: Row(
-            children: [
-              // Left Side Actions
-              _buildActionButton(
-                label: 'Hold',
-                icon: Icons.pause_circle_outline,
-                color: AppColors.secondary,
-                onPressed: hasItems ? () {} : null,
-              ),
-              SizedBox(width: 1.w),
-              _buildActionButton(
-                label: 'Clear',
-                icon: Icons.delete_sweep_outlined,
-                color: AppColors.error,
-                onPressed: hasItems
-                    ? () => ref.read(posNotifierProvider.notifier).clearCart()
-                    : null,
-              ),
-              SizedBox(width: 1.w),
-              _buildActionButton(
-                label: 'Discount',
-                icon: Icons.local_offer_outlined,
-                color: AppColors.grey700,
-                onPressed: hasItems ? () {} : null,
-              ),
-              SizedBox(width: 1.w),
-              if (isDesktop || isTablet)
-                _buildActionButton(
-                  label: 'Split',
-                  icon: Icons.call_split,
-                  color: AppColors.grey700,
-                  onPressed: hasItems ? () {} : null,
+        ],
+      ),
+      child: Row(
+        children: [
+          /// LEFT ACTIONS
+          _buildActionButton(
+            label: 'Hold',
+            icon: Icons.pause_circle_outline,
+            color: AppColors.secondary,
+            onPressed: hasItems ? () {} : null,
+          ),
+          SizedBox(width: 1.w),
+          _buildActionButton(
+            label: 'Clear',
+            icon: Icons.delete_sweep_outlined,
+            color: AppColors.error,
+            onPressed: hasItems
+                ? () => ref.read(posNotifierProvider.notifier).clearCart()
+                : null,
+          ),
+          SizedBox(width: 1.w),
+          _buildActionButton(
+            label: 'Discount',
+            icon: Icons.local_offer_outlined,
+            color: AppColors.grey700,
+            onPressed: hasItems ? () {} : null,
+          ),
+          SizedBox(width: 1.w),
+          if (isDesktop || isTablet)
+            _buildActionButton(
+              label: 'Split',
+              icon: Icons.call_split,
+              color: AppColors.grey700,
+              onPressed: hasItems ? () {} : null,
+            ),
+
+          const Spacer(),
+
+          /// PAY NOW
+          SizedBox(
+            height: double.infinity,
+            width: isDesktop ? 15.w : 220,
+            child: ElevatedButton(
+              onPressed: hasItems
+                  ? () => _showPaymentDialog(context, ref, state.summary.total)
+                  : null,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.success,
+                foregroundColor: AppColors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-
-              const Spacer(),
-
-              // Primary Action: Pay Now
-              SizedBox(
-                height: double.infinity,
-                width: isDesktop ? 15.w : 220,
-                child: ElevatedButton(
-                  onPressed: hasItems
-                      ? () => _showPaymentDialog(
-                          context,
-                          ref,
-                          state.summary.total,
-                        )
-                      : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.success,
-                    foregroundColor: AppColors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    width: 6.w,
+                    height: 6.w,
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: Icon(Icons.payments_outlined),
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.payments_outlined, size: isDesktop ? 2.w : 24),
-                      SizedBox(width: 0.8.w),
-                      Flexible(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'PAY NOW',
-                              style: TextStyle(
-                                fontSize: isDesktop ? 15.sp : 16,
-                                fontWeight: FontWeight.bold,
-                                letterSpacing: 1,
-                              ),
-                            ),
-                            Text(
-                              'Total: \$${state.summary.total.toStringAsFixed(2)}',
-                              style: TextStyle(
-                                fontSize: isDesktop ? 12.sp : 11,
-                                color: AppColors.white.withOpacity(0.9),
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
+                  SizedBox(width: 1.w),
+                  Flexible(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        AutoSizeText(
+                          'PAY NOW',
+                          maxLines: 1,
+                          minFontSize: 10,
+                          maxFontSize: 16,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1,
+                          ),
                         ),
-                      ),
-                    ],
+                        AutoSizeText(
+                          'Total: \$${state.summary.total.toStringAsFixed(2)}',
+                          maxLines: 1,
+                          minFontSize: 9,
+                          maxFontSize: 13,
+                          style: TextStyle(
+                            color: AppColors.white.withOpacity(0.9),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
+
+  /// ================= ACTION BUTTON =================
 
   Widget _buildActionButton({
     required String label,
@@ -134,6 +140,7 @@ class PosFooter extends ConsumerWidget {
     VoidCallback? onPressed,
   }) {
     final bool isDesktop = Device.width > 900;
+
     return SizedBox(
       height: double.infinity,
       width: isDesktop ? 7.w : 80,
@@ -143,33 +150,36 @@ class PosFooter extends ConsumerWidget {
           side: BorderSide(
             color: onPressed != null ? color : AppColors.grey300,
           ),
-          foregroundColor: color,
-          padding: EdgeInsets.symmetric(vertical: 0.5.h, horizontal: 0.5.w),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
           backgroundColor: onPressed != null
               ? color.withOpacity(0.05)
               : Colors.transparent,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              icon,
-              size: isDesktop ? 1.5.w : 20,
-              color: onPressed != null ? color : AppColors.grey400,
-            ),
-            SizedBox(height: 0.2.h),
-            FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontSize: isDesktop ? 12.sp : 10,
-                  fontWeight: FontWeight.bold,
-                  color: onPressed != null ? color : AppColors.grey500,
+            SizedBox(
+              width: 5.w,
+              height: 5.w,
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: Icon(
+                  icon,
+                  color: onPressed != null ? color : AppColors.grey400,
                 ),
+              ),
+            ),
+            SizedBox(height: 0.4.h),
+            AutoSizeText(
+              label,
+              maxLines: 1,
+              minFontSize: 8,
+              maxFontSize: 12,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: onPressed != null ? color : AppColors.grey500,
               ),
             ),
           ],
@@ -177,6 +187,8 @@ class PosFooter extends ConsumerWidget {
       ),
     );
   }
+
+  /// ================= PAYMENT DIALOG =================
 
   void _showPaymentDialog(BuildContext context, WidgetRef ref, double amount) {
     showDialog(
@@ -205,6 +217,7 @@ class PaymentDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bool isDesktop = Device.width > 900;
+
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       child: Container(
@@ -213,14 +226,20 @@ class PaymentDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
+            AutoSizeText(
               'Select Payment Method',
-              style: TextStyle(fontSize: 18.sp, fontWeight: FontWeight.bold),
+              maxLines: 1,
+              minFontSize: 14,
+              maxFontSize: 20,
+              style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 0.5.h),
-            Text(
+            AutoSizeText(
               'Amount Payable: \$${totalAmount.toStringAsFixed(2)}',
-              style: TextStyle(fontSize: 15.sp, color: AppColors.textSecondary),
+              maxLines: 1,
+              minFontSize: 12,
+              maxFontSize: 16,
+              style: TextStyle(color: AppColors.textSecondary),
             ),
             SizedBox(height: 3.h),
 
@@ -231,29 +250,17 @@ class PaymentDialog extends StatelessWidget {
               crossAxisSpacing: 1.5.w,
               childAspectRatio: 2.8,
               children: [
-                _buildPaymentOption(
-                  Icons.money,
-                  'Cash',
-                  AppColors.success,
-                  onConfirm,
-                ),
+                _buildPaymentOption(Icons.money, 'Cash', AppColors.success),
                 _buildPaymentOption(
                   Icons.credit_card,
                   'Card',
                   AppColors.primary,
-                  onConfirm,
                 ),
-                _buildPaymentOption(
-                  Icons.qr_code,
-                  'UPI',
-                  AppColors.secondary,
-                  onConfirm,
-                ),
+                _buildPaymentOption(Icons.qr_code, 'UPI', AppColors.secondary),
                 _buildPaymentOption(
                   Icons.call_split,
                   'Split',
                   AppColors.grey700,
-                  onConfirm,
                 ),
               ],
             ),
@@ -272,12 +279,12 @@ class PaymentDialog extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                child: Text(
+                child: AutoSizeText(
                   'CANCEL',
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 15.sp,
-                  ),
+                  maxLines: 1,
+                  minFontSize: 12,
+                  maxFontSize: 16,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -287,15 +294,9 @@ class PaymentDialog extends StatelessWidget {
     );
   }
 
-  Widget _buildPaymentOption(
-    IconData icon,
-    String label,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    final bool isDesktop = Device.width > 900;
+  Widget _buildPaymentOption(IconData icon, String label, Color color) {
     return InkWell(
-      onTap: onTap,
+      onTap: onConfirm,
       child: Container(
         decoration: BoxDecoration(
           border: Border.all(color: AppColors.border),
@@ -304,13 +305,22 @@ class PaymentDialog extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, color: color, size: isDesktop ? 1.5.w : 20),
-            SizedBox(width: 0.8.w),
+            SizedBox(
+              width: 5.w,
+              height: 5.w,
+              child: AspectRatio(
+                aspectRatio: 1,
+                child: Icon(icon, color: color),
+              ),
+            ),
+            SizedBox(width: 1.w),
             Flexible(
-              child: Text(
+              child: AutoSizeText(
                 label,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp),
-                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                minFontSize: 10,
+                maxFontSize: 14,
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ],

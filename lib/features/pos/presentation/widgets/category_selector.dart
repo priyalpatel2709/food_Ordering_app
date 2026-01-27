@@ -15,7 +15,7 @@ class CategorySelector extends ConsumerWidget {
     final bool isDesktop = Device.width > 900;
 
     return Container(
-      height: isDesktop ? 8.h : 60,
+      height: 5.h,
       padding: EdgeInsets.symmetric(vertical: 0.8.h),
       decoration: BoxDecoration(
         color: AppColors.white,
@@ -58,9 +58,7 @@ class CategorySelector extends ConsumerWidget {
                 },
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: isDesktop ? 2.w : 6.w,
-                  ),
+                  padding: EdgeInsets.symmetric(horizontal: 2.w),
                   decoration: BoxDecoration(
                     color: isSelected ? AppColors.primary : AppColors.grey100,
                     borderRadius: BorderRadius.circular(12),
@@ -77,7 +75,7 @@ class CategorySelector extends ConsumerWidget {
                       color: isSelected
                           ? AppColors.white
                           : AppColors.textPrimary,
-                      fontSize: isDesktop ? 14.sp : 15.sp,
+                      fontSize: 12.sp,
                     ),
                   ),
                 ),

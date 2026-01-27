@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:auto_size_text/auto_size_text.dart';
+
 import '../../../../shared/theme/app_colors.dart';
 import '../providers/pos_provider.dart';
 import '../providers/pos_state.dart';
@@ -12,44 +14,35 @@ class BillingSummary extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(posNotifierProvider);
     final summary = state.summary;
-    final bool isDesktop = Device.width > 900;
 
     return Padding(
-      padding: EdgeInsets.all(isDesktop ? 1.5.w : 4.w),
+      padding: EdgeInsets.all(4.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Order Type Selector
-          Text(
-            'Order Type',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: isDesktop ? 15.sp : 17.sp,
-            ),
-          ),
+          /// ORDER TYPE
+          _sectionTitle('Order Type'),
           SizedBox(height: 1.5.h),
+
           Row(
             children: [
-              _buildTypeIcon(
-                context,
+              _buildOrderType(
                 ref,
                 OrderType.dineIn,
                 Icons.restaurant,
                 'Dine-in',
                 state.orderType,
               ),
-              SizedBox(width: isDesktop ? 0.8.w : 2.w),
-              _buildTypeIcon(
-                context,
+              SizedBox(width: 2.w),
+              _buildOrderType(
                 ref,
                 OrderType.takeaway,
                 Icons.shopping_bag,
                 'Takeaway',
                 state.orderType,
               ),
-              SizedBox(width: isDesktop ? 0.8.w : 2.w),
-              _buildTypeIcon(
-                context,
+              SizedBox(width: 2.w),
+              _buildOrderType(
                 ref,
                 OrderType.delivery,
                 Icons.delivery_dining,
@@ -61,122 +54,144 @@ class BillingSummary extends ConsumerWidget {
 
           SizedBox(height: 3.h),
 
-          // Customer Details
-          Text(
-            'Customer Details',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: isDesktop ? 15.sp : 17.sp,
-            ),
-          ),
-          SizedBox(height: 1.5.h),
-          Container(
-            padding: EdgeInsets.all(isDesktop ? 1.w : 3.w),
-            decoration: BoxDecoration(
-              color: AppColors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.person_add_alt_1,
-                  color: AppColors.textSecondary,
-                  size: isDesktop ? 1.5.w : 5.w,
-                ),
-                SizedBox(width: isDesktop ? 0.8.w : 3.w),
-                Expanded(
-                  child: Text(
+          /// CUSTOMER DETAILS (DINE-IN ONLY)
+          if (state.orderType == OrderType.dineIn) ...[
+            _sectionTitle('Customer Details'),
+            SizedBox(height: 1.5.h),
+
+            Container(
+              // padding: EdgeInsets.symmetric(vertical: 1.6.h, horizontal: 3.w),
+              decoration: BoxDecoration(
+                color: AppColors.white,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(
+                children: [
+                  /// NAME ROW
+                  AutoSizeText(
                     state.customerName ?? 'Walk-in Customer',
+                    maxLines: 1,
+                    minFontSize: 12,
+                    maxFontSize: 16,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                      fontSize: isDesktop ? 14.sp : 15.sp,
-                      color: state.customerName != null
-                          ? AppColors.textPrimary
-                          : AppColors.textSecondary,
                       fontWeight: state.customerName != null
                           ? FontWeight.bold
                           : FontWeight.normal,
+                      color: state.customerName != null
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
                     ),
-                    overflow: TextOverflow.ellipsis,
                   ),
-                ),
-                Icon(
-                  Icons.edit,
-                  size: isDesktop ? 1.2.w : 4.w,
-                  color: AppColors.primary,
-                ),
-              ],
+
+                  SizedBox(height: 1.2.h),
+                  Divider(height: .5.h),
+
+                  /// PHONE ROW
+                  AutoSizeText(
+                    state.customerPhone ?? 'Add phone number',
+                    maxLines: 1,
+                    minFontSize: 12,
+                    maxFontSize: 15,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      color: state.customerPhone != null
+                          ? AppColors.textPrimary
+                          : AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            SizedBox(height: 2.h),
+          ],
+
+          /// SCROLLABLE SUMMARY
+          Expanded(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: Column(
+                children: [
+                  _summaryRow('Subtotal', summary.subtotal),
+                  _summaryRow('Tax (GST 10%)', summary.totalTax),
+                  _summaryRow(
+                    'Discount',
+                    summary.discountAmount,
+                    isDiscount: true,
+                  ),
+                  _summaryRow('Service Charge', 0),
+                ],
+              ),
             ),
           ),
 
-          const Spacer(),
+          Divider(height: 3.h),
 
-          // Calculation
-          _buildSummaryRow('Subtotal', summary.subtotal, isDesktop),
-          _buildSummaryRow('Tax (GST 10%)', summary.totalTax, isDesktop),
-          _buildSummaryRow(
-            'Discount',
-            summary.discountAmount,
-            isDesktop,
-            isDiscount: true,
-          ),
-          _buildSummaryRow('Service Charge', 0.00, isDesktop),
-
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 2.h),
-            child: const Divider(thickness: 1),
-          ),
-
+          /// TOTAL
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              AutoSizeText(
                 'Grand Total',
-                style: TextStyle(
-                  fontSize: isDesktop ? 16.sp : 18.sp,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
+                maxLines: 1,
+                minFontSize: 14,
+                maxFontSize: 16,
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
-              Text(
+              AutoSizeText(
                 '\$${summary.total.toStringAsFixed(2)}',
+                maxLines: 1,
+                minFontSize: 14,
+                maxFontSize: 16,
                 style: TextStyle(
-                  fontSize: isDesktop ? 18.sp : 20.sp,
                   fontWeight: FontWeight.bold,
                   color: AppColors.primary,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 1.h),
-          Text(
-            '${summary.totalItems} Items selected',
-            style: TextStyle(
-              fontSize: isDesktop ? 13.sp : 14.sp,
-              color: AppColors.textSecondary,
-            ),
+          SizedBox(height: 0.8.h),
+          AutoSizeText(
+            '${summary.totalItems} items selected',
+            maxLines: 1,
+            minFontSize: 14,
+            maxFontSize: 16,
+            style: TextStyle(color: AppColors.textSecondary),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildTypeIcon(
-    BuildContext context,
+  /// ===================== COMPONENTS =====================
+
+  Widget _sectionTitle(String text) {
+    return AutoSizeText(
+      text,
+      maxLines: 1,
+      minFontSize: 12,
+      maxFontSize: 16,
+      style: const TextStyle(fontWeight: FontWeight.bold),
+    );
+  }
+
+  Widget _buildOrderType(
     WidgetRef ref,
     OrderType type,
     IconData icon,
     String label,
     OrderType currentType,
   ) {
-    final bool isDesktop = Device.width > 900;
-    final isSelected = type == currentType;
+    final bool isSelected = type == currentType;
 
     return Expanded(
       child: InkWell(
+        borderRadius: BorderRadius.circular(12),
         onTap: () => ref.read(posNotifierProvider.notifier).setOrderType(type),
         child: Container(
-          padding: EdgeInsets.symmetric(vertical: 1.5.h, horizontal: 0.5.w),
+          padding: EdgeInsets.symmetric(vertical: 1.5.h),
           decoration: BoxDecoration(
             color: isSelected
                 ? AppColors.primary.withOpacity(0.1)
@@ -184,31 +199,32 @@ class BillingSummary extends ConsumerWidget {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
               color: isSelected ? AppColors.primary : AppColors.border,
-              width: 1,
             ),
           ),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                icon,
-                color: isSelected ? AppColors.primary : AppColors.textSecondary,
-                size: isDesktop ? 2.w : 6.w,
+              AspectRatio(
+                aspectRatio: 1,
+                child: Icon(
+                  icon,
+                  color: isSelected
+                      ? AppColors.primary
+                      : AppColors.textSecondary,
+                ),
               ),
-              SizedBox(height: 0.8.h),
-              FittedBox(
-                fit: BoxFit.scaleDown,
-                child: Text(
-                  label,
-                  style: TextStyle(
-                    fontSize: isDesktop ? 13.sp : 14.sp,
-                    fontWeight: isSelected
-                        ? FontWeight.bold
-                        : FontWeight.normal,
-                    color: isSelected
-                        ? AppColors.primary
-                        : AppColors.textSecondary,
-                  ),
+
+              SizedBox(height: 0.6.h),
+              AutoSizeText(
+                label,
+                maxLines: 1,
+                minFontSize: 10,
+                maxFontSize: 14,
+                style: TextStyle(
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                  color: isSelected
+                      ? AppColors.primary
+                      : AppColors.textSecondary,
                 ),
               ),
             ],
@@ -218,30 +234,27 @@ class BillingSummary extends ConsumerWidget {
     );
   }
 
-  Widget _buildSummaryRow(
-    String label,
-    double amount,
-    bool isDesktop, {
-    bool isDiscount = false,
-  }) {
+  Widget _summaryRow(String label, double amount, {bool isDiscount = false}) {
     return Padding(
-      padding: EdgeInsets.only(bottom: 1.h),
+      padding: EdgeInsets.symmetric(vertical: 0.8.h),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
+          AutoSizeText(
             label,
-            style: TextStyle(
-              color: AppColors.textSecondary,
-              fontSize: isDesktop ? 14.sp : 15.sp,
-            ),
+            maxLines: 1,
+            minFontSize: 10,
+            maxFontSize: 14,
+            style: TextStyle(color: AppColors.textSecondary),
           ),
-          Text(
+          AutoSizeText(
             '${isDiscount ? "-" : ""}\$${amount.toStringAsFixed(2)}',
+            maxLines: 1,
+            minFontSize: 10,
+            maxFontSize: 14,
             style: TextStyle(
               fontWeight: FontWeight.w600,
               color: isDiscount ? AppColors.error : AppColors.textPrimary,
-              fontSize: isDesktop ? 14.sp : 15.sp,
             ),
           ),
         ],
