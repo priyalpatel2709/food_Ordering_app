@@ -33,6 +33,8 @@ class CreateOrderRequest {
   final double deliveryCharge;
   final double deliveryTipCharge;
   final String orderType; // ID from orderTypes API
+  final DateTime? scheduledFor; // Scheduled date for the order
+  final bool? isScheduledOrder; // Scheduled time in HH:mm format
   // final String restaurantId;
 
   const CreateOrderRequest({
@@ -43,11 +45,13 @@ class CreateOrderRequest {
     this.deliveryCharge = 0,
     this.deliveryTipCharge = 0,
     required this.orderType,
+    this.scheduledFor,
+    this.isScheduledOrder,
     // required this.restaurantId,
   });
 
   Map<String, dynamic> toJson() {
-    return {
+    final json = {
       'orderItems': orderItems.map((item) => item.toJson()).toList(),
       'tax': tax,
       'discount': discount,
@@ -57,6 +61,16 @@ class CreateOrderRequest {
       'orderType': orderType,
       // 'restaurantId': restaurantId,
     };
+
+    // Add scheduled order fields if provided
+    if (scheduledFor != null) {
+      json['scheduledTime'] = scheduledFor!.toIso8601String();
+    }
+    if (isScheduledOrder != null) {
+      json['isScheduledOrder'] = isScheduledOrder!;
+    }
+
+    return json;
   }
 }
 

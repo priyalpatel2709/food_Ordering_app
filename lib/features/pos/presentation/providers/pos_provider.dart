@@ -266,6 +266,14 @@ class PosNotifier extends StateNotifier<PosState> {
     state = state.copyWith(customerName: name);
   }
 
+  void setScheduledOrder(DateTime? date, String? time) {
+    state = state.copyWith(scheduledFor: date, scheduledOrderTime: time);
+  }
+
+  void clearScheduledOrder() {
+    state = state.copyWith(clearScheduledOrder: true);
+  }
+
   void selectTable(String? tableNumber, {String? orderId}) async {
     state = state.copyWith(
       tableNumber: tableNumber,
@@ -370,10 +378,15 @@ class PosNotifier extends StateNotifier<PosState> {
         deliveryCharge: state.orderType == OrderType.delivery ? 5.0 : 0.0,
         deliveryTipCharge: 0,
         orderType: state.dynamicOrderType?.id ?? '',
+        scheduledFor: state.scheduledFor,
+        isScheduledOrder: state.scheduledOrderTime != null,
       );
 
       await _orderNotifier.createOrder(request);
-      state = state.copyWith(isLoading: false);
+      state = state.copyWith(
+        isLoading: false,
+        clearScheduledOrder: true, // Clear scheduled order after placing
+      );
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }

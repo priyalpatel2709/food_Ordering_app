@@ -23,6 +23,8 @@ class PosState {
   final DineInOrderEntity? ongoingOrder;
   final bool isLoading;
   final String? error;
+  final DateTime? scheduledFor; // Scheduled date for the order
+  final String? scheduledOrderTime; // Scheduled time in HH:mm format
 
   const PosState({
     this.availableMenus = const [],
@@ -42,6 +44,8 @@ class PosState {
     this.ongoingOrder,
     this.isLoading = false,
     this.error,
+    this.scheduledFor,
+    this.scheduledOrderTime,
   });
 
   PosState copyWith({
@@ -62,9 +66,12 @@ class PosState {
     DineInOrderEntity? ongoingOrder,
     bool? isLoading,
     String? error,
+    DateTime? scheduledFor,
+    String? scheduledOrderTime,
     bool clearSelectedCategory = false,
     bool clearOngoingOrderId = false,
     bool clearOngoingOrder = false,
+    bool clearScheduledOrder = false,
   }) {
     return PosState(
       availableMenus: availableMenus ?? this.availableMenus,
@@ -90,6 +97,12 @@ class PosState {
           : (ongoingOrder ?? this.ongoingOrder),
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
+      scheduledFor: clearScheduledOrder
+          ? null
+          : (scheduledFor ?? this.scheduledFor),
+      scheduledOrderTime: clearScheduledOrder
+          ? null
+          : (scheduledOrderTime ?? this.scheduledOrderTime),
     );
   }
 

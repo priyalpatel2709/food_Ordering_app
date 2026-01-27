@@ -9,6 +9,7 @@ import '../providers/pos_provider.dart';
 import '../providers/pos_state.dart';
 
 import './table_selection_dialog.dart';
+import './schedule_order_dialog.dart';
 
 class OrderBuilder extends ConsumerWidget {
   const OrderBuilder({super.key});
@@ -21,6 +22,11 @@ class OrderBuilder extends ConsumerWidget {
     final summary = state.summary;
 
     final double totalToPay = summary.total + (ongoingOrder?.totalAmount ?? 0);
+
+    String formatScheduledTime(DateTime date, String? time) {
+      final dateStr = '${date.month}/${date.day}';
+      return time != null ? '$dateStr at $time' : dateStr;
+    }
 
     return Column(
       children: [
@@ -188,6 +194,54 @@ class OrderBuilder extends ConsumerWidget {
                   ),
                 ],
               ),
+              // Schedule Order Button (for non-Dine-In orders)
+              if (state.orderType != OrderType.dineIn && items.isNotEmpty) ...[
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => const ScheduleOrderDialog(),
+                    );
+                  },
+                  icon: Icon(
+                    Icons.schedule,
+                    size: 18,
+                    color: state.scheduledFor != null
+                        ? AppColors.primary
+                        : AppColors.textSecondary,
+                  ),
+                  label: Text(
+                    state.scheduledFor != null
+                        ? 'Scheduled: ${formatScheduledTime(state.scheduledFor!, state.scheduledOrderTime)}'
+                        : 'Schedule Order',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontWeight: state.scheduledFor != null
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                      color: state.scheduledFor != null
+                          ? AppColors.primary
+                          : AppColors.textSecondary,
+                    ),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    side: BorderSide(
+                      color: state.scheduledFor != null
+                          ? AppColors.primary
+                          : AppColors.border,
+                      width: state.scheduledFor != null ? 2 : 1,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
               Row(
                 children: [
