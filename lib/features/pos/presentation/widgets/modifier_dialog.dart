@@ -161,6 +161,9 @@ class _ModifierDialogState extends ConsumerState<ModifierDialog> {
                           .addToCart(
                             widget.product,
                             customizations: List.from(_selectedOptions),
+                            note: _noteController.text.trim().isEmpty
+                                ? null
+                                : _noteController.text.trim(),
                           );
                       Navigator.pop(context);
                     },

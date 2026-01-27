@@ -521,7 +521,7 @@ class _CartPageState extends ConsumerState<CartPage> {
           modifiers: cartItem.selectedCustomizations
               .map((c) => DineInModifier(name: c.name, price: c.price))
               .toList(),
-          specialInstructions: null,
+          specialInstructions: cartItem.note,
         );
       }).toList();
 

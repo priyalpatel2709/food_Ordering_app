@@ -431,14 +431,22 @@ class _OrderCard extends ConsumerWidget {
             SizedBox(height: 0.8.h),
             const Divider(height: 1),
             SizedBox(height: 0.8.h),
-            ...stationItems.map((item) => _buildItemRow(context, ref, item)),
+            ...stationItems.map(
+              (item) =>
+                  _buildItemRow(context, ref, item, order.specialInstructions),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildItemRow(BuildContext context, WidgetRef ref, KdsOrderItem item) {
+  Widget _buildItemRow(
+    BuildContext context,
+    WidgetRef ref,
+    KdsOrderItem item,
+    String? specialInstructions,
+  ) {
     final bool isDesktop = Device.width > 900;
     final isCurrentStage = item.status == currentStage;
 
@@ -493,35 +501,48 @@ class _OrderCard extends ConsumerWidget {
                 ),
               ],
             ),
-            if (item.modifiers.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.only(left: 32, top: 4),
-                child: Wrap(
-                  spacing: 4,
-                  children: item.modifiers
-                      .map(
-                        (m) => Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 4,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.grey.shade100,
-                            borderRadius: BorderRadius.circular(2),
-                          ),
-                          child: Text(
-                            m,
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: Colors.grey[700],
-                            ),
+
+            // if (item.s.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(left: 32, top: 4),
+              child: Wrap(
+                spacing: 4,
+                children: item.modifiers
+                    .map(
+                      (m) => Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 4,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(2),
+                        ),
+                        child: Text(
+                          m,
+                          style: TextStyle(
+                            fontSize: 10,
+                            color: Colors.grey[700],
                           ),
                         ),
-                      )
-                      .toList(),
+                      ),
+                    )
+                    .toList(),
+              ),
+            ),
+            //note
+            if (item.specialInstructions?.isNotEmpty ?? false)
+              Padding(
+                padding: const EdgeInsets.only(left: 32, top: 4),
+                child: Text(
+                  item.specialInstructions ?? '123',
+                  style: TextStyle(
+                    fontSize: isDesktop ? 12.sp : 14.sp,
+
+                    // Maybe strikethrough if done?
+                  ),
                 ),
               ),
-
             // Action Button
             if (isCurrentStage)
               Padding(

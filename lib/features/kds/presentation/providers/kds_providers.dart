@@ -50,8 +50,8 @@ final kdsSocketProvider = StreamProvider.autoDispose<List<KdsOrder>>((
         .read(kdsRemoteDataSourceProvider)
         .getOrders();
     yield currentOrders;
-  } catch (e) {
-    log('Error fetching initial KDS orders: $e');
+  } catch (e, st) {
+    log('Error fetching initial KDS orders: $e , $st');
   }
 
   // Listen for socket updates and re-fetch orders

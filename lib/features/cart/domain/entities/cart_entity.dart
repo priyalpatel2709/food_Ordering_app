@@ -11,6 +11,7 @@ class CartItemEntity {
   final List<CustomizationSelection> selectedCustomizations;
   final DateTime addedAt;
   final TaxRateEntity? taxRate; // Tax rate for this item (e.g., 0.1 for 10%)
+  final String? note; // Note for special instructions
 
   const CartItemEntity({
     required this.id,
@@ -22,6 +23,7 @@ class CartItemEntity {
     required this.selectedCustomizations,
     required this.addedAt,
     this.taxRate, // Default 10% tax
+    this.note,
   });
 
   /// Get price per item (base + customizations)
@@ -66,6 +68,7 @@ class CartItemEntity {
     List<CustomizationSelection>? selectedCustomizations,
     DateTime? addedAt,
     TaxRateEntity? taxRate,
+    String? note,
   }) {
     return CartItemEntity(
       id: id ?? this.id,
@@ -78,6 +81,7 @@ class CartItemEntity {
           selectedCustomizations ?? this.selectedCustomizations,
       addedAt: addedAt ?? this.addedAt,
       taxRate: taxRate ?? this.taxRate,
+      note: note ?? this.note,
     );
   }
 

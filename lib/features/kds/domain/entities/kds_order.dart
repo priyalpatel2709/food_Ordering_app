@@ -41,6 +41,7 @@ class KdsOrderItem {
   final int quantity;
   final String status;
   final String? category; // Category ID or Name
+  final String? specialInstructions; 
   final Map<String, dynamic>? itemDetails;
   final List<String> modifiers;
 
@@ -51,6 +52,7 @@ class KdsOrderItem {
     required this.status,
     this.category,
     this.itemDetails,
+    this.specialInstructions,
     this.modifiers = const [],
   });
 
@@ -93,6 +95,7 @@ class KdsOrderItem {
 
     return KdsOrderItem(
       id: json['_id'] ?? json['id'] ?? '',
+      specialInstructions: json['specialInstructions'] ?? json['specialInstructions'] ?? '',
       name: name,
       quantity: json['quantity'] ?? 1,
       status: json['status'] ?? json['itemStatus'] ?? 'new',
@@ -107,6 +110,7 @@ class KdsOrder {
   final String id;
   final String orderId; // printable ID
   final String? tableNumber;
+  final String? specialInstructions;
   final String kdsStatus;
   final List<KdsOrderItem> items;
   final DateTime createdAt;
@@ -115,6 +119,7 @@ class KdsOrder {
     required this.id,
     required this.orderId,
     this.tableNumber,
+    this.specialInstructions,
     required this.kdsStatus,
     required this.items,
     required this.createdAt,
@@ -126,6 +131,7 @@ class KdsOrder {
       orderId: json['orderId'] ?? '',
       tableNumber: json['tableNumber'],
       kdsStatus: json['kdsStatus'] ?? 'new',
+      specialInstructions: json['specialInstructions'] ?? '',
       items:
           (json['orderItems'] as List<dynamic>?)
               ?.map((e) => KdsOrderItem.fromJson(e))

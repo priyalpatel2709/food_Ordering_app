@@ -179,12 +179,14 @@ class PosNotifier extends StateNotifier<PosState> {
   void addToCart(
     MenuItemEntity product, {
     List<CustomizationSelection> customizations = const [],
+    String? note,
   }) {
     // If we have customizations, we always add as a new item or find an exact match
     final existingIndex = state.cartItems.indexWhere(
       (item) =>
           item.menuItemId == product.id &&
-          _areCustomizationsSame(item.selectedCustomizations, customizations),
+          _areCustomizationsSame(item.selectedCustomizations, customizations) &&
+          item.note == note,
     );
 
     if (existingIndex >= 0) {
@@ -200,6 +202,7 @@ class PosNotifier extends StateNotifier<PosState> {
         selectedCustomizations: customizations,
         addedAt: DateTime.now(),
         taxRate: product.taxRate,
+        note: note,
       );
       state = state.copyWith(cartItems: [...state.cartItems, newItem]);
     }
@@ -305,6 +308,7 @@ class PosNotifier extends StateNotifier<PosState> {
             modifiers: cartItem.selectedCustomizations
                 .map((m) => DineInModifier(name: m.name, price: m.price))
                 .toList(),
+            specialInstructions: cartItem.note,
           );
         }).toList();
 
@@ -345,7 +349,9 @@ class PosNotifier extends StateNotifier<PosState> {
           item: cartItem.menuItemId,
           quantity: cartItem.quantity,
           price: cartItem.basePrice,
-          customizationOptions: [],
+          customizationOptions: cartItem.selectedCustomizations
+              .map((m) => DineInModifier(name: m.name, price: m.price))
+              .toList(),
         );
       }).toList();
 
@@ -389,6 +395,7 @@ class PosNotifier extends StateNotifier<PosState> {
             modifiers: cartItem.selectedCustomizations
                 .map((m) => DineInModifier(name: m.name, price: m.price))
                 .toList(),
+            specialInstructions: cartItem.note,
           );
         }).toList();
         await _addItemsToDineInOrder.call(orderId, dineInItems);

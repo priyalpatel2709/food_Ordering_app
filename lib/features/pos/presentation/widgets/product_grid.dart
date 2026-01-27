@@ -171,122 +171,180 @@ class ProductCard extends ConsumerWidget {
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(color: AppColors.border.withOpacity(0.5)),
         ),
-        child: InkWell(
-          onTap: isAvailable
-              ? () => ref.read(posNotifierProvider.notifier).addToCart(product)
-              : null,
-          onLongPress: isAvailable
-              ? () => showDialog(
-                  context: context,
-                  builder: (context) => ModifierDialog(product: product),
-                )
-              : null,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              // Image Section
-              Expanded(
-                flex: 4,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    Image.network(
-                      product.image,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(
-                        color: AppColors.primaryContainer.withOpacity(0.3),
-                        child: Icon(
-                          Icons.restaurant,
-                          color: AppColors.primary,
-                          size: 32,
-                        ),
-                      ),
-                    ),
-                    if (!isAvailable)
-                      Container(
-                        color: Colors.black45,
-                        alignment: Alignment.center,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: AppColors.error,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: const Text(
-                            'UNAVAILABLE',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
+        child: Stack(
+          children: [
+            InkWell(
+              onTap: isAvailable
+                  ? () {
+                      if (product.customizationOptions.isNotEmpty) {
+                        showDialog(
+                          context: context,
+                          builder: (context) =>
+                              ModifierDialog(product: product),
+                        );
+                      } else {
+                        ref
+                            .read(posNotifierProvider.notifier)
+                            .addToCart(product);
+                      }
+                    }
+                  : null,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Image Section
+                  Expanded(
+                    flex: 4,
+                    child: Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.network(
+                          product.image,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) => Container(
+                            color: AppColors.primaryContainer.withOpacity(0.3),
+                            child: Icon(
+                              Icons.restaurant,
+                              color: AppColors.primary,
+                              size: 32,
                             ),
                           ),
                         ),
-                      ),
-                  ],
-                ),
-              ),
-
-              // Info Section
-              Expanded(
-                flex: 3,
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: AutoSizeText(
-                          product.name,
-                          maxLines: 2,
-                          minFontSize: 11,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 11.sp,
-                            color: AppColors.textPrimary,
+                        if (product.customizationOptions.isNotEmpty)
+                          Positioned(
+                            top: 8,
+                            right: 8,
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: AppColors.white.withOpacity(0.9),
+                                shape: BoxShape.circle,
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.1),
+                                    blurRadius: 4,
+                                  ),
+                                ],
+                              ),
+                              child: Icon(
+                                Icons.tune,
+                                size: 14,
+                                color: AppColors.primary,
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        if (!isAvailable)
+                          Container(
+                            color: Colors.black45,
+                            alignment: Alignment.center,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 4,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.error,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: const Text(
+                                'UNAVAILABLE',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  // Info Section
+                  Expanded(
+                    flex: 3,
+                    child: Padding(
+                      padding: const EdgeInsets.all(12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Expanded(
                             child: AutoSizeText(
-                              '\$${product.price.toStringAsFixed(2)}',
-                              maxLines: 1,
-                              minFontSize: 12,
+                              product.name,
+                              maxLines: 2,
+                              minFontSize: 11,
+                              overflow: TextOverflow.ellipsis,
                               style: TextStyle(
-                                fontWeight: FontWeight.w900,
-                                fontSize: 12.sp,
-                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11.sp,
+                                color: AppColors.textPrimary,
                               ),
                             ),
                           ),
-                          if (isAvailable)
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(8),
+                          const SizedBox(height: 8),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: AutoSizeText(
+                                  '\$${product.price.toStringAsFixed(2)}',
+                                  maxLines: 1,
+                                  minFontSize: 12,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w900,
+                                    fontSize: 12.sp,
+                                    color: AppColors.primary,
+                                  ),
+                                ),
                               ),
-                              child: const Icon(
-                                Icons.add,
-                                size: 18,
-                                color: AppColors.primary,
-                              ),
-                            ),
+                              const SizedBox(
+                                width: 40,
+                              ), // Spacer for the floating button
+                            ],
+                          ),
                         ],
                       ),
-                    ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            // Direct Add Button (Quick Add)
+            if (isAvailable)
+              Positioned(
+                bottom: 12,
+                right: 12,
+                child: Material(
+                  color: AppColors.primary,
+                  borderRadius: BorderRadius.circular(12),
+                  elevation: 4,
+                  shadowColor: AppColors.primary.withOpacity(0.4),
+                  child: InkWell(
+                    onTap: () {
+                      ref.read(posNotifierProvider.notifier).addToCart(product);
+                      ScaffoldMessenger.of(context).clearSnackBars();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${product.name} added to cart'),
+                          duration: const Duration(milliseconds: 500),
+                          backgroundColor: Colors.black87,
+                          behavior: SnackBarBehavior.floating,
+                          width: 200,
+                        ),
+                      );
+                    },
+                    borderRadius: BorderRadius.circular(12),
+                    child: Container(
+                      padding: const EdgeInsets.all(10),
+                      child: const Icon(
+                        Icons.add,
+                        size: 20,
+                        color: Colors.white,
+                      ),
+                    ),
                   ),
                 ),
               ),
-            ],
-          ),
+          ],
         ),
       ),
     );

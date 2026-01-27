@@ -390,17 +390,33 @@ class _CartItemTile extends ConsumerWidget {
                       item.menuItemName,
                       style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
-                    if (item.selectedCustomizations.isNotEmpty)
+                    if (item.selectedCustomizations.isNotEmpty ||
+                        item.note != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          item.selectedCustomizations
-                              .map((c) => c.name)
-                              .join(', '),
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.textSecondary,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (item.selectedCustomizations.isNotEmpty)
+                              Text(
+                                item.selectedCustomizations
+                                    .map((c) => c.name)
+                                    .join(', '),
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            if (item.note != null)
+                              Text(
+                                'Note: ${item.note}',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: AppColors.primary,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                   ],
@@ -519,15 +535,31 @@ class _OngoingItemTile extends StatelessWidget {
                         color: AppColors.textPrimary.withOpacity(0.8),
                       ),
                     ),
-                    if (item.modifiers.isNotEmpty)
+                    if (item.modifiers.isNotEmpty ||
+                        item.specialInstructions != null)
                       Padding(
                         padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          item.modifiers.map((m) => m.name).join(', '),
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: AppColors.textSecondary,
-                          ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            if (item.modifiers.isNotEmpty)
+                              Text(
+                                item.modifiers.map((m) => m.name).join(', '),
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            if (item.specialInstructions != null)
+                              Text(
+                                'Note: ${item.specialInstructions}',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.primary,
+                                  fontStyle: FontStyle.italic,
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                   ],
