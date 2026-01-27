@@ -32,6 +32,7 @@ class CreateOrderRequest {
   final double restaurantTipCharge;
   final double deliveryCharge;
   final double deliveryTipCharge;
+  final String orderType; // ID from orderTypes API
   // final String restaurantId;
 
   const CreateOrderRequest({
@@ -41,6 +42,7 @@ class CreateOrderRequest {
     this.restaurantTipCharge = 0,
     this.deliveryCharge = 0,
     this.deliveryTipCharge = 0,
+    required this.orderType,
     // required this.restaurantId,
   });
 
@@ -52,6 +54,7 @@ class CreateOrderRequest {
       'restaurantTipCharge': restaurantTipCharge,
       'deliveryCharge': deliveryCharge,
       'deliveryTipCharge': deliveryTipCharge,
+      'orderType': orderType,
       // 'restaurantId': restaurantId,
     };
   }

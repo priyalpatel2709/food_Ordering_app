@@ -8,6 +8,7 @@ import 'package:food_order_app/features/menu/domain/usecases/get_all_menus_use_c
 import 'package:food_order_app/features/menu/domain/usecases/get_current_menu_use_case.dart';
 import 'package:food_order_app/features/order/domain/entities/order_entity.dart';
 import 'package:food_order_app/features/order/presentation/providers/order_provider.dart';
+import 'package:food_order_app/features/order/domain/usecases/get_order_types_usecase.dart';
 import 'package:food_order_app/features/cart/domain/entities/cart_entity.dart';
 import '../../../dine_in/domain/entities/payment_entity.dart';
 import '../../../dine_in/presentation/providers/dine_in_providers.dart';
@@ -26,6 +27,7 @@ final posNotifierProvider = StateNotifierProvider<PosNotifier, PosState>((ref) {
   final addItemsToDineInOrder = ref.watch(addItemsToDineInOrderUseCaseProvider);
   final getDineInOrderDetails = ref.watch(getDineInOrderDetailsUseCaseProvider);
   final completeDineInPayment = ref.watch(completeDineInPaymentUseCaseProvider);
+  final getOrderTypes = ref.watch(getOrderTypesUseCaseProvider);
 
   return PosNotifier(
     getAllMenus: getAllMenus,
@@ -35,6 +37,7 @@ final posNotifierProvider = StateNotifierProvider<PosNotifier, PosState>((ref) {
     addItemsToDineInOrder: addItemsToDineInOrder,
     getDineInOrderDetails: getDineInOrderDetails,
     completeDineInPayment: completeDineInPayment,
+    getOrderTypes: getOrderTypes,
   );
 });
 
@@ -46,6 +49,7 @@ class PosNotifier extends StateNotifier<PosState> {
   final AddItemsToDineInOrderUseCase _addItemsToDineInOrder;
   final GetDineInOrderDetailsUseCase _getDineInOrderDetails;
   final CompleteDineInPaymentUseCase _completeDineInPayment;
+  final GetOrderTypesUseCase _getOrderTypes;
 
   PosNotifier({
     required GetAllMenusUseCase getAllMenus,
@@ -55,6 +59,7 @@ class PosNotifier extends StateNotifier<PosState> {
     required AddItemsToDineInOrderUseCase addItemsToDineInOrder,
     required GetDineInOrderDetailsUseCase getDineInOrderDetails,
     required CompleteDineInPaymentUseCase completeDineInPayment,
+    required GetOrderTypesUseCase getOrderTypes,
   }) : _getAllMenus = getAllMenus,
        _getCurrentMenu = getCurrentMenu,
        _orderNotifier = orderNotifier,
@@ -62,8 +67,43 @@ class PosNotifier extends StateNotifier<PosState> {
        _addItemsToDineInOrder = addItemsToDineInOrder,
        _getDineInOrderDetails = getDineInOrderDetails,
        _completeDineInPayment = completeDineInPayment,
+       _getOrderTypes = getOrderTypes,
        super(const PosState(categories: [], products: [])) {
-    fetchProductsAndCategories();
+    _init();
+  }
+
+  Future<void> _init() async {
+    await fetchOrderTypes();
+    await fetchProductsAndCategories();
+  }
+
+  Future<void> fetchOrderTypes() async {
+    try {
+      final types = await _getOrderTypes.call();
+      state = state.copyWith(availableOrderTypes: types);
+
+      // Set default dynamic order type based on current orderType enum
+      _syncDynamicOrderType();
+    } catch (e) {
+      log('Error fetching order types: $e');
+    }
+  }
+
+  void _syncDynamicOrderType() {
+    if (state.availableOrderTypes.isEmpty) return;
+
+    final typeName = switch (state.orderType) {
+      OrderType.dineIn => 'Dine_In',
+      OrderType.takeaway => 'Take_away',
+      OrderType.delivery => 'Delivery',
+    };
+
+    final dynamicType = state.availableOrderTypes.firstWhere(
+      (t) => t.orderType.toLowerCase() == typeName.toLowerCase(),
+      orElse: () => state.availableOrderTypes.first,
+    );
+
+    state = state.copyWith(dynamicOrderType: dynamicType);
   }
 
   Future<void> fetchProductsAndCategories({String? menuId}) async {
@@ -216,6 +256,7 @@ class PosNotifier extends StateNotifier<PosState> {
 
   void setOrderType(OrderType type) {
     state = state.copyWith(orderType: type);
+    _syncDynamicOrderType();
   }
 
   void setCustomerName(String name) {
@@ -244,10 +285,15 @@ class PosNotifier extends StateNotifier<PosState> {
   Future<void> placeOrder() async {
     if (state.cartItems.isEmpty) return;
 
-    state = state.copyWith(isLoading: true);
+    if (state.orderType == OrderType.dineIn && state.tableNumber == null) {
+      state = state.copyWith(error: 'Please select a table for Dine-In order');
+      return;
+    }
+
+    state = state.copyWith(isLoading: true, error: null);
 
     try {
-      if (state.orderType == OrderType.dineIn && state.tableNumber != null) {
+      if (state.orderType == OrderType.dineIn) {
         final dineInItems = state.cartItems.map((cartItem) {
           return DineInOrderItem(
             id: cartItem.id,
@@ -262,15 +308,15 @@ class PosNotifier extends StateNotifier<PosState> {
           );
         }).toList();
 
-        if (state.ongoingOrderId != null) {
+        if (state.ongoingOrderId != null && state.ongoingOrderId!.isNotEmpty) {
           // Add items to ongoing order
-          await _addItemsToDineInOrder.call(state.ongoingOrderId!, dineInItems);
-
-          // Refresh order details to show new items in "Ordered" section
-          final order = await _getDineInOrderDetails.call(
+          final order = await _addItemsToDineInOrder.call(
             state.ongoingOrderId!,
+            dineInItems,
           );
+
           state = state.copyWith(
+            ongoingOrderId: order.id,
             ongoingOrder: order,
             cartItems: [],
             isLoading: false,
@@ -280,6 +326,7 @@ class PosNotifier extends StateNotifier<PosState> {
           final order = await _createDineInOrder.call(
             state.tableNumber!,
             items: dineInItems,
+            orderTypeId: state.dynamicOrderType?.id,
           );
           state = state.copyWith(
             ongoingOrderId: order.id,
@@ -316,6 +363,7 @@ class PosNotifier extends StateNotifier<PosState> {
         restaurantTipCharge: 0,
         deliveryCharge: state.orderType == OrderType.delivery ? 5.0 : 0.0,
         deliveryTipCharge: 0,
+        orderType: state.dynamicOrderType?.id ?? '',
       );
 
       await _orderNotifier.createOrder(request);

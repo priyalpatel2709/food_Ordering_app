@@ -9,7 +9,12 @@ class CreateDineInOrderUseCase {
   Future<DineInOrderEntity> call(
     String tableNumber, {
     List<DineInOrderItem>? items,
+    String? orderTypeId,
   }) {
-    return _repository.createDineInOrder(tableNumber, items: items);
+    return _repository.createDineInOrder(
+      tableNumber,
+      items: items,
+      orderTypeId: orderTypeId,
+    );
   }
 }

@@ -1,6 +1,7 @@
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../domain/entities/order_entity.dart';
+import '../../domain/entities/order_type_entity.dart';
 
 /// Remote data source for orders
 abstract class OrderRemoteDataSource {
@@ -8,6 +9,7 @@ abstract class OrderRemoteDataSource {
   Future<OrderEntity> getOrder(String orderId);
   Future<List<OrderEntity>> getOrders();
   Future<List<OrderEntity>> getMyOrders();
+  Future<List<OrderTypeEntity>> getOrderTypes();
   Future<void> refundOrder(String orderId, double amount, String reason);
 }
 
@@ -49,7 +51,7 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
   Future<List<OrderEntity>> getOrders() async {
     final response = await _dioClient.get(
       '${ApiConstants.v1}${ApiConstants.orders}',
-      queryParameters: {"sort":"-1"},
+      queryParameters: {"sort": "-1"},
     );
 
     final data = response.data as Map<String, dynamic>;
@@ -79,6 +81,23 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
       return orders;
     } else {
       throw Exception(data['message'] ?? 'Failed to get my orders');
+    }
+  }
+
+  @override
+  Future<List<OrderTypeEntity>> getOrderTypes() async {
+    final response = await _dioClient.get(
+      '${ApiConstants.v1}${ApiConstants.orderTypeEndpoint}',
+    );
+
+    final data = response.data as Map<String, dynamic>;
+    if (data['status'] == 'success') {
+      final list = (data['data'] as List)
+          .map((item) => OrderTypeEntity.fromJson(item as Map<String, dynamic>))
+          .toList();
+      return list;
+    } else {
+      throw Exception(data['message'] ?? 'Failed to get order types');
     }
   }
 

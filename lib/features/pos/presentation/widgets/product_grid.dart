@@ -142,7 +142,7 @@ class ProductGrid extends ConsumerWidget {
           Text(
             'No products found',
             style: TextStyle(
-              fontSize: 16.sp,
+              fontSize: 14.sp,
               fontWeight: FontWeight.bold,
               color: AppColors.textSecondary,
             ),
@@ -245,7 +245,7 @@ class ProductCard extends ConsumerWidget {
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
-                            fontSize: 13.sp,
+                            fontSize: 11.sp,
                             color: AppColors.textPrimary,
                           ),
                         ),
@@ -261,7 +261,7 @@ class ProductCard extends ConsumerWidget {
                               minFontSize: 12,
                               style: TextStyle(
                                 fontWeight: FontWeight.w900,
-                                fontSize: 14.sp,
+                                fontSize: 12.sp,
                                 color: AppColors.primary,
                               ),
                             ),

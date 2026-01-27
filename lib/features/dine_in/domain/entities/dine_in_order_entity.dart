@@ -83,6 +83,7 @@ class DineInOrderEntity {
   final String status;
   final List<DineInOrderItem> items;
   final double totalAmount;
+  final String orderType;
 
   const DineInOrderEntity({
     required this.id,
@@ -90,6 +91,7 @@ class DineInOrderEntity {
     required this.status,
     required this.items,
     required this.totalAmount,
+    required this.orderType,
   });
 
   factory DineInOrderEntity.fromJson(Map<String, dynamic> json) {
@@ -108,6 +110,7 @@ class DineInOrderEntity {
                   json['totalAmount'] ??
                   0)
               .toDouble(),
+      orderType: json['OrderType'] ?? json['OrderType'] ?? '',
     );
   }
 

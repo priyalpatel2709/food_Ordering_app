@@ -89,7 +89,7 @@ class _PosHeaderState extends ConsumerState<PosHeader> {
                     Text(
                       'POS',
                       style: TextStyle(
-                        fontSize: isDesktop ? 15.sp : 16.sp,
+                        fontSize: isDesktop ? 13.sp : 14.sp,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
                         height: 1.1,
@@ -99,7 +99,7 @@ class _PosHeaderState extends ConsumerState<PosHeader> {
                       Text(
                         'Branch: Downtown',
                         style: TextStyle(
-                          fontSize: isDesktop ? 10.sp : 11.sp,
+                          fontSize: isDesktop ? 9.sp : 10.sp,
                           color: AppColors.textSecondary,
                         ),
                       ),
@@ -152,7 +152,7 @@ class _PosHeaderState extends ConsumerState<PosHeader> {
                     ).format(_currentTime),
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      fontSize: isDesktop ? 13.sp : 13.sp,
+                      fontSize: isDesktop ? 11.sp : 12.sp,
                     ),
                   ),
                 ],
@@ -173,64 +173,64 @@ class _PosHeaderState extends ConsumerState<PosHeader> {
                   size: isDesktop ? 1.4.w : 18,
                 ),
               ),
-              if (isDesktop) SizedBox(width: 0.6.w),
-              if (isDesktop)
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'John Doe',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12.sp,
-                        height: 1.1,
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          decoration: const BoxDecoration(
-                            color: AppColors.success,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          'Shift Active',
-                          style: TextStyle(
-                            fontSize: 10.sp,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+              // if (isDesktop) SizedBox(width: 0.6.w),
+              // if (isDesktop)
+              //   Column(
+              //     mainAxisAlignment: MainAxisAlignment.center,
+              //     crossAxisAlignment: CrossAxisAlignment.start,
+              //     children: [
+              //       Text(
+              //         'John Doe',
+              //         style: TextStyle(
+              //           fontWeight: FontWeight.bold,
+              //           fontSize: 11.sp,
+              //           height: 1.1,
+              //         ),
+              //       ),
+              //       Row(
+              //         children: [
+              //           Container(
+              //             width: 4,
+              //             height: 4,
+              //             decoration: const BoxDecoration(
+              //               color: AppColors.success,
+              //               shape: BoxShape.circle,
+              //             ),
+              //           ),
+              //           const SizedBox(width: 4),
+              //           Text(
+              //             'Shift Active',
+              //             style: TextStyle(
+              //               fontSize: 9.sp,
+              //               color: AppColors.textSecondary,
+              //             ),
+              //           ),
+              //         ],
+              //       ),
+              //     ],
+              //   ),
             ],
           ),
 
           SizedBox(width: 0.8.w),
 
           // Settings Icon
-          IconButton(
-            onPressed: () {},
-            icon: Icon(
-              Icons.settings_outlined,
-              color: AppColors.textSecondary,
-              size: isDesktop ? 1.4.w : 22,
-            ),
-            padding: EdgeInsets.zero,
-            constraints: const BoxConstraints(),
-            style: IconButton.styleFrom(
-              backgroundColor: AppColors.grey100,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
-              ),
-            ),
-          ),
+          // IconButton(
+          //   onPressed: () {},
+          //   icon: Icon(
+          //     Icons.settings_outlined,
+          //     color: AppColors.textSecondary,
+          //     size: isDesktop ? 1.4.w : 22,
+          //   ),
+          //   padding: EdgeInsets.zero,
+          //   constraints: const BoxConstraints(),
+          //   style: IconButton.styleFrom(
+          //     backgroundColor: AppColors.grey100,
+          //     shape: RoundedRectangleBorder(
+          //       borderRadius: BorderRadius.circular(8),
+          //     ),
+          //   ),
+          // ),
         ],
       ),
     );
@@ -290,7 +290,7 @@ class _PosHeaderState extends ConsumerState<PosHeader> {
                 Text(
                   'ACTIVE MENU',
                   style: TextStyle(
-                    fontSize: 10.sp,
+                    fontSize: 8.5.sp,
                     fontWeight: FontWeight.bold,
                     color: AppColors.primary,
                     letterSpacing: 0.5,
@@ -299,7 +299,7 @@ class _PosHeaderState extends ConsumerState<PosHeader> {
                 Text(
                   selectedMenu?.name ?? 'Select Menu',
                   style: TextStyle(
-                    fontSize: 13.sp,
+                    fontSize: 11.sp,
                     fontWeight: FontWeight.w600,
                     color: AppColors.textPrimary,
                   ),
@@ -393,7 +393,7 @@ class _PosHeaderState extends ConsumerState<PosHeader> {
                   : 'Select Table',
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: isDesktop ? 12.sp : 13.sp,
+                fontSize: isDesktop ? 10.5.sp : 11.sp,
                 color: state.tableNumber != null
                     ? AppColors.primary
                     : AppColors.textPrimary,
@@ -411,7 +411,7 @@ class _PosHeaderState extends ConsumerState<PosHeader> {
                   'ACTIVE',
                   style: TextStyle(
                     color: Colors.white,
-                    fontSize: 9.sp,
+                    fontSize: 8.sp,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

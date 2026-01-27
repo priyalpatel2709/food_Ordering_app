@@ -6,6 +6,9 @@ import '../../../../shared/theme/app_colors.dart';
 import '../../../dine_in/domain/entities/dine_in_order_entity.dart';
 import '../../../dine_in/domain/entities/payment_entity.dart';
 import '../providers/pos_provider.dart';
+import '../providers/pos_state.dart';
+
+import './table_selection_dialog.dart';
 
 class OrderBuilder extends ConsumerWidget {
   const OrderBuilder({super.key});
@@ -35,7 +38,7 @@ class OrderBuilder extends ConsumerWidget {
                     child: Text(
                       'Your Cart',
                       style: TextStyle(
-                        fontSize: 16.sp,
+                        fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -68,7 +71,7 @@ class OrderBuilder extends ConsumerWidget {
                       style: TextStyle(
                         color: AppColors.primary,
                         fontWeight: FontWeight.bold,
-                        fontSize: 12.sp,
+                        fontSize: 10.5.sp,
                       ),
                     ),
                   ),
@@ -90,7 +93,7 @@ class OrderBuilder extends ConsumerWidget {
                         child: Text(
                           'NEW ITEMS',
                           style: TextStyle(
-                            fontSize: 12.sp,
+                            fontSize: 10.5.sp,
                             fontWeight: FontWeight.bold,
                             color: AppColors.textSecondary,
                             letterSpacing: 1,
@@ -109,7 +112,7 @@ class OrderBuilder extends ConsumerWidget {
                             Text(
                               'ORDERED ITEMS',
                               style: TextStyle(
-                                fontSize: 12.sp,
+                                fontSize: 10.5.sp,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.success,
                                 letterSpacing: 1,
@@ -129,7 +132,7 @@ class OrderBuilder extends ConsumerWidget {
                                 ongoingOrder.status.toUpperCase(),
                                 style: TextStyle(
                                   color: AppColors.success,
-                                  fontSize: 10.sp,
+                                  fontSize: 8.sp,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
@@ -171,14 +174,14 @@ class OrderBuilder extends ConsumerWidget {
                   Text(
                     'Total Amount',
                     style: TextStyle(
-                      fontSize: 16.sp,
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
                     '\$${totalToPay.toStringAsFixed(2)}',
                     style: TextStyle(
-                      fontSize: 18.sp,
+                      fontSize: 16.sp,
                       fontWeight: FontWeight.w900,
                       color: AppColors.primary,
                     ),
@@ -193,11 +196,24 @@ class OrderBuilder extends ConsumerWidget {
                       child: SizedBox(
                         height: 50,
                         child: ElevatedButton(
-                          onPressed: () => ref
-                              .read(posNotifierProvider.notifier)
-                              .placeOrder(),
+                          onPressed: () {
+                            if (state.orderType == OrderType.dineIn &&
+                                state.tableNumber == null) {
+                              showDialog(
+                                context: context,
+                                builder: (context) =>
+                                    const TableSelectionDialog(),
+                              );
+                              return;
+                            }
+                            ref.read(posNotifierProvider.notifier).placeOrder();
+                          },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.secondary,
+                            backgroundColor:
+                                (state.orderType == OrderType.dineIn &&
+                                    state.tableNumber == null)
+                                ? AppColors.grey400
+                                : AppColors.secondary,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(8),
@@ -205,9 +221,12 @@ class OrderBuilder extends ConsumerWidget {
                             elevation: 0,
                           ),
                           child: Text(
-                            ongoingOrder != null
-                                ? 'ADD TO ORDER'
-                                : 'PLACE ORDER',
+                            (state.orderType == OrderType.dineIn &&
+                                    state.tableNumber == null)
+                                ? 'SELECT TABLE'
+                                : (ongoingOrder != null
+                                      ? 'ADD TO ORDER'
+                                      : 'PLACE ORDER'),
                             style: const TextStyle(fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -297,14 +316,14 @@ class OrderBuilder extends ConsumerWidget {
         children: [
           Text(
             label,
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 13.sp),
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 11.sp),
           ),
           Text(
             '${amount < 0 ? "-" : ""}\$${amount.abs().toStringAsFixed(2)}',
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: isDiscount ? AppColors.error : AppColors.textPrimary,
-              fontSize: 14.sp,
+              fontSize: 12.sp,
             ),
           ),
         ],
@@ -326,7 +345,7 @@ class OrderBuilder extends ConsumerWidget {
           Text(
             'Cart is empty',
             style: TextStyle(
-              fontSize: 16.sp,
+              fontSize: 14.sp,
               color: AppColors.textSecondary,
               fontWeight: FontWeight.bold,
             ),

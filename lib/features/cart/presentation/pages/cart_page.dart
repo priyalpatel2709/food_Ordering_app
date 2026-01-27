@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -473,6 +474,19 @@ class _CartPageState extends ConsumerState<CartPage> {
         ? <String>[selectedDiscount.id!]
         : <String>[];
 
+    // Fetch order types to get the correct ID for Take-away
+    String otId = '';
+    try {
+      final orderTypes = await ref.read(getOrderTypesUseCaseProvider).call();
+      final takeAway = orderTypes.firstWhere(
+        (t) => t.orderType.toLowerCase() == 'take_away',
+        orElse: () => orderTypes.first,
+      );
+      otId = takeAway.id;
+    } catch (e) {
+      log('Error fetching order types for cart checkout: $e');
+    }
+
     final orderRequest = CreateOrderRequest(
       orderItems: orderItems,
       tax: taxIds,
@@ -480,6 +494,7 @@ class _CartPageState extends ConsumerState<CartPage> {
       restaurantTipCharge: 0,
       deliveryCharge: 0,
       deliveryTipCharge: 0,
+      orderType: otId,
     );
 
     ref.read(orderNotifierProvider.notifier).createOrder(orderRequest);

@@ -38,9 +38,11 @@ class DineInRemoteDataSource {
   Future<DineInOrderEntity> createDineInOrder(
     String tableNumber, {
     List<DineInOrderItem>? items,
+    String? orderTypeId,
   }) async {
     final body = {
       'tableNumber': tableNumber,
+      if (orderTypeId != null) 'orderType': orderTypeId,
       if (items != null && items.isNotEmpty)
         'items': items
             .map(
@@ -57,7 +59,12 @@ class DineInRemoteDataSource {
       ApiConstants.v1 + ApiConstants.orders + ApiConstants.dineIn,
       data: body,
     );
-    return DineInOrderEntity.fromJson(response.data);
+
+    final data = response.data;
+    if (data is Map && data['data'] != null) {
+      return DineInOrderEntity.fromJson(data['data']);
+    }
+    return DineInOrderEntity.fromJson(data);
   }
 
   Future<DineInOrderEntity> addItemsToOrder(
@@ -80,17 +87,21 @@ class DineInRemoteDataSource {
       '${ApiConstants.v1}${ApiConstants.orders}${ApiConstants.dineIn}/$orderId/items',
       data: body,
     );
-    return DineInOrderEntity.fromJson(response.data);
+
+    final data = response.data;
+    if (data is Map && data['data'] != null) {
+      return DineInOrderEntity.fromJson(data['data']);
+    }
+    return DineInOrderEntity.fromJson(data);
   }
 
   Future<void> completePayment(
     String orderId,
     PaymentEntity paymentDetails,
   ) async {
-    final body = {'payment': paymentDetails};
     await _dioClient.post(
       '${ApiConstants.v1}${ApiConstants.orders}${ApiConstants.dineIn}/$orderId/pay',
-      data: body,
+      data: paymentDetails.toJson(),
     );
   }
 
@@ -98,7 +109,12 @@ class DineInRemoteDataSource {
     final response = await _dioClient.get(
       '${ApiConstants.v1}${ApiConstants.orders}/$orderId',
     );
-    return DineInOrderEntity.fromJson(response.data);
+
+    final data = response.data;
+    if (data is Map && data['data'] != null) {
+      return DineInOrderEntity.fromJson(data['data']);
+    }
+    return DineInOrderEntity.fromJson(data);
   }
 
   Future<void> deleteDineInOrder(String orderId) async {
@@ -114,7 +130,12 @@ class DineInRemoteDataSource {
     final response = await _dioClient.delete(
       '${ApiConstants.v1}${ApiConstants.orders}${ApiConstants.dineIn}/$orderId/item/$itemId',
     );
-    return DineInOrderEntity.fromJson(response.data);
+
+    final data = response.data;
+    if (data is Map && data['data'] != null) {
+      return DineInOrderEntity.fromJson(data['data']);
+    }
+    return DineInOrderEntity.fromJson(data);
   }
 
   Future<TableEntity> createTable(String tableNumber, int capacity) async {

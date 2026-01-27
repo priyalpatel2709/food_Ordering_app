@@ -100,14 +100,14 @@ class PosFooter extends ConsumerWidget {
                       'Cashier: Admin',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        fontSize: 13.sp,
+                        fontSize: 11.sp,
                       ),
                     ),
                     Text(
                       'ID: #1002',
                       style: TextStyle(
                         color: AppColors.textSecondary,
-                        fontSize: 11.sp,
+                        fontSize: 9.sp,
                       ),
                     ),
                   ],

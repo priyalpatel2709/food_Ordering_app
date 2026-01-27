@@ -5,6 +5,7 @@ import '../../../../core/network/dio_client.dart';
 import '../../data/datasources/order_remote_data_source.dart';
 import '../../data/repositories/order_repository.dart';
 import '../../domain/entities/order_entity.dart';
+import '../../domain/usecases/get_order_types_usecase.dart';
 
 /// Dio Client Provider
 final dioClientProvider = Provider<DioClient>((ref) {
@@ -19,6 +20,11 @@ final orderRemoteDataSourceProvider = Provider<OrderRemoteDataSource>((ref) {
 /// Order Repository Provider
 final orderRepositoryProvider = Provider<OrderRepository>((ref) {
   return OrderRepository(ref.watch(orderRemoteDataSourceProvider));
+});
+
+/// Get Order Types Use Case Provider
+final getOrderTypesUseCaseProvider = Provider<GetOrderTypesUseCase>((ref) {
+  return GetOrderTypesUseCase(ref.watch(orderRepositoryProvider));
 });
 
 /// Order State
@@ -150,7 +156,7 @@ class StaffOrdersNotifier extends StateNotifier<OrdersListState> {
     try {
       final orders = await _repository.getOrders();
       state = OrdersListSuccess(orders);
-    } catch (e,st) {
+    } catch (e, st) {
       log('get all orders error: $e, $st');
       state = OrdersListError(e.toString());
     }

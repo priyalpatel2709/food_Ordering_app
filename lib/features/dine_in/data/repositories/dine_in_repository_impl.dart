@@ -18,8 +18,13 @@ class DineInRepositoryImpl implements DineInRepository {
   Future<DineInOrderEntity> createDineInOrder(
     String tableNumber, {
     List<DineInOrderItem>? items,
+    String? orderTypeId,
   }) async {
-    return await _remoteDataSource.createDineInOrder(tableNumber, items: items);
+    return await _remoteDataSource.createDineInOrder(
+      tableNumber,
+      items: items,
+      orderTypeId: orderTypeId,
+    );
   }
 
   @override

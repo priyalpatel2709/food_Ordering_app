@@ -1,6 +1,7 @@
 import '../../../cart/domain/entities/cart_entity.dart';
 import '../../../menu/domain/entities/menu_entity.dart';
 import '../../../dine_in/domain/entities/dine_in_order_entity.dart';
+import '../../../order/domain/entities/order_type_entity.dart';
 
 enum OrderType { dineIn, takeaway, delivery }
 
@@ -13,6 +14,8 @@ class PosState {
   final String searchQuery;
   final List<CartItemEntity> cartItems;
   final OrderType orderType;
+  final List<OrderTypeEntity> availableOrderTypes;
+  final OrderTypeEntity? dynamicOrderType; // Selected dynamic order type
   final String? customerName;
   final String? customerPhone;
   final String? tableNumber;
@@ -30,6 +33,8 @@ class PosState {
     this.searchQuery = '',
     this.cartItems = const [],
     this.orderType = OrderType.dineIn,
+    this.availableOrderTypes = const [],
+    this.dynamicOrderType,
     this.customerName,
     this.customerPhone,
     this.tableNumber,
@@ -48,6 +53,8 @@ class PosState {
     String? searchQuery,
     List<CartItemEntity>? cartItems,
     OrderType? orderType,
+    List<OrderTypeEntity>? availableOrderTypes,
+    OrderTypeEntity? dynamicOrderType,
     String? customerName,
     String? customerPhone,
     String? tableNumber,
@@ -70,6 +77,8 @@ class PosState {
       searchQuery: searchQuery ?? this.searchQuery,
       cartItems: cartItems ?? this.cartItems,
       orderType: orderType ?? this.orderType,
+      availableOrderTypes: availableOrderTypes ?? this.availableOrderTypes,
+      dynamicOrderType: dynamicOrderType ?? this.dynamicOrderType,
       customerName: customerName ?? this.customerName,
       customerPhone: customerPhone ?? this.customerPhone,
       tableNumber: tableNumber ?? this.tableNumber,

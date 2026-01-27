@@ -86,7 +86,7 @@ class CategorySelector extends ConsumerWidget {
                         color: isSelected
                             ? Colors.white
                             : AppColors.textPrimary,
-                        fontSize: 12.sp,
+                        fontSize: 10.sp,
                       ),
                     ),
                   ],

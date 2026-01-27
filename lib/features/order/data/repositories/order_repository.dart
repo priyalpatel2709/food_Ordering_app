@@ -1,4 +1,5 @@
 import '../../domain/entities/order_entity.dart';
+import '../../domain/entities/order_type_entity.dart';
 import '../datasources/order_remote_data_source.dart';
 
 /// Order Repository Implementation
@@ -21,6 +22,10 @@ class OrderRepository {
 
   Future<List<OrderEntity>> getMyOrders() async {
     return await _remoteDataSource.getMyOrders();
+  }
+
+  Future<List<OrderTypeEntity>> getOrderTypes() async {
+    return await _remoteDataSource.getOrderTypes();
   }
 
   Future<void> refundOrder(String orderId, double amount, String reason) async {
