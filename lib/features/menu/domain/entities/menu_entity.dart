@@ -78,6 +78,7 @@ class CategoryEntity {
   final String description;
   final bool isActive;
   final int displayOrder;
+  final String? color;
 
   const CategoryEntity({
     required this.id,
@@ -85,6 +86,7 @@ class CategoryEntity {
     required this.description,
     required this.isActive,
     required this.displayOrder,
+    this.color,
   });
 
   CategoryEntity copyWith({
@@ -93,6 +95,7 @@ class CategoryEntity {
     String? description,
     bool? isActive,
     int? displayOrder,
+    String? color,
   }) {
     return CategoryEntity(
       id: id ?? this.id,
@@ -100,6 +103,7 @@ class CategoryEntity {
       description: description ?? this.description,
       isActive: isActive ?? this.isActive,
       displayOrder: displayOrder ?? this.displayOrder,
+      color: color ?? this.color,
     );
   }
 

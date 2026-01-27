@@ -8,7 +8,7 @@ class GetCurrentMenuUseCase {
 
   GetCurrentMenuUseCase(this._repository);
 
-  Future<Result<List<MenuEntity>>> execute() {
-    return _repository.getCurrentMenu();
+  Future<Result<List<MenuEntity>>> execute({String? menuId}) {
+    return _repository.getCurrentMenu(menuId: menuId);
   }
 }

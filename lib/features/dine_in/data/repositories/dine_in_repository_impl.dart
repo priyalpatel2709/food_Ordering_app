@@ -1,3 +1,4 @@
+import '../../domain/entities/payment_entity.dart';
 import '../../domain/repositories/dine_in_repository.dart';
 import '../../domain/entities/dine_in_order_entity.dart';
 import '../../domain/entities/table_entity.dart';
@@ -32,7 +33,7 @@ class DineInRepositoryImpl implements DineInRepository {
   @override
   Future<void> completePayment(
     String orderId,
-    Map<String, dynamic> paymentDetails,
+    PaymentEntity paymentDetails,
   ) async {
     await _remoteDataSource.completePayment(orderId, paymentDetails);
   }

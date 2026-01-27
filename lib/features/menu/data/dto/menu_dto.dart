@@ -202,6 +202,7 @@ class CategoryDto {
   final String description;
   final bool isActive;
   final int displayOrder;
+  final String? color;
 
   const CategoryDto({
     required this.id,
@@ -210,6 +211,7 @@ class CategoryDto {
     required this.description,
     required this.isActive,
     required this.displayOrder,
+    this.color,
   });
 
   factory CategoryDto.fromJson(Map<String, dynamic> json) {
@@ -220,6 +222,7 @@ class CategoryDto {
       description: (json['description'] as String?) ?? '',
       isActive: (json['isActive'] as bool?) ?? true,
       displayOrder: (json['displayOrder'] as num?)?.toInt() ?? 0,
+      color: json['color'] as String?,
     );
   }
 
@@ -231,6 +234,7 @@ class CategoryDto {
       'description': description,
       'isActive': isActive,
       'displayOrder': displayOrder,
+      'color': color,
     };
   }
 
@@ -242,6 +246,7 @@ class CategoryDto {
       description: description,
       isActive: isActive,
       displayOrder: displayOrder,
+      color: color,
     );
   }
 }

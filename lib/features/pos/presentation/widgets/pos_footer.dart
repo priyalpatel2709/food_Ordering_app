@@ -1,329 +1,210 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
-import 'package:auto_size_text/auto_size_text.dart';
-
 import '../../../../shared/theme/app_colors.dart';
 import '../providers/pos_provider.dart';
+import '../providers/pos_state.dart';
+
+import '../widgets/table_selection_dialog.dart';
 
 class PosFooter extends ConsumerWidget {
   const PosFooter({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bool isDesktop = Device.width > 900;
-    final bool isTablet = Device.width > 600 && Device.width <= 900;
-
     final state = ref.watch(posNotifierProvider);
-    final hasItems = state.cartItems.isNotEmpty;
+    final bool isDesktop = Device.width > 1000;
 
     return Container(
-      height: 15.h,
-      padding: EdgeInsets.symmetric(horizontal: 5.w, vertical: 1.2.h),
+      height: 80,
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       decoration: BoxDecoration(
         color: AppColors.white,
-        border: Border(top: BorderSide(color: AppColors.border)),
+        border: Border(top: BorderSide(color: AppColors.border, width: 1)),
         boxShadow: [
           BoxShadow(
-            color: AppColors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, -2),
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -4),
           ),
         ],
       ),
       child: Row(
         children: [
-          /// LEFT ACTIONS
-          _buildActionButton(
-            label: 'Hold',
-            icon: Icons.pause_circle_outline,
-            color: AppColors.secondary,
-            onPressed: hasItems ? () {} : null,
+          // Order Type Selector
+          _FooterActionButton(
+            label: state.orderType.name.toUpperCase(),
+            icon: _getOrderTypeIcon(state.orderType),
+            color: AppColors.primary,
+            onTap: () => _showOrderTypeDialog(context, ref, state),
           ),
-          SizedBox(width: 1.w),
-          _buildActionButton(
-            label: 'Clear',
+          const SizedBox(width: 12),
+
+          if (state.orderType == OrderType.dineIn) ...[
+            _FooterActionButton(
+              label: 'TABLES',
+              icon: Icons.table_restaurant_outlined,
+              color: AppColors.primary,
+              onTap: () => showDialog(
+                context: context,
+                builder: (context) => const TableSelectionDialog(),
+              ),
+            ),
+            const SizedBox(width: 12),
+          ],
+
+          // Action Buttons
+          _FooterActionButton(
+            label: 'HOLD',
+            icon: Icons.pause_circle_outline,
+            color: Colors.orange,
+            onTap: () {},
+          ),
+          const SizedBox(width: 12),
+
+          _FooterActionButton(
+            label: 'OPEN ORDERS',
+            icon: Icons.receipt_long_outlined,
+            color: AppColors.secondary,
+            onTap: () {},
+          ),
+          const SizedBox(width: 12),
+
+          _FooterActionButton(
+            label: 'CLEAR',
             icon: Icons.delete_sweep_outlined,
             color: AppColors.error,
-            onPressed: hasItems
-                ? () => ref.read(posNotifierProvider.notifier).clearCart()
-                : null,
+            onTap: () => ref.read(posNotifierProvider.notifier).clearCart(),
           ),
-          SizedBox(width: 1.w),
-          _buildActionButton(
-            label: 'Discount',
-            icon: Icons.local_offer_outlined,
-            color: AppColors.grey700,
-            onPressed: hasItems ? () {} : null,
-          ),
-          SizedBox(width: 1.w),
-          if (isDesktop || isTablet)
-            _buildActionButton(
-              label: 'Split',
-              icon: Icons.call_split,
-              color: AppColors.grey700,
-              onPressed: hasItems ? () {} : null,
-            ),
 
           const Spacer(),
 
-          /// PAY NOW
-          SizedBox(
-            height: double.infinity,
-            width: isDesktop ? 15.w : 220,
-            child: ElevatedButton(
-              onPressed: hasItems
-                  ? () => _showPaymentDialog(context, ref, state.summary.total)
-                  : null,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.success,
-                foregroundColor: AppColors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
+          // Current Cashier Info (Desktop only)
+          if (isDesktop)
+            Row(
+              children: [
+                CircleAvatar(
+                  radius: 20,
+                  backgroundColor: AppColors.grey100,
+                  child: const Icon(
+                    Icons.person_outline,
+                    color: AppColors.primary,
+                  ),
                 ),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(
-                    width: 6.w,
-                    height: 6.w,
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child: Icon(Icons.payments_outlined),
+                const SizedBox(width: 12),
+                Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Cashier: Admin',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 13.sp,
+                      ),
                     ),
-                  ),
-                  SizedBox(width: 1.w),
-                  Flexible(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AutoSizeText(
-                          'PAY NOW',
-                          maxLines: 1,
-                          minFontSize: 10,
-                          maxFontSize: 16,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                        AutoSizeText(
-                          'Total: \$${state.summary.total.toStringAsFixed(2)}',
-                          maxLines: 1,
-                          minFontSize: 9,
-                          maxFontSize: 13,
-                          style: TextStyle(
-                            color: AppColors.white.withOpacity(0.9),
-                          ),
-                        ),
-                      ],
+                    Text(
+                      'ID: #1002',
+                      style: TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 11.sp,
+                      ),
                     ),
-                  ),
-                ],
-              ),
+                  ],
+                ),
+              ],
             ),
-          ),
         ],
       ),
     );
   }
 
-  /// ================= ACTION BUTTON =================
-
-  Widget _buildActionButton({
-    required String label,
-    required IconData icon,
-    required Color color,
-    VoidCallback? onPressed,
-  }) {
-    final bool isDesktop = Device.width > 900;
-
-    return SizedBox(
-      height: double.infinity,
-      width: isDesktop ? 7.w : 80,
-      child: OutlinedButton(
-        onPressed: onPressed,
-        style: OutlinedButton.styleFrom(
-          side: BorderSide(
-            color: onPressed != null ? color : AppColors.grey300,
-          ),
-          backgroundColor: onPressed != null
-              ? color.withOpacity(0.05)
-              : Colors.transparent,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 5.w,
-              height: 5.w,
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: Icon(
-                  icon,
-                  color: onPressed != null ? color : AppColors.grey400,
-                ),
-              ),
-            ),
-            SizedBox(height: 0.4.h),
-            AutoSizeText(
-              label,
-              maxLines: 1,
-              minFontSize: 8,
-              maxFontSize: 12,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: onPressed != null ? color : AppColors.grey500,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  IconData _getOrderTypeIcon(OrderType type) {
+    switch (type) {
+      case OrderType.dineIn:
+        return Icons.restaurant;
+      case OrderType.takeaway:
+        return Icons.local_mall;
+      case OrderType.delivery:
+        return Icons.delivery_dining;
+    }
   }
 
-  /// ================= PAYMENT DIALOG =================
-
-  void _showPaymentDialog(BuildContext context, WidgetRef ref, double amount) {
+  void _showOrderTypeDialog(
+    BuildContext context,
+    WidgetRef ref,
+    PosState state,
+  ) {
     showDialog(
       context: context,
-      builder: (context) => PaymentDialog(
-        totalAmount: amount,
-        onConfirm: () {
-          ref.read(posNotifierProvider.notifier).placeOrder();
-          Navigator.pop(context);
-        },
+      builder: (context) => AlertDialog(
+        title: const Text('Select Order Type'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: OrderType.values.map((type) {
+            final isSelected = state.orderType == type;
+            return ListTile(
+              leading: Icon(
+                _getOrderTypeIcon(type),
+                color: isSelected ? AppColors.primary : null,
+              ),
+              title: Text(type.name.toUpperCase()),
+              trailing: isSelected
+                  ? const Icon(Icons.check, color: AppColors.primary)
+                  : null,
+              onTap: () {
+                ref.read(posNotifierProvider.notifier).setOrderType(type);
+                Navigator.pop(context);
+              },
+            );
+          }).toList(),
+        ),
       ),
     );
   }
 }
 
-class PaymentDialog extends StatelessWidget {
-  final double totalAmount;
-  final VoidCallback onConfirm;
+class _FooterActionButton extends StatelessWidget {
+  final String label;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
 
-  const PaymentDialog({
-    super.key,
-    required this.totalAmount,
-    required this.onConfirm,
+  const _FooterActionButton({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    final bool isDesktop = Device.width > 900;
-
-    return Dialog(
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      child: Container(
-        width: isDesktop ? 30.w : 400,
-        padding: EdgeInsets.all(isDesktop ? 2.w : 24),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            AutoSizeText(
-              'Select Payment Method',
-              maxLines: 1,
-              minFontSize: 14,
-              maxFontSize: 20,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 0.5.h),
-            AutoSizeText(
-              'Amount Payable: \$${totalAmount.toStringAsFixed(2)}',
-              maxLines: 1,
-              minFontSize: 12,
-              maxFontSize: 16,
-              style: TextStyle(color: AppColors.textSecondary),
-            ),
-            SizedBox(height: 3.h),
-
-            GridView.count(
-              shrinkWrap: true,
-              crossAxisCount: 2,
-              mainAxisSpacing: 1.5.h,
-              crossAxisSpacing: 1.5.w,
-              childAspectRatio: 2.8,
-              children: [
-                _buildPaymentOption(Icons.money, 'Cash', AppColors.success),
-                _buildPaymentOption(
-                  Icons.credit_card,
-                  'Card',
-                  AppColors.primary,
-                ),
-                _buildPaymentOption(Icons.qr_code, 'UPI', AppColors.secondary),
-                _buildPaymentOption(
-                  Icons.call_split,
-                  'Split',
-                  AppColors.grey700,
-                ),
-              ],
-            ),
-
-            SizedBox(height: 3.h),
-
-            SizedBox(
-              width: double.infinity,
-              height: 6.h,
-              child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.grey700,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: AutoSizeText(
-                  'CANCEL',
-                  maxLines: 1,
-                  minFontSize: 12,
-                  maxFontSize: 16,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPaymentOption(IconData icon, String label, Color color) {
-    return InkWell(
-      onTap: onConfirm,
-      child: Container(
-        decoration: BoxDecoration(
-          border: Border.all(color: AppColors.border),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 5.w,
-              height: 5.w,
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: Icon(icon, color: color),
-              ),
-            ),
-            SizedBox(width: 1.w),
-            Flexible(
-              child: AutoSizeText(
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          decoration: BoxDecoration(
+            border: Border.all(color: color.withOpacity(0.3)),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: color, size: 24),
+              const SizedBox(width: 8),
+              Text(
                 label,
-                maxLines: 1,
-                minFontSize: 10,
-                maxFontSize: 14,
-                style: const TextStyle(fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  color: color,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                  letterSpacing: 0.5,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

@@ -1,9 +1,12 @@
 import '../../../cart/domain/entities/cart_entity.dart';
 import '../../../menu/domain/entities/menu_entity.dart';
+import '../../../dine_in/domain/entities/dine_in_order_entity.dart';
 
 enum OrderType { dineIn, takeaway, delivery }
 
 class PosState {
+  final List<MenuEntity> availableMenus;
+  final MenuEntity? selectedMenu;
   final List<CategoryEntity> categories;
   final List<MenuItemEntity> products;
   final CategoryEntity? selectedCategory;
@@ -12,10 +15,15 @@ class PosState {
   final OrderType orderType;
   final String? customerName;
   final String? customerPhone;
+  final String? tableNumber;
+  final String? ongoingOrderId;
+  final DineInOrderEntity? ongoingOrder;
   final bool isLoading;
   final String? error;
 
   const PosState({
+    this.availableMenus = const [],
+    this.selectedMenu,
     required this.categories,
     required this.products,
     this.selectedCategory,
@@ -24,11 +32,16 @@ class PosState {
     this.orderType = OrderType.dineIn,
     this.customerName,
     this.customerPhone,
+    this.tableNumber,
+    this.ongoingOrderId,
+    this.ongoingOrder,
     this.isLoading = false,
     this.error,
   });
 
   PosState copyWith({
+    List<MenuEntity>? availableMenus,
+    MenuEntity? selectedMenu,
     List<CategoryEntity>? categories,
     List<MenuItemEntity>? products,
     CategoryEntity? selectedCategory,
@@ -37,18 +50,35 @@ class PosState {
     OrderType? orderType,
     String? customerName,
     String? customerPhone,
+    String? tableNumber,
+    String? ongoingOrderId,
+    DineInOrderEntity? ongoingOrder,
     bool? isLoading,
     String? error,
+    bool clearSelectedCategory = false,
+    bool clearOngoingOrderId = false,
+    bool clearOngoingOrder = false,
   }) {
     return PosState(
+      availableMenus: availableMenus ?? this.availableMenus,
+      selectedMenu: selectedMenu ?? this.selectedMenu,
       categories: categories ?? this.categories,
       products: products ?? this.products,
-      selectedCategory: selectedCategory ?? this.selectedCategory,
+      selectedCategory: clearSelectedCategory
+          ? null
+          : (selectedCategory ?? this.selectedCategory),
       searchQuery: searchQuery ?? this.searchQuery,
       cartItems: cartItems ?? this.cartItems,
       orderType: orderType ?? this.orderType,
       customerName: customerName ?? this.customerName,
       customerPhone: customerPhone ?? this.customerPhone,
+      tableNumber: tableNumber ?? this.tableNumber,
+      ongoingOrderId: clearOngoingOrderId
+          ? null
+          : (ongoingOrderId ?? this.ongoingOrderId),
+      ongoingOrder: clearOngoingOrder
+          ? null
+          : (ongoingOrder ?? this.ongoingOrder),
       isLoading: isLoading ?? this.isLoading,
       error: error ?? this.error,
     );

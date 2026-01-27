@@ -1,7 +1,9 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import '../../domain/entities/payment_entity.dart';
 import '../../domain/entities/table_entity.dart';
 import '../../domain/entities/dine_in_order_entity.dart';
 import '../providers/dine_in_providers.dart';
@@ -719,33 +721,45 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
                     ElevatedButton(
                       onPressed: () async {
                         try {
-                          Map<String, dynamic> discountData = {
-                            "discounts": [],
-                            "totalDiscountAmount": 0,
-                          };
+                          Discount discount = Discount(
+                            discounts: [],
+                            totalDiscountAmount: 0,
+                          );
 
                           if (selectedDiscount != null) {
-                            discountData = {
-                              "discounts": [
-                                {
-                                  "discountId": selectedDiscount!.id,
-                                  "discountAmount": selectedDiscount!
+                            discount = Discount(
+                              discounts: [
+                                DiscountDetails(
+                                  discountId: selectedDiscount!.id,
+                                  discountAmount: selectedDiscount!
                                       .calculateDiscountAmount(amount),
-                                },
+                                ),
                               ],
-                              "totalDiscountAmount": selectedDiscount!
+                              totalDiscountAmount: selectedDiscount!
                                   .calculateDiscountAmount(amount),
-                            };
+                            );
                           }
 
                           await ref
                               .read(completeDineInPaymentUseCaseProvider)
-                              .call(orderId, {
-                                "method": "cash",
-                                "amount": finalAmount,
-                                "notes": "Paid via App",
-                                "discount": discountData,
-                              });
+                              .call(
+                                orderId,
+                                PaymentEntity(
+                                  payment: Payment(
+                                    method: 'cash',
+                                    amount: finalAmount,
+                                    notes: 'Paid via App',
+                                    discount: discount,
+                                  ),
+                                ),
+
+                                // {
+                                //   "method": "cash",
+                                //   "amount": finalAmount,
+                                //   "notes": "Paid via App",
+                                //   "discount": discountData,
+                                // }
+                              );
                           if (context.mounted) {
                             ref.invalidate(tablesProvider);
                             Navigator.pop(context); // Close dialog

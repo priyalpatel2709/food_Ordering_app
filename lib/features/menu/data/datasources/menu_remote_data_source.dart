@@ -6,7 +6,7 @@ import '../dto/menu_dto.dart';
 
 /// Remote data source for menu
 abstract class MenuRemoteDataSource {
-  Future<MenuResponseDto> getCurrentMenu();
+  Future<MenuResponseDto> getCurrentMenu({String? menuId});
   Future<MenuDto> getMenuById(String id);
   Future<void> createMenu(Map<String, dynamic> data);
   Future<void> updateMenu(String id, Map<String, dynamic> data);
@@ -47,10 +47,11 @@ class MenuRemoteDataSourceImpl implements MenuRemoteDataSource {
   MenuRemoteDataSourceImpl(this._dioClient);
 
   @override
-  Future<MenuResponseDto> getCurrentMenu() async {
+  Future<MenuResponseDto> getCurrentMenu({String? menuId}) async {
     try {
       final response = await _dioClient.get(
         '${ApiConstants.v2}${ApiConstants.menuEndpoint}${ApiConstants.menuCurrentEndpoint}',
+        queryParameters: menuId != null ? {'menuId': menuId} : null,
       );
 
       final responseData = response.data;

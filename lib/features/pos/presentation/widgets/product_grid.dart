@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
+import 'package:auto_size_text/auto_size_text.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../menu/domain/entities/menu_entity.dart';
 import '../providers/pos_provider.dart';
+
+import './modifier_dialog.dart';
 
 class ProductGrid extends ConsumerWidget {
   const ProductGrid({super.key});
@@ -12,70 +15,120 @@ class ProductGrid extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(posNotifierProvider);
     final products = state.filteredProducts;
-    final bool isDesktop = Device.width > 900;
-    final bool isTablet = Device.width > 600 && Device.width <= 900;
+    final bool isDesktop = Device.width > 1000;
 
     return Column(
       children: [
-        // Search Bar
+        // Search & Filter Bar
         Padding(
-          padding: EdgeInsets.all(isDesktop ? 1.w : 2.w),
-          child: TextField(
-            onChanged: (value) =>
-                ref.read(posNotifierProvider.notifier).setSearchQuery(value),
-            decoration: InputDecoration(
-              hintText: 'Search product or scan barcode...',
-              prefixIcon: Icon(
-                Icons.search,
-                color: AppColors.textSecondary,
-                size: isDesktop ? 1.4.w : 22,
-              ),
-              suffixIcon: IconButton(
-                onPressed: () {},
-                icon: Icon(
-                  Icons.qr_code_scanner,
-                  color: AppColors.primary,
-                  size: isDesktop ? 1.4.w : 22,
+          padding: EdgeInsets.all(isDesktop ? 1.w : 16),
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  onChanged: (value) => ref
+                      .read(posNotifierProvider.notifier)
+                      .setSearchQuery(value),
+                  decoration: InputDecoration(
+                    hintText: 'Search menu items...',
+                    prefixIcon: const Icon(
+                      Icons.search,
+                      color: AppColors.textSecondary,
+                    ),
+                    filled: true,
+                    fillColor: AppColors.white,
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: BorderSide(color: AppColors.border),
+                    ),
+                  ),
                 ),
               ),
-              filled: true,
-              fillColor: AppColors.grey50,
-              contentPadding: EdgeInsets.symmetric(
-                horizontal: 2.w,
-                vertical: isDesktop ? 1.h : 1.5.h,
+              const SizedBox(width: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: IconButton(
+                  onPressed: () {},
+                  icon: const Icon(Icons.filter_list),
+                  color: AppColors.textSecondary,
+                ),
               ),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.border),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide(color: AppColors.border),
-              ),
-            ),
-            style: TextStyle(fontSize: isDesktop ? 12.sp : 14.sp),
+            ],
           ),
         ),
 
         // Product Grid
         Expanded(
-          child: products.isEmpty
+          child: state.isLoading
+              ? _buildSkeletonGrid()
+              : products.isEmpty
               ? _buildEmptyState()
-              : GridView.builder(
-                  padding: EdgeInsets.all(isDesktop ? 1.w : 2.w),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: isDesktop ? 4 : (isTablet ? 3 : 2),
-                    childAspectRatio: isDesktop ? 0.72 : 0.78,
-                    crossAxisSpacing: isDesktop ? 1.w : 2.w,
-                    mainAxisSpacing: isDesktop ? 1.w : 2.w,
-                  ),
-                  itemCount: products.length,
-                  itemBuilder: (context, index) {
-                    return ProductCard(product: products[index]);
+              : LayoutBuilder(
+                  builder: (context, constraints) {
+                    final crossAxisCount = _getCrossAxisCount(
+                      constraints.maxWidth,
+                    );
+                    // Adjust aspect ratio based on item width to keep cards proportional
+                    final aspectRatio = isDesktop ? 0.8 : 0.75;
+
+                    return GridView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: crossAxisCount,
+                        childAspectRatio: aspectRatio,
+                        crossAxisSpacing: 16,
+                        mainAxisSpacing: 16,
+                      ),
+                      itemCount: products.length,
+                      itemBuilder: (context, index) {
+                        return ProductCard(product: products[index]);
+                      },
+                    );
                   },
                 ),
         ),
       ],
+    );
+  }
+
+  int _getCrossAxisCount(double width) {
+    if (width > 1200) return 6;
+    if (width > 900) return 4;
+    if (width > 600) return 3;
+    if (width > 400) return 2;
+    return 1;
+  }
+
+  Widget _buildSkeletonGrid() {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = _getCrossAxisCount(constraints.maxWidth);
+        return GridView.builder(
+          padding: const EdgeInsets.all(16),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            childAspectRatio: 0.8,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+          ),
+          itemCount: 8,
+          itemBuilder: (context, index) => Container(
+            decoration: BoxDecoration(
+              color: AppColors.grey100,
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -84,7 +137,7 @@ class ProductGrid extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.search_off, size: 6.w, color: AppColors.grey300),
+          Icon(Icons.restaurant_menu, size: 64, color: AppColors.grey300),
           const SizedBox(height: 16),
           Text(
             'No products found',
@@ -107,115 +160,133 @@ class ProductCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final bool isDesktop = Device.width > 900;
+    final bool isAvailable = product.isAvailable;
 
-    return Card(
-      elevation: 0,
-      clipBehavior: Clip.antiAlias,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: AppColors.border, width: 1),
-      ),
-      child: InkWell(
-        onTap: () => ref.read(posNotifierProvider.notifier).addToCart(product),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image or Color Block
-            Expanded(
-              flex: 5,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.network(
-                    product.image,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      color: AppColors.primaryContainer,
-                      child: Icon(
-                        Icons.restaurant,
-                        color: AppColors.primary,
-                        size: isDesktop ? 2.5.w : 30,
-                      ),
-                    ),
-                  ),
-                  if (!product.isAvailable)
-                    Container(
-                      color: Colors.black.withOpacity(0.6),
-                      alignment: Alignment.center,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.error,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: Text(
-                          'OUT OF STOCK',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 9.sp,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-
-            // Product Info
-            Expanded(
-              flex: 4,
-              child: Padding(
-                padding: EdgeInsets.all(isDesktop ? 0.8.w : 3.w),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Opacity(
+      opacity: isAvailable ? 1.0 : 0.6,
+      child: Card(
+        elevation: 0,
+        clipBehavior: Clip.antiAlias,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: AppColors.border.withOpacity(0.5)),
+        ),
+        child: InkWell(
+          onTap: isAvailable
+              ? () => ref.read(posNotifierProvider.notifier).addToCart(product)
+              : null,
+          onLongPress: isAvailable
+              ? () => showDialog(
+                  context: context,
+                  builder: (context) => ModifierDialog(product: product),
+                )
+              : null,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Image Section
+              Expanded(
+                flex: 4,
+                child: Stack(
+                  fit: StackFit.expand,
                   children: [
-                    Text(
-                      product.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12.sp,
-                        color: AppColors.textPrimary,
-                        height: 1.1,
+                    Image.network(
+                      product.image,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) => Container(
+                        color: AppColors.primaryContainer.withOpacity(0.3),
+                        child: Icon(
+                          Icons.restaurant,
+                          color: AppColors.primary,
+                          size: 32,
+                        ),
                       ),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          '\$${product.price.toStringAsFixed(2)}',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12.sp,
-                            color: AppColors.primary,
+                    if (!isAvailable)
+                      Container(
+                        color: Colors.black45,
+                        alignment: Alignment.center,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
                           ),
-                        ),
-                        Container(
-                          padding: EdgeInsets.all(isDesktop ? 0.3.w : 1.w),
                           decoration: BoxDecoration(
-                            color: AppColors.primary.withOpacity(0.1),
-                            shape: BoxShape.circle,
+                            color: AppColors.error,
+                            borderRadius: BorderRadius.circular(4),
                           ),
-                          child: Icon(
-                            Icons.add,
-                            size: isDesktop ? 1.w : 4.w,
-                            color: AppColors.primary,
+                          child: const Text(
+                            'UNAVAILABLE',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
                   ],
                 ),
               ),
-            ),
-          ],
+
+              // Info Section
+              Expanded(
+                flex: 3,
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: AutoSizeText(
+                          product.name,
+                          maxLines: 2,
+                          minFontSize: 11,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 13.sp,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: AutoSizeText(
+                              '\$${product.price.toStringAsFixed(2)}',
+                              maxLines: 1,
+                              minFontSize: 12,
+                              style: TextStyle(
+                                fontWeight: FontWeight.w900,
+                                fontSize: 14.sp,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          ),
+                          if (isAvailable)
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.add,
+                                size: 18,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -6,6 +6,7 @@ import '../../../../features/rbac/presentation/widgets/permission_guard.dart';
 import '../../../../core/constants/permission_constants.dart';
 import '../../../menu/domain/entities/menu_entity.dart';
 import '../../../menu/presentation/viewmodels/categories_view_model.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class CategoriesManagementPage extends ConsumerStatefulWidget {
   const CategoriesManagementPage({super.key});
@@ -139,9 +140,26 @@ class _CategoriesManagementPageState
         return Card(
           margin: const EdgeInsets.only(bottom: 12),
           child: ListTile(
-            title: Text(
-              category.name,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+            title: Row(
+              children: [
+                if (category.color != null)
+                  Container(
+                    width: 16,
+                    height: 16,
+                    margin: const EdgeInsets.only(right: 8),
+                    decoration: BoxDecoration(
+                      color: _hexToColor(category.color),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                  ),
+                Expanded(
+                  child: Text(
+                    category.name,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
             ),
             subtitle: Text(category.description),
             trailing: Row(
@@ -181,53 +199,115 @@ class _CategoriesManagementPageState
     final nameController = TextEditingController();
     final descController = TextEditingController();
     final displayOrderController = TextEditingController();
+    Color selectedColor = AppColors.primary;
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Add Category'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Add Category'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: 'Name'),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: descController,
+                  decoration: const InputDecoration(labelText: 'Description'),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: displayOrderController,
+                  decoration: const InputDecoration(labelText: 'Display Order'),
+                  keyboardType: TextInputType.number,
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Category Color',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                InkWell(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Pick a color'),
+                        content: SingleChildScrollView(
+                          child: ColorPicker(
+                            pickerColor: selectedColor,
+                            onColorChanged: (color) => selectedColor = color,
+                          ),
+                        ),
+                        actions: [
+                          ElevatedButton(
+                            child: const Text('Got it'),
+                            onPressed: () {
+                              setState(() {});
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: selectedColor,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text('Select Category Color'),
+                        const Spacer(),
+                        const Icon(Icons.colorize),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 16),
-            TextField(
-              controller: descController,
-              decoration: const InputDecoration(labelText: 'Description'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
             ),
-            SizedBox(height: 16),
-            TextField(
-              controller: displayOrderController,
-              decoration: const InputDecoration(labelText: 'Display Order'),
-              keyboardType: TextInputType.number,
+            ElevatedButton(
+              onPressed: () async {
+                final success = await ref
+                    .read(categoriesNotifierProvider.notifier)
+                    .createCategory({
+                      'name': nameController.text,
+                      'description': descController.text,
+                      'displayOrder':
+                          int.tryParse(displayOrderController.text) ?? 0,
+                      'isActive': true,
+                      'color': _colorToHex(selectedColor),
+                    });
+                if (success && mounted) {
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Add'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final success = await ref
-                  .read(categoriesNotifierProvider.notifier)
-                  .createCategory({
-                    'name': nameController.text,
-                    'description': descController.text,
-                    'displayOrder': displayOrderController.text,
-                    'isActive': true,
-                  });
-              if (success && mounted) {
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Add'),
-          ),
-        ],
       ),
     );
   }
@@ -235,47 +315,124 @@ class _CategoriesManagementPageState
   void _showEditCategoryDialog(CategoryEntity category) {
     final nameController = TextEditingController(text: category.name);
     final descController = TextEditingController(text: category.description);
+    Color selectedColor = _hexToColor(category.color);
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Edit Category'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(labelText: 'Name'),
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('Edit Category'),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                TextField(
+                  controller: nameController,
+                  decoration: const InputDecoration(labelText: 'Name'),
+                ),
+                const SizedBox(height: 16.0),
+                TextField(
+                  controller: descController,
+                  decoration: const InputDecoration(labelText: 'Description'),
+                ),
+                const SizedBox(height: 16.0),
+                const Text(
+                  'Category Color',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                InkWell(
+                  onTap: () {
+                    showDialog(
+                      context: context,
+                      builder: (context) => AlertDialog(
+                        title: const Text('Pick a color'),
+                        content: SingleChildScrollView(
+                          child: ColorPicker(
+                            pickerColor: selectedColor,
+                            onColorChanged: (color) => selectedColor = color,
+                          ),
+                        ),
+                        actions: [
+                          ElevatedButton(
+                            child: const Text('Got it'),
+                            onPressed: () {
+                              setState(() {});
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                  child: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: selectedColor,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.grey.shade300),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        const Text('Select Category Color'),
+                        const Spacer(),
+                        const Icon(Icons.colorize),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 16.0),
-            TextField(
-              controller: descController,
-              decoration: const InputDecoration(labelText: 'Description'),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final success = await ref
+                    .read(categoriesNotifierProvider.notifier)
+                    .updateCategory(category.id, {
+                      'name': nameController.text,
+                      'description': descController.text,
+                      'color': _colorToHex(selectedColor),
+                    });
+                if (success && mounted) {
+                  Navigator.pop(context);
+                }
+              },
+              child: const Text('Update'),
             ),
           ],
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () async {
-              final success = await ref
-                  .read(categoriesNotifierProvider.notifier)
-                  .updateCategory(category.id, {
-                    'name': nameController.text,
-                    'description': descController.text,
-                  });
-              if (success && mounted) {
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Update'),
-          ),
-        ],
       ),
     );
+  }
+
+  String _colorToHex(Color color) {
+    return '#${color.value.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+  }
+
+  Color _hexToColor(String? hexString) {
+    if (hexString == null || hexString.isEmpty) return AppColors.primary;
+    try {
+      final buffer = StringBuffer();
+      if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
+      buffer.write(hexString.replaceFirst('#', ''));
+      return Color(int.parse(buffer.toString(), radix: 16));
+    } catch (e) {
+      return AppColors.primary;
+    }
   }
 
   void _confirmDeleteCategory(CategoryEntity category) {

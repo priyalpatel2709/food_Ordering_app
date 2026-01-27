@@ -1,6 +1,7 @@
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../domain/entities/dine_in_order_entity.dart';
+import '../../domain/entities/payment_entity.dart';
 import '../../domain/entities/table_entity.dart';
 
 class DineInRemoteDataSource {
@@ -84,7 +85,7 @@ class DineInRemoteDataSource {
 
   Future<void> completePayment(
     String orderId,
-    Map<String, dynamic> paymentDetails,
+    PaymentEntity paymentDetails,
   ) async {
     final body = {'payment': paymentDetails};
     await _dioClient.post(

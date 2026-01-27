@@ -17,10 +17,12 @@ class MenuRepositoryImpl implements MenuRepository {
   MenuRepositoryImpl(this._remoteDataSource, this._localDataSource);
 
   @override
-  Future<Result<List<MenuEntity>>> getCurrentMenu() async {
+  Future<Result<List<MenuEntity>>> getCurrentMenu({String? menuId}) async {
     try {
       // Try to fetch from remote
-      final menuResponseDto = await _remoteDataSource.getCurrentMenu();
+      final menuResponseDto = await _remoteDataSource.getCurrentMenu(
+        menuId: menuId,
+      );
       final menus = menuResponseDto.menus.map((m) => m.toEntity()).toList();
 
       // Cache the response
