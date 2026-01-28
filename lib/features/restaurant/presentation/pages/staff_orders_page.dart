@@ -5,6 +5,8 @@ import '../../../order/presentation/providers/order_provider.dart';
 import '../../../order/domain/entities/order_entity.dart';
 import '../../../../features/rbac/presentation/widgets/permission_guard.dart';
 import '../../../../core/constants/permission_constants.dart';
+import '../widgets/order_payment_dialog.dart';
+import 'staff_order_details_page.dart';
 
 class StaffOrdersPage extends ConsumerStatefulWidget {
   const StaffOrdersPage({super.key});
@@ -123,7 +125,12 @@ class _StaffOrdersPageState extends ConsumerState<StaffOrdersPage> {
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: () {
-          // TODO: Navigate to staff order details if needed
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => StaffOrderDetailsPage(order: order),
+            ),
+          );
         },
         child: Padding(
           padding: const EdgeInsets.all(16),
@@ -147,7 +154,7 @@ class _StaffOrdersPageState extends ConsumerState<StaffOrdersPage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          dateFormat.format(order.createdAt),
+                          dateFormat.format(order.createdAt.toLocal()),
                           style: TextStyle(
                             fontSize: 12,
                             color: Colors.grey[600],
@@ -282,21 +289,46 @@ class _StaffOrdersPageState extends ConsumerState<StaffOrdersPage> {
                   ),
                   // if (order.orderStatus.toLowerCase() == 'pending' ||
                   //     order.orderStatus.toLowerCase() == 'confirmed')
+                  PermissionGuard(
+                    permission: PermissionConstants.orderUpdate,
+                    child: OutlinedButton(
+                      onPressed: () =>
+                          _showCancelDialog(context, ref, order.id),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.red,
+                        side: const BorderSide(color: Colors.red),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 0,
+                        ),
+                        visualDensity: VisualDensity.compact,
+                      ),
+                      child: const Text('Cancel'),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  if (order.payment.paymentStatus.toLowerCase() != 'paid' &&
+                      order.orderStatus.toLowerCase() != 'cancelled')
                     PermissionGuard(
                       permission: PermissionConstants.orderUpdate,
-                      child: OutlinedButton(
-                        onPressed: () =>
-                            _showCancelDialog(context, ref, order.id),
-                        style: OutlinedButton.styleFrom(
-                          foregroundColor: Colors.red,
-                          side: const BorderSide(color: Colors.red),
+                      child: ElevatedButton(
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) =>
+                                OrderPaymentDialog(order: order),
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(
                             horizontal: 16,
                             vertical: 0,
                           ),
                           visualDensity: VisualDensity.compact,
                         ),
-                        child: const Text('Cancel'),
+                        child: const Text('Take Payment'),
                       ),
                     ),
                   if (order.payment.paymentStatus.toLowerCase() == 'paid' &&

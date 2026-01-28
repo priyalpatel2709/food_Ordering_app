@@ -144,7 +144,7 @@ class _HeldOrderCard extends StatelessWidget {
   });
 
   String _formatTime(DateTime dateTime) {
-    return DateFormat('h:mm a').format(dateTime);
+    return DateFormat('h:mm a').format(dateTime.toLocal());
   }
 
   String _getOrderTypeIcon(String orderType) {

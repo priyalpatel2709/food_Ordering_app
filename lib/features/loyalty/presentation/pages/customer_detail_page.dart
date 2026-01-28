@@ -149,7 +149,7 @@ class _CustomerDetailPageState extends ConsumerState<CustomerDetailPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Member since ${DateFormat.yMMMMd().format(customer.memberSince)}',
+                    'Member since ${DateFormat.yMMMMd().format(customer.memberSince.toLocal())}',
                     style: TextStyle(color: Colors.grey[600]),
                   ),
                   const SizedBox(height: 12),
@@ -399,7 +399,10 @@ class _CustomerDetailPageState extends ConsumerState<CustomerDetailPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text(
-                            DateFormat.yMMMd().add_jm().format(note.addedAt),
+                            // DateFormat.yMMMd().add_jm().format(note.addedAt),
+                            DateFormat.yMMMd().add_jm().format(
+                              note.addedAt.toLocal(),
+                            ),
                             style: TextStyle(
                               fontSize: 12,
                               color: Colors.grey[600],

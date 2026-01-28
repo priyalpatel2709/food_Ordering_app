@@ -163,7 +163,7 @@ class _OrdersPageState extends ConsumerState<OrdersPage> {
                         ),
                         SizedBox(height: 0.5.h),
                         Text(
-                          dateFormat.format(order.createdAt),
+                          dateFormat.format(order.createdAt.toLocal()),
                           style: TextStyle(
                             fontSize: 12.sp,
                             color: Colors.grey[600],

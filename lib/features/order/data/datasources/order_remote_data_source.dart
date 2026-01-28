@@ -3,6 +3,7 @@ import '../../../../core/network/dio_client.dart';
 import '../../domain/entities/order_entity.dart';
 import '../../domain/entities/order_type_entity.dart';
 import '../../domain/entities/create_order_with_payment_request.dart';
+import '../../domain/entities/payment_process_request.dart';
 
 /// Remote data source for orders
 abstract class OrderRemoteDataSource {
@@ -16,6 +17,7 @@ abstract class OrderRemoteDataSource {
   Future<List<OrderTypeEntity>> getOrderTypes();
   Future<void> cancelOrder(String orderId);
   Future<void> refundOrder(String orderId, double amount, String reason);
+  Future<void> payOrder(String orderId, PaymentProcessRequest paymentData);
 }
 
 class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
@@ -145,6 +147,22 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
     final data = response.data as Map<String, dynamic>;
     if (data['status'] != 'success') {
       throw Exception(data['message'] ?? 'Failed to refund order');
+    }
+  }
+
+  @override
+  Future<void> payOrder(
+    String orderId,
+    PaymentProcessRequest paymentData,
+  ) async {
+    final response = await _dioClient.post(
+      '${ApiConstants.v1}${ApiConstants.payment}${ApiConstants.processPayment}/$orderId',
+      data: paymentData.toJson(),
+    );
+
+    final data = response.data as Map<String, dynamic>;
+    if (data['status'] != 'success') {
+      throw Exception(data['message'] ?? 'Failed to pay order');
     }
   }
 }

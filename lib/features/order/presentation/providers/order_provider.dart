@@ -7,6 +7,7 @@ import '../../data/repositories/order_repository.dart';
 import '../../domain/entities/order_entity.dart';
 import '../../domain/usecases/get_order_types_usecase.dart';
 import '../../domain/entities/create_order_with_payment_request.dart';
+import '../../domain/entities/payment_process_request.dart';
 
 /// Dio Client Provider
 final dioClientProvider = Provider<DioClient>((ref) {
@@ -210,6 +211,21 @@ class StaffOrdersNotifier extends StateNotifier<OrdersListState> {
       return true;
     } catch (e) {
       log('refund error: $e');
+      return false;
+    }
+  }
+
+  /// Pay order
+  Future<bool> payOrder(
+    String orderId,
+    PaymentProcessRequest paymentData,
+  ) async {
+    try {
+      await _repository.payOrder(orderId, paymentData);
+      await getAllOrders(); // Refresh list
+      return true;
+    } catch (e) {
+      log('pay order error: $e');
       return false;
     }
   }

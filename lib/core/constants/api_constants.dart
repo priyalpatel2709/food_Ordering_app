@@ -51,6 +51,7 @@ class ApiConstants {
   //payment
   static const String payment = 'payment';
   static const String refund = '/refund';
+  static const String processPayment = '/processPayment';
 
   // RBAC
   static const String rbac = 'rbac';
