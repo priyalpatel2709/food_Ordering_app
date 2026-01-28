@@ -95,23 +95,23 @@ class _PosHeaderState extends ConsumerState<PosHeader> {
                         height: 1.1,
                       ),
                     ),
-                    if (isDesktop || isTablet)
-                      Text(
-                        'Branch: Downtown',
-                        style: TextStyle(
-                          fontSize: isDesktop ? 9.sp : 10.sp,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
+                    // if (isDesktop || isTablet)
+                    //   Text(
+                    //     'Branch: Downtown',
+                    //     style: TextStyle(
+                    //       fontSize: isDesktop ? 9.sp : 10.sp,
+                    //       color: AppColors.textSecondary,
+                    //     ),
+                    //   ),
                   ],
                 ),
               ],
             ),
           ),
 
-          const SizedBox(width: 24),
+          SizedBox(width: 2.w),
           const VerticalDivider(width: 1, indent: 20, endIndent: 20),
-          const SizedBox(width: 24),
+          SizedBox(width: 2.w),
 
           // Menu Switcher
           _buildMenuSwitcher(ref),
@@ -146,13 +146,12 @@ class _PosHeaderState extends ConsumerState<PosHeader> {
                   SizedBox(width: 0.5.w),
                   Text(
                     DateFormat(
-                      isDesktop
-                          ? 'EEE, MMM d, yyyy  •  hh:mm:ss a'
-                          : 'hh:mm:ss a',
+                      'hh:mm:ss a',
                     ).format(_currentTime),
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: isDesktop ? 11.sp : 12.sp,
+                      overflow: TextOverflow.ellipsis
                     ),
                   ),
                 ],
@@ -162,17 +161,17 @@ class _PosHeaderState extends ConsumerState<PosHeader> {
           SizedBox(width: 1.5.w),
 
           // Cashier Info
-          Row(
-            children: [
-              CircleAvatar(
-                radius: isDesktop ? 1.1.w : 16,
-                backgroundColor: AppColors.secondaryContainer,
-                child: Icon(
-                  Icons.person,
-                  color: AppColors.secondary,
-                  size: isDesktop ? 1.4.w : 18,
-                ),
-              ),
+          // Row(
+          //   children: [
+          //     CircleAvatar(
+          //       radius: isDesktop ? 1.1.w : 16,
+          //       backgroundColor: AppColors.secondaryContainer,
+          //       child: Icon(
+          //         Icons.person,
+          //         color: AppColors.secondary,
+          //         size: isDesktop ? 1.4.w : 18,
+          //       ),
+          //     ),
               // if (isDesktop) SizedBox(width: 0.6.w),
               // if (isDesktop)
               //   Column(
@@ -209,10 +208,10 @@ class _PosHeaderState extends ConsumerState<PosHeader> {
               //       ),
               //     ],
               //   ),
-            ],
-          ),
+            // ],
+          // ),
 
-          SizedBox(width: 0.8.w),
+          // SizedBox(width: 0.8.w),
 
           // Settings Icon
           // IconButton(

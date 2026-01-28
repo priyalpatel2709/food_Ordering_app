@@ -193,11 +193,11 @@ class StaffHomePage extends ConsumerWidget {
       body: Stack(
         children: [
           Positioned(
-            top: -10.h,
-            right: -10.h,
+            top: -100,
+            right: -100,
             child: Container(
-              width: 30.h,
-              height: 30.h,
+              width: 300,
+              height: 300,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppColors.primary.withOpacity(0.05),
@@ -214,23 +214,23 @@ class StaffHomePage extends ConsumerWidget {
                 SliverToBoxAdapter(
                   child: Padding(
                     padding: EdgeInsets.symmetric(
-                      horizontal: isDesktop ? 3.w : 5.w,
+                      horizontal: isDesktop ? 24 : 20,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 2.h),
+                        const SizedBox(height: 16),
                         _buildGreeting(user?.name ?? 'Admin'),
-                        SizedBox(height: 3.h),
-                        Text(
+                        const SizedBox(height: 24),
+                        const Text(
                           'Business Management',
                           style: TextStyle(
-                            fontSize: 18.sp,
+                            fontSize: 22,
                             fontWeight: FontWeight.bold,
-                            color: const Color(0xFF1E293B),
+                            color: Color(0xFF1E293B),
                           ),
                         ),
-                        SizedBox(height: 1.5.h),
+                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
@@ -238,16 +238,16 @@ class StaffHomePage extends ConsumerWidget {
 
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(
-                    isDesktop ? 3.w : 5.w,
+                    isDesktop ? 24 : 20,
                     0,
-                    isDesktop ? 3.w : 5.w,
-                    5.h,
+                    isDesktop ? 24 : 20,
+                    40,
                   ),
                   sliver: SliverGrid(
                     gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: crossAxisCount,
-                      crossAxisSpacing: isDesktop ? 1.5.w : 3.w,
-                      mainAxisSpacing: isDesktop ? 1.5.w : 3.w,
+                      crossAxisSpacing: isDesktop ? 16 : 12,
+                      mainAxisSpacing: isDesktop ? 16 : 12,
                       childAspectRatio: childAspectRatio,
                     ),
                     delegate: SliverChildBuilderDelegate((context, index) {
@@ -272,15 +272,15 @@ class StaffHomePage extends ConsumerWidget {
     final bool isDesktop = Device.width > 900;
     return SliverPadding(
       padding: EdgeInsets.symmetric(
-        horizontal: isDesktop ? 3.w : 5.w,
-        vertical: 2.h,
+        horizontal: isDesktop ? 24 : 20,
+        vertical: 16,
       ),
       sliver: SliverToBoxAdapter(
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Container(
-              padding: EdgeInsets.all(isDesktop ? 0.8.w : 2.w),
+              padding: EdgeInsets.all(isDesktop ? 8 : 10),
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
@@ -294,11 +294,11 @@ class StaffHomePage extends ConsumerWidget {
               ),
               // child: Image.asset(
               //   'assets/images/logo.png',
-              //   height: isDesktop ? 4.h : 3.5.h,
+              //   height: isDesktop ? 32 : 28,
               //   errorBuilder: (context, error, stackTrace) => Icon(
               //     Icons.restaurant_rounded,
               //     color: AppColors.primary,
-              //     size: isDesktop ? 2.5.w : 5.w,
+              //     size: isDesktop ? 24 : 24,
               //   ),
               // ),
             ),
@@ -308,7 +308,7 @@ class StaffHomePage extends ConsumerWidget {
                   icon: Icons.notifications_none_rounded,
                   onTap: () {},
                 ),
-                SizedBox(width: isDesktop ? 1.w : 2.w),
+                SizedBox(width: isDesktop ? 8 : 8),
                 _buildAppBarAction(
                   icon: Icons.logout_rounded,
                   onTap: () => _showLogoutDialog(context, storage),
@@ -332,13 +332,13 @@ class StaffHomePage extends ConsumerWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Container(
-        padding: EdgeInsets.all(isDesktop ? 0.8.w : 2.5.w),
+        padding: EdgeInsets.all(isDesktop ? 8 : 10),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: const Color(0xFFF1F5F9)),
         ),
-        child: Icon(icon, size: isDesktop ? 1.5.w : 5.w, color: color),
+        child: Icon(icon, size: isDesktop ? 20 : 24, color: color),
       ),
     );
   }
@@ -354,19 +354,19 @@ class StaffHomePage extends ConsumerWidget {
       children: [
         Text(
           greeting,
-          style: TextStyle(
-            fontSize: 15.sp,
-            color: const Color(0xFF64748B),
+          style: const TextStyle(
+            fontSize: 16,
+            color: Color(0xFF64748B),
             fontWeight: FontWeight.w500,
           ),
         ),
         Text(
           'Welcome back, $name!',
-          style: TextStyle(
-            fontSize: 20.sp,
+          style: const TextStyle(
+            fontSize: 24,
             fontWeight: FontWeight.bold,
             letterSpacing: -0.5,
-            color: const Color(0xFF0F172A),
+            color: Color(0xFF0F172A),
           ),
         ),
       ],
@@ -377,16 +377,16 @@ class StaffHomePage extends ConsumerWidget {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Logout', style: TextStyle(fontSize: 18.sp)),
-        content: Text(
+        title: const Text('Logout', style: TextStyle(fontSize: 20)),
+        content: const Text(
           'Are you sure you want to exit?',
-          style: TextStyle(fontSize: 16.sp),
+          style: TextStyle(fontSize: 16),
         ),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text('Cancel', style: TextStyle(fontSize: 15.sp)),
+            child: const Text('Cancel', style: TextStyle(fontSize: 15)),
           ),
           ElevatedButton(
             onPressed: () async {
@@ -399,7 +399,7 @@ class StaffHomePage extends ConsumerWidget {
               backgroundColor: const Color(0xFFEF4444),
               foregroundColor: Colors.white,
             ),
-            child: Text('Logout', style: TextStyle(fontSize: 15.sp)),
+            child: const Text('Logout', style: TextStyle(fontSize: 15)),
           ),
         ],
       ),
@@ -422,7 +422,7 @@ class _ManagementCard extends StatelessWidget {
         onTap: () => context.push(item.route),
         borderRadius: BorderRadius.circular(24),
         child: Container(
-          padding: EdgeInsets.all(isDesktop ? 1.2.w : 3.w),
+          padding: EdgeInsets.all(isDesktop ? 12 : 12),
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(24),
@@ -440,7 +440,7 @@ class _ManagementCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: EdgeInsets.all(isDesktop ? 0.8.w : 2.5.w),
+                padding: EdgeInsets.all(isDesktop ? 10 : 10),
                 decoration: BoxDecoration(
                   color: item.color.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(16),
@@ -448,25 +448,25 @@ class _ManagementCard extends StatelessWidget {
                 child: Icon(
                   item.icon,
                   color: item.color,
-                  size: isDesktop ? 1.8.w : 6.w,
+                  size: isDesktop ? 24 : 28,
                 ),
               ),
               const Spacer(),
               Text(
                 item.title,
-                style: TextStyle(
-                  fontSize: 15.sp,
+                style: const TextStyle(
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: const Color(0xFF1E293B),
+                  color: Color(0xFF1E293B),
                 ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
-              SizedBox(height: 0.5.h),
+              const SizedBox(height: 4),
               Text(
                 item.description,
                 style: TextStyle(
-                  fontSize: 13.sp,
+                  fontSize: 13,
                   color: const Color(0xFF64748B).withOpacity(0.8),
                   height: 1.2,
                 ),
