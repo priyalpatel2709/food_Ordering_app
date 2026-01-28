@@ -4,7 +4,7 @@ import '../../domain/entities/customer_loyalty_entity.dart';
 
 /// Remote data source for customer loyalty operations
 abstract class LoyaltyRemoteDataSource {
-  Future<CustomerLoyaltyEntity?> lookupCustomer(String identifier);
+  Future<List<CustomerLoyaltyEntity>> lookupCustomer(String identifier);
   Future<CustomerLoyaltyEntity> createCustomer({
     required String name,
     required String phone,
@@ -37,25 +37,29 @@ class LoyaltyRemoteDataSourceImpl implements LoyaltyRemoteDataSource {
   LoyaltyRemoteDataSourceImpl(this._dioClient);
 
   @override
-  Future<CustomerLoyaltyEntity?> lookupCustomer(String identifier) async {
+  Future<List<CustomerLoyaltyEntity>> lookupCustomer(String identifier) async {
     try {
       // Use search query parameter to support full-text search (name, email, phone)
       final response = await _dioClient.get(
         '${ApiConstants.v1}/loyalty/customers',
-        queryParameters: {'search': identifier, 'limit': 1},
+        queryParameters: {'search': identifier, 'limit': 10},
       );
 
       final data = response.data as Map<String, dynamic>;
       if (data['status'] == 'success' &&
           data['data'] != null &&
           (data['data'] as List).isNotEmpty) {
-        return CustomerLoyaltyEntity.fromJson(
-          data['data'][0] as Map<String, dynamic>,
-        );
+        return (data['data'] as List)
+            .map(
+              (customer) => CustomerLoyaltyEntity.fromJson(
+                customer as Map<String, dynamic>,
+              ),
+            )
+            .toList();
       }
-      return null;
+      return [];
     } catch (e) {
-      return null;
+      return [];
     }
   }
 

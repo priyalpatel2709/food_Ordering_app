@@ -16,6 +16,8 @@ import '../../../../shared/theme/app_colors.dart';
 import '../../../../core/services/storage_service.dart';
 import '../../../discount/domain/entities/discount_entity.dart';
 import '../../../discount/presentation/providers/discount_provider.dart';
+import '../../../loyalty/domain/entities/customer_loyalty_entity.dart';
+import '../../../loyalty/presentation/widgets/customer_lookup_dialog.dart';
 
 class TableDetailsPage extends ConsumerStatefulWidget {
   final TableEntity table;
@@ -553,6 +555,8 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
           builder: (context, ref, child) {
             final discountsAsync = ref.watch(discountNotifierProvider);
             DiscountEntity? selectedDiscount;
+            CustomerLoyaltyEntity? loyaltyCustomer;
+            int pointsToRedeem = 0;
 
             return StatefulBuilder(
               builder: (context, setState) {
@@ -676,6 +680,97 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
                                   fontWeight: FontWeight.bold,
                                   fontSize: isDesktop ? 11.sp : 14.sp,
                                 ),
+                              ),
+                            ],
+                          ),
+                        ],
+
+                        // Loyalty Points Section
+                        SizedBox(height: 2.h),
+                        const Divider(),
+                        SizedBox(height: 1.h),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Loyalty Customer:",
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: isDesktop ? 12.sp : 15.sp,
+                              ),
+                            ),
+                            if (loyaltyCustomer == null)
+                              TextButton.icon(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) => CustomerLookupDialog(
+                                      onCustomerFound: (customer) {
+                                        setState(() {
+                                          loyaltyCustomer = customer;
+                                        });
+                                      },
+                                    ),
+                                  );
+                                },
+                                icon: const Icon(Icons.person_search, size: 18),
+                                label: const Text("Select"),
+                              )
+                            else
+                              IconButton(
+                                icon: const Icon(Icons.close, size: 18),
+                                onPressed: () =>
+                                    setState(() => loyaltyCustomer = null),
+                              ),
+                          ],
+                        ),
+                        if (loyaltyCustomer != null) ...[
+                          Text(
+                            "${loyaltyCustomer!.name} (${loyaltyCustomer!.loyaltyPoints.current} pts)",
+                            style: TextStyle(
+                              fontSize: isDesktop ? 11.sp : 14.sp,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                          SizedBox(height: 1.h),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: TextField(
+                                  decoration: const InputDecoration(
+                                    labelText: "Points to Redeem",
+                                    isDense: true,
+                                  ),
+                                  keyboardType: TextInputType.number,
+                                  onChanged: (val) {
+                                    setState(() {
+                                      pointsToRedeem = int.tryParse(val) ?? 0;
+                                    });
+                                  },
+                                ),
+                              ),
+                              SizedBox(width: 2.w),
+                              ElevatedButton(
+                                onPressed:
+                                    pointsToRedeem > 0 &&
+                                        pointsToRedeem <=
+                                            loyaltyCustomer!
+                                                .loyaltyPoints
+                                                .current
+                                    ? () async {
+                                        await applyLoyaltyDiscountToOrder(
+                                          orderId: orderId,
+                                          loyaltyCustomerId:
+                                              loyaltyCustomer!.id,
+                                          pointsToRedeem: pointsToRedeem,
+                                        );
+                                        // Close dialog and detail page will refresh
+                                        if (context.mounted) {
+                                          Navigator.pop(context);
+                                        }
+                                      }
+                                    : null,
+                                child: const Text("Apply"),
                               ),
                             ],
                           ),
@@ -973,5 +1068,38 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
         );
       },
     );
+  }
+
+  Future<void> applyLoyaltyDiscountToOrder({
+    required String orderId,
+    required String loyaltyCustomerId,
+    required int pointsToRedeem,
+  }) async {
+    try {
+      await ref
+          .read(applyLoyaltyDiscountUseCaseProvider)
+          .call(
+            orderId: orderId,
+            loyaltyCustomerId: loyaltyCustomerId,
+            pointsToRedeem: pointsToRedeem,
+          );
+
+      // Refresh order details to show updated totals
+      ref.invalidate(orderDetailsProvider(orderId));
+
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Loyalty discount applied successfully'),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error applying loyalty discount: $e')),
+        );
+      }
+    }
   }
 }

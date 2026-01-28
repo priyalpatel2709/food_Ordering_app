@@ -87,4 +87,17 @@ class DineInRepositoryImpl implements DineInRepository {
   Future<void> deleteTable(String id) async {
     await _remoteDataSource.deleteTable(id);
   }
+
+  @override
+  Future<void> applyLoyaltyDiscountToOrder({
+    required String orderId,
+    required String loyaltyCustomerId,
+    required int pointsToRedeem,
+  }) async {
+    await _remoteDataSource.applyLoyaltyDiscountToOrder(
+      orderId: orderId,
+      loyaltyCustomerId: loyaltyCustomerId,
+      pointsToRedeem: pointsToRedeem,
+    );
+  }
 }

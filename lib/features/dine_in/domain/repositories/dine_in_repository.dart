@@ -31,4 +31,9 @@ abstract class DineInRepository {
     TableStatus status,
   );
   Future<void> deleteTable(String id);
+  Future<void> applyLoyaltyDiscountToOrder({
+    required String orderId,
+    required String loyaltyCustomerId,
+    required int pointsToRedeem,
+  });
 }

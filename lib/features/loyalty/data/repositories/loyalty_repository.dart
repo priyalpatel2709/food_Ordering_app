@@ -3,7 +3,7 @@ import '../datasources/loyalty_remote_data_source.dart';
 
 /// Repository for loyalty operations
 abstract class LoyaltyRepository {
-  Future<CustomerLoyaltyEntity?> lookupCustomer(String identifier);
+  Future<List<CustomerLoyaltyEntity>> lookupCustomer(String identifier);
   Future<CustomerLoyaltyEntity> createCustomer({
     required String name,
     required String phone,
@@ -36,7 +36,7 @@ class LoyaltyRepositoryImpl implements LoyaltyRepository {
   LoyaltyRepositoryImpl(this._remoteDataSource);
 
   @override
-  Future<CustomerLoyaltyEntity?> lookupCustomer(String identifier) async {
+  Future<List<CustomerLoyaltyEntity>> lookupCustomer(String identifier) async {
     return await _remoteDataSource.lookupCustomer(identifier);
   }
 

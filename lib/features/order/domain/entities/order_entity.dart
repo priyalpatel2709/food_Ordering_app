@@ -153,10 +153,12 @@ class DiscountBreakdown {
 
   factory DiscountBreakdown.fromJson(Map<String, dynamic> json) {
     return DiscountBreakdown(
-      discount: json['discountId'] is String
-          ? null
-          : Discount.fromJson(json['discountId'] as Map<String, dynamic>),
-      discountId: json['discountId'] is String
+      discount:
+          json['discountId'] is Map<String, dynamic> &&
+              json['discountId'] != null
+          ? Discount.fromJson(json['discountId'] as Map<String, dynamic>)
+          : null,
+      discountId: json['discountId'] is String && json['discountId'] != null
           ? json['discountId'] as String
           : null,
       discountAmount: (json['discountAmount'] as num).toDouble(),
@@ -273,12 +275,14 @@ class OrderEntity {
       id: json['_id'] as String,
       orderId: json['orderId'] as String,
       restaurantId: json['restaurantId'].toString(), // Convert to string
-      customerId: json['customerId'] is String
+      customerId: json['customerId'] is String && json['customerId'] != null
           ? json['customerId'] as String
           : null,
-      customer: json['customerId'] is String
-          ? null
-          : Customer.fromJson(json['customerId'] as Map<String, dynamic>),
+      customer:
+          json['customerId'] is Map<String, dynamic> &&
+              json['customerId'] != null
+          ? Customer.fromJson(json['customerId'] as Map<String, dynamic>)
+          : null,
       restaurantTipCharge:
           (json['restaurantTipCharge'] as num?)?.toDouble() ?? 0.0,
       isScheduledOrder: json['isScheduledOrder'] as bool? ?? false,

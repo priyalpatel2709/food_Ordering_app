@@ -7,7 +7,7 @@ class LookupCustomerUseCase {
 
   LookupCustomerUseCase(this._repository);
 
-  Future<CustomerLoyaltyEntity?> call(String identifier) async {
+  Future<List<CustomerLoyaltyEntity>> call(String identifier) async {
     return await _repository.lookupCustomer(identifier);
   }
 }

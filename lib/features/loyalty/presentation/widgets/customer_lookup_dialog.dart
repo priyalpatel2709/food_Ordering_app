@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../domain/entities/customer_loyalty_entity.dart';
 import '../providers/loyalty_providers.dart';
@@ -21,8 +22,26 @@ class _CustomerLookupDialogState extends ConsumerState<CustomerLookupDialog> {
   bool _isSearching = false;
 
   @override
+  void initState() {
+    super.initState();
+    // Start with a clean state to avoid showing previous searches
+    Future.microtask(() {
+      if (mounted) {
+        ref.read(loyaltyNotifierProvider.notifier).clearCustomer();
+      }
+    });
+  }
+
+  @override
   void dispose() {
     _phoneController.dispose();
+    // Clean up the search state when the dialog is closed
+    // This ensures that the global state is reset for the next time the dialog is opened.
+    Future.microtask(() {
+      // Check mounted is not enough here as the state is defunct,
+      // but we use a microtask to ensure we are out of the dispose frame.
+      // ref.read(loyaltyNotifierProvider.notifier).clearCustomer();
+    });
     super.dispose();
   }
 
@@ -36,10 +55,8 @@ class _CustomerLookupDialogState extends ConsumerState<CustomerLookupDialog> {
 
     setState(() => _isSearching = false);
 
-    final state = ref.read(loyaltyNotifierProvider);
-    if (state.customer != null && widget.onCustomerFound != null) {
-      widget.onCustomerFound!(state.customer!);
-    }
+    // No longer automatically calling onCustomerFound here.
+    // The user must explicitly click "Use This Customer" or select from the list.
   }
 
   void _showCreateCustomerDialog() {
@@ -184,6 +201,102 @@ class _CustomerLookupDialogState extends ConsumerState<CustomerLookupDialog> {
               ),
             ],
 
+            // Multiple Results Found
+            if (loyaltyState.customer == null &&
+                loyaltyState.searchResults.length > 1) ...[
+              const SizedBox(height: 24),
+              Text(
+                'Multiple matches found:',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: ListView.separated(
+                  itemCount: loyaltyState.searchResults.length,
+                  separatorBuilder: (context, index) => const Divider(),
+                  itemBuilder: (context, index) {
+                    final customer = loyaltyState.searchResults[index];
+                    return ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 8,
+                      ),
+                      leading: Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withOpacity(0.1),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Center(
+                          child: Text(
+                            customer.name[0].toUpperCase(),
+                            style: TextStyle(
+                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                      title: Text(
+                        customer.name,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.phone,
+                              size: 12,
+                              color: AppColors.textSecondary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(customer.phone),
+                            const SizedBox(width: 12),
+                            Icon(
+                              Icons.stars,
+                              size: 12,
+                              color: AppColors.secondary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${customer.loyaltyPoints.current} pts',
+                              style: TextStyle(
+                                color: AppColors.secondary,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      trailing: Icon(
+                        Icons.chevron_right,
+                        color: AppColors.primary.withOpacity(0.5),
+                      ),
+                      onTap: () {
+                        ref
+                            .read(loyaltyNotifierProvider.notifier)
+                            .selectCustomer(customer);
+                        if (widget.onCustomerFound != null) {
+                          widget.onCustomerFound!(customer);
+                        }
+                        Navigator.pop(context);
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+
             // Customer Info
             if (loyaltyState.customer != null) ...[
               const SizedBox(height: 24),
@@ -193,17 +306,49 @@ class _CustomerLookupDialogState extends ConsumerState<CustomerLookupDialog> {
                 ),
               ),
               const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.secondary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  ElevatedButton(
+                    onPressed: () {
+                      if (widget.onCustomerFound != null) {
+                        widget.onCustomerFound!(loyaltyState.customer!);
+                      }
+                      Navigator.pop(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.secondary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Use This Customer'),
                   ),
-                ),
-                child: const Text('Use This Customer'),
+                  SizedBox(width: 2.w),
+                  ElevatedButton(
+                    onPressed: () {
+                      // Just clear the selection within the dialog to allow a new search
+                      _phoneController.clear();
+                      ref
+                          .read(loyaltyNotifierProvider.notifier)
+                          .clearCustomer();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.error,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 16,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text('Clear Search'),
+                  ),
+                ],
               ),
             ],
           ],

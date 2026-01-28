@@ -14,6 +14,7 @@ import '../../domain/usecases/remove_dine_in_item_usecase.dart';
 import '../../domain/usecases/create_table_usecase.dart';
 import '../../domain/usecases/update_table_usecase.dart';
 import '../../domain/usecases/delete_table_usecase.dart';
+import '../../domain/usecases/apply_loyalty_discount_usecase.dart';
 import '../../domain/entities/table_entity.dart';
 import '../../domain/entities/dine_in_order_entity.dart';
 import '../../domain/entities/dine_in_session.dart';
@@ -77,6 +78,11 @@ final updateTableUseCaseProvider = Provider<UpdateTableUseCase>((ref) {
 final deleteTableUseCaseProvider = Provider<DeleteTableUseCase>((ref) {
   return DeleteTableUseCase(ref.watch(dineInRepositoryProvider));
 });
+
+final applyLoyaltyDiscountUseCaseProvider =
+    Provider<ApplyLoyaltyDiscountUseCase>((ref) {
+      return ApplyLoyaltyDiscountUseCase(ref.watch(dineInRepositoryProvider));
+    });
 
 // Controllers/State
 final tablesProvider = FutureProvider.autoDispose<List<TableEntity>>((

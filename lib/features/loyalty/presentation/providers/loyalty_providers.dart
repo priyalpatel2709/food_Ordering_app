@@ -44,6 +44,7 @@ final createCustomerUseCaseProvider = Provider<CreateCustomerUseCase>((ref) {
 class LoyaltyState {
   final List<CustomerLoyaltyEntity> allCustomers;
   final CustomerLoyaltyEntity? customer;
+  final List<CustomerLoyaltyEntity> searchResults;
   final List<CustomerLoyaltyEntity> upcomingOccasions;
   final bool isLoading;
   final String? error;
@@ -52,6 +53,7 @@ class LoyaltyState {
   const LoyaltyState({
     this.allCustomers = const [],
     this.customer,
+    this.searchResults = const [],
     this.upcomingOccasions = const [],
     this.isLoading = false,
     this.error,
@@ -61,6 +63,7 @@ class LoyaltyState {
   LoyaltyState copyWith({
     List<CustomerLoyaltyEntity>? allCustomers,
     CustomerLoyaltyEntity? customer,
+    List<CustomerLoyaltyEntity>? searchResults,
     List<CustomerLoyaltyEntity>? upcomingOccasions,
     bool? isLoading,
     String? error,
@@ -71,6 +74,7 @@ class LoyaltyState {
     return LoyaltyState(
       allCustomers: allCustomers ?? this.allCustomers,
       customer: clearCustomer ? null : (customer ?? this.customer),
+      searchResults: searchResults ?? this.searchResults,
       upcomingOccasions: upcomingOccasions ?? this.upcomingOccasions,
       isLoading: isLoading ?? this.isLoading,
       error: clearError ? null : (error ?? this.error),
@@ -97,11 +101,27 @@ class LoyaltyNotifier extends StateNotifier<LoyaltyState> {
 
   /// Lookup customer by phone or email
   Future<void> lookupCustomer(String identifier) async {
-    state = state.copyWith(isLoading: true, clearError: true);
+    state = state.copyWith(
+      isLoading: true,
+      clearError: true,
+      searchResults: [],
+    );
 
     try {
-      final customer = await _lookupCustomerUseCase.call(identifier);
-      state = state.copyWith(customer: customer, isLoading: false);
+      final results = await _lookupCustomerUseCase.call(identifier);
+      if (results.length == 1) {
+        state = state.copyWith(
+          customer: results[0],
+          searchResults: results,
+          isLoading: false,
+        );
+      } else {
+        state = state.copyWith(
+          searchResults: results,
+          isLoading: false,
+          customer: null,
+        );
+      }
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
     }
@@ -249,9 +269,18 @@ class LoyaltyNotifier extends StateNotifier<LoyaltyState> {
     }
   }
 
-  /// Clear current customer
+  /// Select a customer from search results
+  void selectCustomer(CustomerLoyaltyEntity customer) {
+    state = state.copyWith(customer: customer);
+  }
+
+  /// Clear current customer and search results
   void clearCustomer() {
-    state = state.copyWith(clearCustomer: true, clearError: true);
+    state = state.copyWith(
+      clearCustomer: true,
+      clearError: true,
+      searchResults: [],
+    );
   }
 
   /// Clear error

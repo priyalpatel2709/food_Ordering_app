@@ -5,6 +5,7 @@ import '../../../cart/domain/entities/cart_entity.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../dine_in/domain/entities/dine_in_order_entity.dart';
 import '../../../dine_in/domain/entities/payment_entity.dart';
+import '../../../loyalty/presentation/providers/loyalty_providers.dart';
 import '../providers/pos_provider.dart';
 import '../providers/pos_state.dart';
 
@@ -402,7 +403,7 @@ class OrderBuilder extends ConsumerWidget {
               else
                 Row(
                   children: [
-                    if (state.cartItems.isNotEmpty)
+                    // if (state.cartItems.isNotEmpty)
                       IconButton(
                         onPressed: () {
                           showDialog(
@@ -432,6 +433,13 @@ class OrderBuilder extends ConsumerWidget {
                     IconButton(
                       onPressed: () {
                         ref.read(posNotifierProvider.notifier).clearLoyalty();
+                        // Defer to next microtask to ensure widgets are disposed/unsubscribed
+                        // before the global loyalty state notifies.
+                        Future.microtask(() {
+                          ref
+                              .read(loyaltyNotifierProvider.notifier)
+                              .clearCustomer();
+                        });
                       },
                       icon: const Icon(Icons.close, size: 18),
                       color: AppColors.error,

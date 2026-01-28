@@ -186,4 +186,23 @@ class DineInRemoteDataSource {
       '${ApiConstants.v1}${ApiConstants.orders}${ApiConstants.tables}/$id',
     );
   }
+
+  Future<void> applyLoyaltyDiscountToOrder({
+    required String orderId,
+    required String loyaltyCustomerId,
+    required int pointsToRedeem,
+  }) async {
+    final response = await _dioClient.post(
+      '${ApiConstants.v1}${ApiConstants.orders}${ApiConstants.dineIn}/$orderId/apply-loyalty-discount',
+      data: {
+        'loyaltyCustomerId': loyaltyCustomerId,
+        'pointsToRedeem': pointsToRedeem,
+      },
+    );
+
+    final data = response.data as Map<String, dynamic>;
+    if (data['status'] != 'success') {
+      throw Exception(data['message'] ?? 'Failed to apply loyalty discount');
+    }
+  }
 }
