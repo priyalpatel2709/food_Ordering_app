@@ -29,6 +29,10 @@ class ApiConstants {
   static const String taxEndpoint = 'tax';
   static const String orderTypeEndpoint = 'orderType';
   static const String restaurantEndpoint = 'restaurant';
+  static const String cashRegisterEndpoint = 'cash-register';
+  static const String openShiftEndpoint = '/open';
+  static const String transactionEndpoint = '/transaction';
+  static const String closeShiftEndpoint = '/close';
 
   // orders
   static const String orders = 'orders';

@@ -157,6 +157,14 @@ class StaffHomePage extends ConsumerWidget {
         description: 'Customer profiles & points',
       ),
       _DashboardItem(
+        title: 'Cash Register',
+        icon: Icons.point_of_sale_rounded,
+        color: const Color(0xFF10B981),
+        route: RouteConstants.cashManagement,
+        permission: PermissionConstants.roleRead,
+        description: 'Manage shifts & cash flow',
+      ),
+      _DashboardItem(
         title: 'Settings',
         icon: Icons.settings_suggest_rounded,
         color: const Color(0xFF64748B),

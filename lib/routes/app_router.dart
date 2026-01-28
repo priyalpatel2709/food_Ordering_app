@@ -31,6 +31,7 @@ import '../features/rbac/presentation/pages/permission_management_page.dart';
 import '../features/pos/presentation/screens/pos_screen.dart';
 import '../features/dine_in/presentation/pages/table_management_page.dart';
 import '../features/loyalty/presentation/pages/loyalty_management_page.dart';
+import '../features/cash_management/presentation/pages/cash_management_page.dart';
 import '../features/settings/presentation/pages/settings_page.dart';
 
 class AppRouter {
@@ -262,6 +263,11 @@ class AppRouter {
         path: RouteConstants.loyaltyManagement,
         name: RouteConstants.loyaltyManagementName,
         builder: (context, state) => const LoyaltyManagementPage(),
+      ),
+      GoRoute(
+        path: RouteConstants.cashManagement,
+        name: RouteConstants.cashManagementName,
+        builder: (context, state) => const CashManagementPage(),
       ),
       GoRoute(
         path: RouteConstants.settings,

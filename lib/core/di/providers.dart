@@ -46,6 +46,14 @@ import '../../features/menu/domain/usecases/get_all_customizations_use_case.dart
 import '../../features/menu/domain/usecases/get_all_menus_use_case.dart';
 import '../../features/menu/domain/usecases/delete_menu_use_case.dart';
 import '../../features/tax/domain/usecases/tax_use_cases.dart';
+import '../../features/cash_management/data/datasources/cash_register_remote_data_source.dart';
+import '../../features/cash_management/data/repositories/cash_register_repository_impl.dart';
+import '../../features/cash_management/domain/repositories/cash_register_repository.dart';
+import '../../features/cash_management/domain/usecases/get_registers_usecase.dart';
+import '../../features/cash_management/domain/usecases/create_register_usecase.dart';
+import '../../features/cash_management/domain/usecases/open_shift_usecase.dart';
+import '../../features/cash_management/domain/usecases/add_transaction_usecase.dart';
+import '../../features/cash_management/domain/usecases/close_shift_usecase.dart';
 
 /// Manual Provider Definitions
 /// TODO: When build_runner is fixed, restore @riverpod code generation
@@ -114,6 +122,12 @@ final taxRemoteDataSourceProvider = Provider<TaxRemoteDataSource>((ref) {
   return TaxRemoteDataSourceImpl(ref.watch(dioClientProvider));
 });
 
+/// Cash Register Remote Data Source Provider
+final cashRegisterRemoteDataSourceProvider =
+    Provider<CashRegisterRemoteDataSource>((ref) {
+      return CashRegisterRemoteDataSourceImpl(ref.watch(dioClientProvider));
+    });
+
 // ============================================================================
 // Repository Providers
 // ============================================================================
@@ -145,6 +159,13 @@ final restaurantRepositoryProvider = Provider<RestaurantRepository>((ref) {
 /// Tax Repository Provider
 final taxRepositoryProvider = Provider<TaxRepository>((ref) {
   return TaxRepositoryImpl(ref.watch(taxRemoteDataSourceProvider));
+});
+
+/// Cash Register Repository Provider
+final cashRegisterRepositoryProvider = Provider<CashRegisterRepository>((ref) {
+  return CashRegisterRepositoryImpl(
+    ref.watch(cashRegisterRemoteDataSourceProvider),
+  );
 });
 
 // ============================================================================
@@ -331,4 +352,25 @@ final updateTaxUseCaseProvider = Provider<UpdateTaxUseCase>((ref) {
 
 final deleteTaxUseCaseProvider = Provider<DeleteTaxUseCase>((ref) {
   return DeleteTaxUseCase(ref.watch(taxRepositoryProvider));
+});
+
+/// Cash Register Use Case Providers
+final getRegistersUseCaseProvider = Provider<GetRegistersUseCase>((ref) {
+  return GetRegistersUseCase(ref.watch(cashRegisterRepositoryProvider));
+});
+
+final createRegisterUseCaseProvider = Provider<CreateRegisterUseCase>((ref) {
+  return CreateRegisterUseCase(ref.watch(cashRegisterRepositoryProvider));
+});
+
+final openShiftUseCaseProvider = Provider<OpenShiftUseCase>((ref) {
+  return OpenShiftUseCase(ref.watch(cashRegisterRepositoryProvider));
+});
+
+final addTransactionUseCaseProvider = Provider<AddTransactionUseCase>((ref) {
+  return AddTransactionUseCase(ref.watch(cashRegisterRepositoryProvider));
+});
+
+final closeShiftUseCaseProvider = Provider<CloseShiftUseCase>((ref) {
+  return CloseShiftUseCase(ref.watch(cashRegisterRepositoryProvider));
 });

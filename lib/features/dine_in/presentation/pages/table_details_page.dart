@@ -1,11 +1,10 @@
 import 'dart:async';
-import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
-import '../../domain/entities/payment_entity.dart';
 import '../../domain/entities/table_entity.dart';
 import '../../domain/entities/dine_in_order_entity.dart';
+import '../../domain/entities/payment_entity.dart';
 import '../providers/dine_in_providers.dart';
 import '../../../../core/di/providers.dart';
 import 'package:go_router/go_router.dart';

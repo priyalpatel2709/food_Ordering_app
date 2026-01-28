@@ -79,6 +79,12 @@ class PermissionConstants {
   static const String tableUpdate = "TABLE.UPDATE";
   static const String tableDelete = "TABLE.DELETE";
 
+  //Cash Register
+  static const String cashRegisterCreate = "CASH_REGISTER.CREATE";
+  static const String cashRegisterRead = "CASH_REGISTER.READ";
+  static const String cashRegisterUpdate = "CASH_REGISTER.UPDATE";
+  static const String cashRegisterDelete = "CASH_REGISTER.DELETE";
+
   static const List<String> values = [
     userCreate,
     userRead,
@@ -131,6 +137,10 @@ class PermissionConstants {
     loyaltyRead,
     loyaltyUpdate,
     loyaltyDelete,
+    cashRegisterCreate,
+    cashRegisterRead,
+    cashRegisterUpdate,
+    cashRegisterDelete,
   ];
 
   static const Map<String, String> modules = {
@@ -141,5 +151,6 @@ class PermissionConstants {
     'ORDER': "ORDER",
     'KDS': "KDS",
     'REPORT': "REPORT",
+    'CASH_REGISTER': "CASH_REGISTER",
   };
 }

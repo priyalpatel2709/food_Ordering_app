@@ -3,10 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/services/storage_service.dart';
 import '../../../../core/constants/permission_constants.dart';
 import '../providers/rbac_provider.dart';
-import '../../../../features/authentication/presentation/providers/auth_provider.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../features/authentication/domain/entities/user_entity.dart';
-import '../../domain/entities/role_entity.dart';
 import '../widgets/permission_guard.dart'; // Import PermissionGuard
 
 class UserManagementPage extends ConsumerWidget {
