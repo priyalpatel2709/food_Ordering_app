@@ -10,6 +10,8 @@ import '../../../menu/domain/entities/menu_entity.dart';
 import '../../../menu/presentation/viewmodels/categories_view_model.dart';
 import '../../../menu/presentation/viewmodels/items_view_model.dart';
 
+import 'package:responsive_sizer/responsive_sizer.dart';
+
 class ItemsManagementPage extends ConsumerStatefulWidget {
   const ItemsManagementPage({super.key});
 
@@ -78,7 +80,7 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.filter_list_rounded),
+            icon: const Icon(Icons.filter_list_rounded, size: 24),
             onPressed: () {},
           ),
         ],
@@ -93,7 +95,10 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
                 child: CircularProgressIndicator(),
               ),
               ItemsError(:final message) => Center(
-                child: Text('Error: $message'),
+                child: Text(
+                  'Error: $message',
+                  style: const TextStyle(fontSize: 15),
+                ),
               ),
               ItemsLoaded(
                 :final items,
@@ -111,10 +116,14 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
         child: FloatingActionButton.extended(
           onPressed: () => context.push(RouteConstants.addItem, extra: null),
           backgroundColor: const Color(0xFF0F172A),
-          icon: const Icon(Icons.add_rounded, color: Colors.white),
+          icon: const Icon(Icons.add_rounded, color: Colors.white, size: 20),
           label: const Text(
             'New Item',
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: 15,
+            ),
           ),
         ),
       ),
@@ -127,16 +136,19 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
       child: TextField(
         controller: _searchController,
+        style: const TextStyle(fontSize: 15),
         decoration: InputDecoration(
           hintText: 'Search by itemName or SKU...',
+          hintStyle: const TextStyle(fontSize: 15),
           prefixIcon: const Icon(
             Icons.search_rounded,
             color: Color(0xFF64748B),
+            size: 22,
           ),
           filled: true,
           fillColor: const Color(0xFFF1F5F9),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(12),
             borderSide: BorderSide.none,
           ),
           contentPadding: const EdgeInsets.symmetric(
@@ -171,6 +183,7 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
           return Padding(
             padding: const EdgeInsets.only(right: 8),
             child: FilterChip(
+              padding: EdgeInsets.zero,
               label: Text(isAll ? 'All Items' : category!.name),
               selected: isSelected,
               onSelected: (val) {
@@ -186,9 +199,10 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
                     ? const Color(0xFF0F172A)
                     : const Color(0xFF64748B),
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                fontSize: 13,
               ),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 side: BorderSide(
                   color: isSelected
                       ? const Color(0xFF0F172A)
@@ -216,27 +230,57 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
             const SizedBox(height: 16),
             const Text(
               'No items found in inventory',
-              style: TextStyle(color: Color(0xFF64748B)),
+              style: TextStyle(color: Color(0xFF64748B), fontSize: 15),
             ),
           ],
         ),
       );
     }
 
-    return ListView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.all(16),
-      itemCount: items.length + (hasMore ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index == items.length) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 32),
-            child: Center(child: CircularProgressIndicator()),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = constraints.maxWidth > 900
+            ? 3
+            : constraints.maxWidth > 600
+            ? 2
+            : 1;
+
+        if (crossAxisCount > 1) {
+          return GridView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.all(16),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 2.8,
+            ),
+            itemCount: items.length + (hasMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == items.length) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return _buildItemCard(items[index]);
+            },
           );
         }
 
-        final item = items[index];
-        return _buildItemCard(item);
+        return ListView.builder(
+          controller: _scrollController,
+          padding: const EdgeInsets.all(16),
+          itemCount: items.length + (hasMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == items.length) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+
+            final item = items[index];
+            return _buildItemCard(item);
+          },
+        );
       },
     );
   }
@@ -246,7 +290,7 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(15),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),
@@ -257,25 +301,25 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
       ),
       child: InkWell(
         onTap: () => context.push(RouteConstants.addItem, extra: item),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(15),
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Row(
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(10),
                 child: item.image.isNotEmpty
                     ? Image.network(
                         item.image,
-                        width: 80,
-                        height: 80,
+                        width: 64,
+                        height: 64,
                         fit: BoxFit.cover,
                         errorBuilder: (context, error, stackTrace) =>
                             _buildImagePlaceholder(),
                       )
                     : _buildImagePlaceholder(),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -307,7 +351,7 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         _buildStatusBadge(item.isAvailable),
@@ -338,10 +382,14 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
 
   Widget _buildImagePlaceholder() {
     return Container(
-      width: 80,
-      height: 80,
+      width: 64,
+      height: 64,
       color: const Color(0xFFF1F5F9),
-      child: const Icon(Icons.fastfood_rounded, color: Color(0xFFCBD5E1)),
+      child: const Icon(
+        Icons.fastfood_rounded,
+        color: Color(0xFFCBD5E1),
+        size: 32,
+      ),
     );
   }
 
@@ -350,14 +398,14 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
         color: const Color(0xFFF0FDF4),
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         '\$${price.toStringAsFixed(2)}',
         style: const TextStyle(
           color: Color(0xFF166534),
           fontWeight: FontWeight.bold,
-          fontSize: 14,
+          fontSize: 13,
         ),
       ),
     );
@@ -374,8 +422,8 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Container(
-            width: 6,
-            height: 6,
+            width: 8,
+            height: 8,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               color: isAvailable
@@ -387,7 +435,7 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
           Text(
             isAvailable ? 'In Stock' : 'Out of Stock',
             style: TextStyle(
-              fontSize: 11,
+              fontSize: 12,
               fontWeight: FontWeight.bold,
               color: isAvailable
                   ? const Color(0xFF166534)
@@ -409,7 +457,7 @@ class _ItemsManagementPageState extends ConsumerState<ItemsManagementPage> {
           padding: const EdgeInsets.all(6),
           decoration: BoxDecoration(
             border: Border.all(color: const Color(0xFFF1F5F9)),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(6),
           ),
           child: Icon(icon, size: 20, color: color),
         ),

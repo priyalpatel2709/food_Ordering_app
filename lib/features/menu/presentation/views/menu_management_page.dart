@@ -47,57 +47,80 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Menu Management', style: TextStyle(fontSize: 18.sp)),
+        title: const Text(
+          'Menu Management',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: AppColors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, size: 6.w),
+          icon: const Icon(Icons.arrow_back, size: 24),
           onPressed: () => context.pop(),
         ),
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: EdgeInsets.all(4.w),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: 'Search menus...',
-                prefixIcon: Icon(Icons.search, size: 5.w),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+      body: Container(
+        color: Colors.white,
+        child: Column(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: TextField(
+                controller: _searchController,
+                style: const TextStyle(fontSize: 15),
+                decoration: InputDecoration(
+                  hintText: 'Search menus...',
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    size: 22,
+                    color: Colors.black87,
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
                 ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 4.w,
-                  vertical: 1.5.h,
-                ),
+                onChanged: _onSearchChanged,
               ),
-              onChanged: _onSearchChanged,
-              style: TextStyle(fontSize: 16.sp),
             ),
-          ),
-          Expanded(
-            child: switch (menuState) {
-              MenuInitial() ||
-              MenuLoading() => const Center(child: CircularProgressIndicator()),
-              MenuError(:final message) => Center(
-                child: Text(
-                  'Error: $message',
-                  style: TextStyle(fontSize: 16.sp),
+            Expanded(
+              child: switch (menuState) {
+                MenuInitial() || MenuLoading() => const Center(
+                  child: CircularProgressIndicator(),
                 ),
-              ),
-              MenuLoaded(:final menus) => _buildMenuList(menus),
-            },
-          ),
-        ],
+                MenuError(:final message) => Center(
+                  child: Text(
+                    'Error: $message',
+                    style: const TextStyle(fontSize: 15),
+                  ),
+                ),
+                MenuLoaded(:final menus) => _buildMenuList(menus),
+              },
+            ),
+          ],
+        ),
       ),
       floatingActionButton: PermissionGuard(
         permission: PermissionConstants.menuCreate,
         child: FloatingActionButton(
           onPressed: () => context.push(RouteConstants.addMenu),
-          backgroundColor: AppColors.primary,
-          child: Icon(Icons.add, size: 7.w),
+          backgroundColor: const Color(0xFFFF7043),
+          elevation: 3,
+          mini: false,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: const Icon(Icons.add, size: 28, color: Colors.white),
         ),
       ),
     );
@@ -105,131 +128,198 @@ class _MenuManagementPageState extends ConsumerState<MenuManagementPage> {
 
   Widget _buildMenuList(List<MenuEntity> menus) {
     if (menus.isEmpty) {
-      return Center(
-        child: Text('No menus found.', style: TextStyle(fontSize: 16.sp)),
+      return const Center(
+        child: Text('No menus found.', style: TextStyle(fontSize: 15)),
       );
     }
 
-    return ListView.builder(
-      padding: EdgeInsets.all(4.w),
-      itemCount: menus.length,
-      itemBuilder: (context, index) {
-        final menu = menus[index];
-        final isActiveNow = _isMenuCurrent(menu);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = constraints.maxWidth > 1200
+            ? 3
+            : constraints.maxWidth > 600
+            ? 2
+            : 1;
 
-        return Card(
-          margin: EdgeInsets.only(bottom: 2.h),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-            side: isActiveNow
-                ? const BorderSide(color: Colors.green, width: 2)
-                : BorderSide.none,
+        return GridView.builder(
+          padding: const EdgeInsets.all(16),
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: crossAxisCount,
+            crossAxisSpacing: 16,
+            mainAxisSpacing: 16,
+            childAspectRatio: crossAxisCount > 1 ? 2.0 : 2.0,
           ),
-          child: ListTile(
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 4.w,
-              vertical: 1.h,
+          itemCount: menus.length,
+          itemBuilder: (context, index) => _buildMenuCard(menus[index]),
+        );
+      },
+    );
+  }
+
+  Widget _buildMenuCard(MenuEntity menu) {
+    final isActiveNow = _isMenuCurrent(menu);
+
+    // Get time range for today if available
+    String timeRange = '';
+    try {
+      final days = [
+        'Monday',
+        'Tuesday',
+        'Wednesday',
+        'Thursday',
+        'Friday',
+        'Saturday',
+        'Sunday',
+      ];
+      final currentDay = DateTime.now().weekday - 1; // 0-indexed for list
+      if (currentDay >= 0 && currentDay < days.length) {
+        final dayName = days[currentDay];
+        final dayConfig = menu.availableDays.firstWhere(
+          (d) => d.day == dayName,
+        );
+        if (dayConfig.timeSlots.isNotEmpty) {
+          final slot = dayConfig.timeSlots.first;
+          timeRange = 'Available from ${slot.openTime} - ${slot.closeTime}';
+        } else {
+          timeRange = 'No time slots today';
+        }
+      } else {
+        timeRange = 'Invalid day';
+      }
+    } catch (_) {
+      timeRange = 'Not available today';
+    }
+
+    return GestureDetector(
+      onTap: () => context.push(RouteConstants.addMenu, extra: menu),
+      child: Container(
+        decoration: BoxDecoration(
+          color: isActiveNow
+              ? const Color(0xFFF8FAF8)
+              : const Color(0xFFFFF7F6),
+          borderRadius: BorderRadius.circular(15),
+          border: isActiveNow
+              ? Border.all(color: const Color(0xFF4CAF50), width: 1.5)
+              : Border.all(color: Colors.transparent),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
             ),
-            leading: CircleAvatar(
-              radius: 6.w,
-              backgroundColor: isActiveNow
-                  ? Colors.green.shade100
-                  : Colors.grey.shade100,
-              child: Icon(
-                Icons.menu_book,
-                size: 6.w,
-                color: isActiveNow ? Colors.green : Colors.grey,
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Menu Book Icon at bottom left
+            Positioned(
+              left: -4,
+              bottom: 8,
+              child: Opacity(
+                opacity: 0.3,
+                child: Icon(
+                  Icons.menu_book_rounded,
+                  size: 80,
+                  color: isActiveNow
+                      ? const Color(0xFF4CAF50)
+                      : const Color(0xFF94A3B8),
+                ),
               ),
             ),
-            title: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    menu.name,
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16.sp,
+
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                children: [
+                  // Content
+                  Expanded(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Spacer(flex: 3),
+                        Expanded(
+                          flex: 7,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                menu.name,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color(0xFF1E293B),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              const SizedBox(height: 4),
+                              if (isActiveNow)
+                                Container(
+                                  margin: const EdgeInsets.only(bottom: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 2,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFF4CAF50),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: const Text(
+                                    'ACTIVE',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              Text(
+                                timeRange,
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: Color(0xFF64748B),
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                menu.isActive ? 'Enabled' : 'Disabled',
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.w600,
+                                  color: menu.isActive
+                                      ? const Color(0xFF4CAF50)
+                                      : const Color(0xFFEF4444),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                ),
-                if (isActiveNow)
-                  Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 2.w,
-                      vertical: 0.5.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.green,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      'ACTIVE',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12.sp,
-                        fontWeight: FontWeight.bold,
+
+                  // Delete Button
+                  PermissionGuard(
+                    permission: PermissionConstants.menuDelete,
+                    child: GestureDetector(
+                      onTap: () {
+                        // Stop propagation of tap
+                        _confirmDelete(menu.id);
+                      },
+                      child: const Icon(
+                        Icons.delete,
+                        color: Color(0xFFEF4444),
+                        size: 22,
                       ),
                     ),
                   ),
-              ],
-            ),
-            subtitle: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 0.5.h),
-                Text(
-                  menu.description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 14.sp),
-                ),
-                SizedBox(height: 1.h),
-                Text(
-                  menu.isActive ? 'Enabled' : 'Disabled',
-                  style: TextStyle(
-                    color: menu.isActive ? Colors.green : Colors.red,
-                    fontSize: 13.sp,
-                  ),
-                ),
-              ],
-            ),
-            trailing: PermissionGuard(
-              permission: PermissionConstants.menuDelete,
-              child: IconButton(
-                icon: Icon(Icons.delete, color: Colors.red, size: 6.w),
-                onPressed: () => _confirmDelete(menu.id),
+                ],
               ),
             ),
-            onTap: () {
-              // We can't wrap onTap directly easily without breaking layout or using a wrapper.
-              // Instead, we can wrap the whole tile content or check permission inside onTap?
-              // Better to wrap the whole Card interaction or just disabling it?
-              // PermissionGuard hides the widget by default. Hiding the whole list item if no READ?
-              // But we are in MenuManagement, so LIST is assumed allowed if we are here (guarded at page level probably).
-              // Let's guard the Edit transition.
-              // BUT PermissionGuard constructs a widget.
-              // IF we wrap the whole Card with PermissionGuard(UPDATE), then users without UPDATE can't even SEE the menu in the list? That's wrong.
-              // We want them to see it (READ), but not edit.
-              // So, we can just check permission before pushing?
-              // Or standard PermissionGuard usage: "If you don't have permission, the child is not shown".
-              // So we can wrap the onTap logic? No.
-              // We can wrap the ListTile with a Widget that conditionally enables onTap?
-              // Or better, we wrap the whole ListTile in a specific way?
-              // Let's try wrapping the trailing DELETE button (done).
-              // For the main tap (Edit):
-              // If we want to strictly use PermissionGuard widget, we'd have to wrap something visual.
-              // Maybe we show a "View" icon if they can only READ, and the tapping opens read-only?
-              // The Edit Page might handle read-only state?
-              // For now, let's leave onTap as is, assuming the Edit Page will be guarded or the user shouldn't be here if they can't manage.
-              // Ideally, we'd check refs permission manually.
-              // But I am instructed to use PermissionGuard.
-              // Let's stick to wrapping the buttons we can see.
-              // Like the FAB.
-              context.push(RouteConstants.addMenu, extra: menu);
-            },
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 

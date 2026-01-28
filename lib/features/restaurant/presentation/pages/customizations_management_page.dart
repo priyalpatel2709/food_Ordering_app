@@ -60,7 +60,10 @@ class _CustomizationsManagementPageState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Customizations'),
+        title: const Text(
+          'Customizations',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: AppColors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -71,13 +74,18 @@ class _CustomizationsManagementPageState
             padding: const EdgeInsets.all(16.0),
             child: TextField(
               controller: _searchController,
+              style: const TextStyle(fontSize: 15),
               decoration: InputDecoration(
                 hintText: 'Search customizations...',
-                prefixIcon: const Icon(Icons.search),
+                hintStyle: const TextStyle(fontSize: 15),
+                prefixIcon: const Icon(Icons.search, size: 22),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
               onChanged: _onSearchChanged,
             ),
@@ -87,7 +95,10 @@ class _CustomizationsManagementPageState
               CustomizationsInitial() || CustomizationsLoading() =>
                 const Center(child: CircularProgressIndicator()),
               CustomizationsError(:final message) => Center(
-                child: Text('Error: $message'),
+                child: Text(
+                  'Error: $message',
+                  style: const TextStyle(fontSize: 15),
+                ),
               ),
               CustomizationsLoaded(
                 :final options,
@@ -108,7 +119,7 @@ class _CustomizationsManagementPageState
         permission: PermissionConstants.customizationCreate,
         child: FloatingActionButton(
           onPressed: () => _showAddCustomizationDialog(),
-          child: const Icon(Icons.add),
+          child: const Icon(Icons.add, size: 28),
         ),
       ),
     );
@@ -120,58 +131,108 @@ class _CustomizationsManagementPageState
     bool hasMore,
   ) {
     if (options.isEmpty) {
-      return const Center(child: Text('No customization options found.'));
+      return const Center(
+        child: Text(
+          'No customization options found.',
+          style: TextStyle(fontSize: 15),
+        ),
+      );
     }
 
-    return ListView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.all(16),
-      itemCount: options.length + (hasMore ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index == options.length) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 32),
-            child: Center(child: CircularProgressIndicator()),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = constraints.maxWidth > 900
+            ? 3
+            : constraints.maxWidth > 600
+            ? 2
+            : 1;
+
+        if (crossAxisCount > 1) {
+          return GridView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.all(16),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 3.5,
+            ),
+            itemCount: options.length + (hasMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == options.length) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return _buildCustomizationCard(options[index]);
+            },
           );
         }
-        final option = options[index];
-        return Card(
-          child: ListTile(
-            title: Text(
-              option.name,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            subtitle: Text('\$${option.price.toStringAsFixed(2)}'),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                PermissionGuard(
-                  permission: PermissionConstants.customizationUpdate,
-                  child: Switch(
-                    value: option.isActive,
-                    onChanged: (val) {
-                      ref
-                          .read(customizationsNotifierProvider.notifier)
-                          .updateOption(option.id, {'isActive': val});
-                    },
-                  ),
-                ),
-                PermissionGuard(
-                  permission: PermissionConstants.customizationDelete,
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.delete_outline,
-                      color: AppColors.error,
-                    ),
-                    onPressed: () => _confirmDeleteOption(option),
-                  ),
-                ),
-              ],
-            ),
-            onTap: () => _showEditCustomizationDialog(option),
-          ),
+
+        return ListView.builder(
+          controller: _scrollController,
+          padding: const EdgeInsets.all(16),
+          itemCount: options.length + (hasMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == options.length) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 32),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final option = options[index];
+            return _buildCustomizationCard(option);
+          },
         );
       },
+    );
+  }
+
+  Widget _buildCustomizationCard(CustomizationOptionEntity option) {
+    return Card(
+      elevation: 1,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        title: Text(
+          option.name,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        ),
+        subtitle: Text(
+          '\$${option.price.toStringAsFixed(2)}',
+          style: const TextStyle(fontSize: 14),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            PermissionGuard(
+              permission: PermissionConstants.customizationUpdate,
+              child: Transform.scale(
+                scale: 0.85,
+                child: Switch(
+                  value: option.isActive,
+                  onChanged: (val) {
+                    ref
+                        .read(customizationsNotifierProvider.notifier)
+                        .updateOption(option.id, {'isActive': val});
+                  },
+                ),
+              ),
+            ),
+            PermissionGuard(
+              permission: PermissionConstants.customizationDelete,
+              child: IconButton(
+                icon: const Icon(
+                  Icons.delete_outline,
+                  color: AppColors.error,
+                  size: 22,
+                ),
+                onPressed: () => _confirmDeleteOption(option),
+              ),
+            ),
+          ],
+        ),
+        onTap: () => _showEditCustomizationDialog(option),
+      ),
     );
   }
 
@@ -190,7 +251,7 @@ class _CustomizationsManagementPageState
               controller: nameController,
               decoration: const InputDecoration(labelText: 'Option Name'),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             TextField(
               controller: priceController,
               decoration: const InputDecoration(labelText: 'Price'),
@@ -240,7 +301,7 @@ class _CustomizationsManagementPageState
               controller: nameController,
               decoration: const InputDecoration(labelText: 'Option Name'),
             ),
-            SizedBox(height: 16.0),
+            const SizedBox(height: 16.0),
             TextField(
               controller: priceController,
               decoration: const InputDecoration(labelText: 'Price'),

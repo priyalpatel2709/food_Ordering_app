@@ -8,6 +8,8 @@ import '../../../menu/domain/entities/menu_entity.dart';
 import '../../../menu/presentation/viewmodels/categories_view_model.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
+import 'package:responsive_sizer/responsive_sizer.dart';
+
 class CategoriesManagementPage extends ConsumerStatefulWidget {
   const CategoriesManagementPage({super.key});
 
@@ -61,7 +63,10 @@ class _CategoriesManagementPageState
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Categories Management'),
+        title: const Text(
+          'Categories Management',
+          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
         backgroundColor: AppColors.white,
         foregroundColor: AppColors.textPrimary,
         elevation: 0,
@@ -69,16 +74,20 @@ class _CategoriesManagementPageState
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: TextField(
               controller: _searchController,
+              style: const TextStyle(fontSize: 15),
               decoration: InputDecoration(
                 hintText: 'Search categories...',
-                prefixIcon: const Icon(Icons.search),
+                prefixIcon: const Icon(Icons.search, size: 22),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(10),
                 ),
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
               ),
               onChanged: _onSearchChanged,
             ),
@@ -89,7 +98,10 @@ class _CategoriesManagementPageState
                 child: CircularProgressIndicator(),
               ),
               CategoriesError(:final message) => Center(
-                child: Text('Error: $message'),
+                child: Text(
+                  'Error: $message',
+                  style: const TextStyle(fontSize: 15),
+                ),
               ),
               CategoriesLoaded(
                 :final categories,
@@ -110,7 +122,8 @@ class _CategoriesManagementPageState
         permission: PermissionConstants.categoryCreate,
         child: FloatingActionButton(
           onPressed: () => _showAddCategoryDialog(),
-          child: const Icon(Icons.add),
+          mini: false,
+          child: const Icon(Icons.add, size: 28),
         ),
       ),
     );
@@ -122,76 +135,130 @@ class _CategoriesManagementPageState
     bool hasMore,
   ) {
     if (categories.isEmpty) {
-      return const Center(child: Text('No categories found.'));
+      return const Center(
+        child: Text('No categories found.', style: TextStyle(fontSize: 15)),
+      );
     }
 
-    return ListView.builder(
-      controller: _scrollController,
-      padding: const EdgeInsets.all(16),
-      itemCount: categories.length + (hasMore ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (index == categories.length) {
-          return const Padding(
-            padding: EdgeInsets.symmetric(vertical: 32),
-            child: Center(child: CircularProgressIndicator()),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final crossAxisCount = constraints.maxWidth > 900
+            ? 3
+            : constraints.maxWidth > 600
+            ? 2
+            : 1;
+
+        if (crossAxisCount > 1) {
+          return GridView.builder(
+            controller: _scrollController,
+            padding: const EdgeInsets.all(16),
+            gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: crossAxisCount,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 3.2,
+            ),
+            itemCount: categories.length + (hasMore ? 1 : 0),
+            itemBuilder: (context, index) {
+              if (index == categories.length) {
+                return const Center(child: CircularProgressIndicator());
+              }
+              return _buildCategoryCard(categories[index]);
+            },
           );
         }
-        final category = categories[index];
-        return Card(
-          margin: const EdgeInsets.only(bottom: 12),
-          child: ListTile(
-            title: Row(
-              children: [
-                if (category.color != null)
-                  Container(
-                    width: 16,
-                    height: 16,
-                    margin: const EdgeInsets.only(right: 8),
-                    decoration: BoxDecoration(
-                      color: _hexToColor(category.color),
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                  ),
-                Expanded(
-                  child: Text(
-                    category.name,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ],
-            ),
-            subtitle: Text(category.description),
-            trailing: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                PermissionGuard(
-                  permission: PermissionConstants.categoryUpdate,
-                  child: Switch(
-                    value: category.isActive,
-                    onChanged: (val) {
-                      ref
-                          .read(categoriesNotifierProvider.notifier)
-                          .updateCategory(category.id, {'isActive': val});
-                    },
-                  ),
-                ),
-                PermissionGuard(
-                  permission: PermissionConstants.categoryDelete,
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.delete_outline,
-                      color: AppColors.error,
-                    ),
-                    onPressed: () => _confirmDeleteCategory(category),
-                  ),
-                ),
-              ],
-            ),
-            onTap: () => _showEditCategoryDialog(category),
-          ),
+
+        return ListView.builder(
+          controller: _scrollController,
+          padding: const EdgeInsets.all(16),
+          itemCount: categories.length + (hasMore ? 1 : 0),
+          itemBuilder: (context, index) {
+            if (index == categories.length) {
+              return const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16),
+                child: Center(child: CircularProgressIndicator()),
+              );
+            }
+            final category = categories[index];
+            return _buildCategoryCard(category);
+          },
         );
       },
+    );
+  }
+
+  Widget _buildCategoryCard(CategoryEntity category) {
+    return Card(
+      elevation: 1,
+      margin: const EdgeInsets.only(bottom: 12),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+        dense: true,
+        title: Row(
+          children: [
+            if (category.color != null)
+              Container(
+                width: 20,
+                height: 20,
+                margin: const EdgeInsets.only(right: 12),
+                decoration: BoxDecoration(
+                  color: _hexToColor(category.color),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.grey.shade300, width: 0.5),
+                ),
+              ),
+            Expanded(
+              child: Text(
+                category.name,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          ],
+        ),
+        subtitle: Text(
+          category.description,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 13),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            PermissionGuard(
+              permission: PermissionConstants.categoryUpdate,
+              child: Transform.scale(
+                scale: 0.8,
+                child: Switch(
+                  value: category.isActive,
+                  onChanged: (val) {
+                    ref
+                        .read(categoriesNotifierProvider.notifier)
+                        .updateCategory(category.id, {'isActive': val});
+                  },
+                ),
+              ),
+            ),
+            PermissionGuard(
+              permission: PermissionConstants.categoryDelete,
+              child: IconButton(
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+                icon: const Icon(
+                  Icons.delete_outline,
+                  color: AppColors.error,
+                  size: 22,
+                ),
+                onPressed: () => _confirmDeleteCategory(category),
+              ),
+            ),
+          ],
+        ),
+        onTap: () => _showEditCategoryDialog(category),
+      ),
     );
   }
 
