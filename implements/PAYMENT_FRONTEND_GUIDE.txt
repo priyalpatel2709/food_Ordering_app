@@ -1,0 +1,75 @@
+# Frontend Payment Integration Guide
+
+This guide explains how to integrate order payments and loyalty redemptions in your frontend application.
+
+## 1. Loyalty Points Redemption (Optional)
+If a customer wants to use loyalty points, call this **before** finalizing the payment.
+
+- **Endpoint**: `POST /api/v1/orders/:orderId/apply-loyalty-discount`
+- **Body**:
+```json
+{
+  "loyaltyCustomerId": "65f...",
+  "pointsToRedeem": 500
+}
+```
+- **Result**: The order's `balanceDue` will decrease by the cash value of the points (e.g., $5.00 for 500 points).
+
+---
+
+## 2. Processing Final Payment
+Depending on the order type and workflow, use one of these two methods.
+
+### Method A: Immediate/Atomic Payment
+*Used for online orders where the user pays at the time of placing the order.*
+
+- **Endpoint**: `POST /api/v1/orders/create-with-payment`
+- **Body**:
+```json
+{
+  "orderType": "Takeaway", // or "Delivery"
+  "orderItems": [...],
+  "payment": {
+    "method": "upi", // credit, debit, cash, online, wallet, upi
+    "transactionId": "TXN_12345",
+    "amount": 45.00 // Total order cost
+  }
+}
+```
+
+### Method B: Settlement Payment (Existing Order)
+*Used for Dine-in (at checkout), Delivery (on door), or Takeaway (at counter).*
+
+- **Endpoint**: `POST /api/v1/payment/processPayment/:orderId`
+- **Body**:
+```json
+{
+  "method": "cash",
+  "amount": 40.00, // Remaining balanceDue
+  "transactionId": "...", // Optional
+  "notes": "Payment at counter"
+}
+```
+
+---
+
+## 3. Recommended Workflow (Checkout Screen)
+
+1.  **Calculate Totals**: Display Subtotal, Tax, and Grand Total (`orderFinalCharge`).
+2.  **Apply Loyalty**:
+    *   Ask: "Use Loyalty Points?"
+    *   If yes, call the `apply-loyalty-discount` endpoint.
+    *   **Refresh UI**: Use the returned `order.payment.balanceDue` as the new amount to pay.
+3.  **Select Payment Method**: Let the user choose Cash, Card, UPI, etc.
+4.  **Confirm Payment**:
+    *   Call `processPayment` with the `balanceDue`.
+5.  **Success**: Show the confirmation and print/generate the bill using `GET /api/v1/payment/bill/:orderId`.
+
+## 4. Payment Methods Enum
+Ensure your frontend UI maps to these valid backend strings:
+- `cash`
+- `credit` (Credit Card)
+- `debit` (Debit Card)
+- `upi`
+- `online`
+- `wallet`

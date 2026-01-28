@@ -50,27 +50,27 @@ class SocketService {
     });
 
     _socket!.on('kds_update', (data) {
-      log('KDS update received: $data');
+      log('KDS update received:');
       _kdsUpdateController.add(Map<String, dynamic>.from(data));
     });
 
     _socket!.on('group_cart_updated', (data) {
-      log('Group cart update received: $data');
+      log('Group cart update received:');
       _groupCartUpdateController.add(Map<String, dynamic>.from(data));
     });
 
     _socket!.on('table_status_updated', (data) {
-      log('Table status updated received: $data');
+      log('Table status updated received: ');
       _tableStatusUpdateController.add(Map<String, dynamic>.from(data));
     });
 
     _socket!.on('table_order_updated', (data) {
-      log('Table order updated received: $data');
+      log('Table order updated received:');
       _tableOrderUpdateController.add(Map<String, dynamic>.from(data));
     });
 
     _socket!.on('order_deleted', (data) {
-      log('Order deleted received: $data');
+      log('Order deleted received:');
       _orderDeletedController.add(Map<String, dynamic>.from(data));
     });
 

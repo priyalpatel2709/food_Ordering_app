@@ -10,7 +10,7 @@ class CreateDineInOrderUseCase {
     String tableNumber, {
     List<DineInOrderItem>? items,
     String? orderTypeId,
-    required String customerId,
+    String? customerId,
   }) {
     return _repository.createDineInOrder(
       tableNumber,

@@ -164,6 +164,14 @@ class StaffHomePage extends ConsumerWidget {
         permission: PermissionConstants.restaurantRead,
         description: 'Store profile & configurations',
       ),
+      _DashboardItem(
+        title: 'App Settings',
+        icon: Icons.settings_suggest_rounded,
+        color: const Color(0xFF64748B),
+        route: RouteConstants.settings,
+        permission: PermissionConstants.restaurantRead,
+        description: 'App profile & configurations',
+      ),
     ];
 
     final filteredItems = allItems.where((item) {
@@ -284,15 +292,15 @@ class StaffHomePage extends ConsumerWidget {
                   ),
                 ],
               ),
-              child: Image.asset(
-                'assets/images/logo.png',
-                height: isDesktop ? 4.h : 3.5.h,
-                errorBuilder: (context, error, stackTrace) => Icon(
-                  Icons.restaurant_rounded,
-                  color: AppColors.primary,
-                  size: isDesktop ? 2.5.w : 5.w,
-                ),
-              ),
+              // child: Image.asset(
+              //   'assets/images/logo.png',
+              //   height: isDesktop ? 4.h : 3.5.h,
+              //   errorBuilder: (context, error, stackTrace) => Icon(
+              //     Icons.restaurant_rounded,
+              //     color: AppColors.primary,
+              //     size: isDesktop ? 2.5.w : 5.w,
+              //   ),
+              // ),
             ),
             Row(
               children: [

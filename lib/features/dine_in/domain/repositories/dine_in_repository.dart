@@ -8,7 +8,7 @@ abstract class DineInRepository {
     String tableNumber, {
     List<DineInOrderItem>? items,
     String? orderTypeId,
-    required String customerId,
+    String? customerId,
   });
   Future<DineInOrderEntity> addItemsToOrder(
     String orderId,

@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
@@ -6,11 +8,11 @@ import '../../../../shared/theme/app_colors.dart';
 import '../../../dine_in/domain/entities/dine_in_order_entity.dart';
 import '../../../dine_in/domain/entities/payment_entity.dart';
 import '../../../loyalty/presentation/providers/loyalty_providers.dart';
-import '../providers/pos_provider.dart';
 import '../providers/pos_state.dart';
-
+import '../providers/pos_provider.dart';
 import './table_selection_dialog.dart';
 import './schedule_order_dialog.dart';
+import './payment_dialog.dart';
 import '../../../loyalty/presentation/widgets/customer_lookup_dialog.dart';
 import '../../../loyalty/presentation/widgets/redeem_points_dialog.dart';
 
@@ -26,66 +28,57 @@ class OrderBuilder extends ConsumerWidget {
 
     final double totalToPay = summary.total + (ongoingOrder?.totalAmount ?? 0);
 
-    String formatScheduledTime(DateTime date, String? time) {
-      final dateStr = '${date.month}/${date.day}';
-      return time != null ? '$dateStr at $time' : dateStr;
-    }
-
     return Column(
       children: [
-        // Cart Header
-        Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        // Top Order Info Bar (Simplified)
+        Container(
+          padding: EdgeInsets.symmetric(horizontal: 16.px, vertical: 12.px),
+          decoration: BoxDecoration(
+            color: AppColors.white,
+            border: Border(bottom: BorderSide(color: AppColors.border)),
+          ),
+          child: Row(
             children: [
-              Row(
-                children: [
-                  Icon(Icons.shopping_cart_outlined, color: AppColors.primary),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      'Your Cart',
+              Icon(
+                Icons.shopping_cart_outlined,
+                color: AppColors.primary,
+                size: 20.px,
+              ),
+              SizedBox(width: 12.px),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      state.orderType.name.toUpperCase(),
+                      style: TextStyle(
+                        fontSize: 9.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textHint,
+                      ),
+                    ),
+                    Text(
+                      state.tableNumber != null
+                          ? 'Table: ${state.tableNumber}'
+                          : 'Cart',
                       style: TextStyle(
                         fontSize: 14.sp,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                  ),
-                  if (items.isNotEmpty)
-                    TextButton(
-                      onPressed: () =>
-                          ref.read(posNotifierProvider.notifier).clearCart(),
-                      child: Text(
-                        'Clear All',
-                        style: TextStyle(color: AppColors.error),
-                      ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-              if (state.tableNumber != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 4,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      'Table: ${state.tableNumber}',
-                      style: TextStyle(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 10.5.sp,
-                      ),
-                    ),
+              if (items.isNotEmpty)
+                IconButton(
+                  onPressed: () =>
+                      ref.read(posNotifierProvider.notifier).clearCart(),
+                  icon: Icon(
+                    Icons.delete_sweep_outlined,
+                    color: AppColors.error,
+                    size: 20.px,
                   ),
                 ),
-              _buildCustomerSection(context, ref, state),
             ],
           ),
         ),
@@ -95,59 +88,25 @@ class OrderBuilder extends ConsumerWidget {
           child: (items.isEmpty && ongoingOrder == null)
               ? _buildEmptyState()
               : ListView(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  padding: EdgeInsets.zero,
                   children: [
-                    if (items.isNotEmpty) ...[
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Text(
-                          'NEW ITEMS',
-                          style: TextStyle(
-                            fontSize: 10.5.sp,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textSecondary,
-                            letterSpacing: 1,
-                          ),
-                        ),
-                      ),
+                    if (items.isNotEmpty)
                       ...items.map((item) => _CartItemTile(item: item)),
-                    ],
                     if (ongoingOrder != null &&
                         ongoingOrder.items.isNotEmpty) ...[
-                      const Divider(height: 32),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 8),
-                        child: Row(
-                          children: [
-                            Text(
-                              'ORDERED ITEMS',
-                              style: TextStyle(
-                                fontSize: 10.5.sp,
-                                fontWeight: FontWeight.bold,
-                                color: AppColors.success,
-                                letterSpacing: 1,
-                              ),
-                            ),
-                            const Spacer(),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.success.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: Text(
-                                ongoingOrder.status.toUpperCase(),
-                                style: TextStyle(
-                                  color: AppColors.success,
-                                  fontSize: 8.sp,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ),
-                          ],
+                      Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: 12.px,
+                          vertical: 4.px,
+                        ),
+                        color: AppColors.grey50,
+                        child: Text(
+                          'ORDERED ITEMS',
+                          style: TextStyle(
+                            fontSize: 10.sp,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.success,
+                          ),
                         ),
                       ),
                       ...ongoingOrder.items.map(
@@ -158,361 +117,339 @@ class OrderBuilder extends ConsumerWidget {
                 ),
         ),
 
-        // Billing Summary Section
-        Container(
-          padding: const EdgeInsets.all(20),
-          decoration: BoxDecoration(
-            color: AppColors.grey50,
-            border: Border(top: BorderSide(color: AppColors.border)),
-          ),
-          child: Column(
-            children: [
-              if (items.isNotEmpty) ...[
-                _summaryRow('Cart Subtotal', summary.subtotal),
-                _summaryRow('Cart Tax', summary.totalTax),
-                if (state.loyaltyDiscount > 0)
-                  _summaryRow(
-                    'Loyalty Discount',
-                    state.loyaltyDiscount,
-                    isDiscount: true,
-                  ),
-              ],
-              if (ongoingOrder != null)
-                _summaryRow('Already Ordered', ongoingOrder.totalAmount),
+        // Bottom Info & Action Section
+        Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Customer Info Row
+            _buildCustomerBar(context, ref, state),
 
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 12),
-                child: Divider(),
+            // Grid-style Summary
+            Container(
+              height: 80.px,
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: AppColors.border)),
               ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Row(
                 children: [
-                  Text(
-                    'Total Amount',
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.bold,
+                  // Subtotal/Tax/Discount Column
+                  Expanded(
+                    flex: 4,
+                    child: Container(
+                      padding: EdgeInsets.all(8.px),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          right: BorderSide(color: AppColors.border),
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          _miniSummaryRow('DISCOUNT:', state.loyaltyDiscount),
+                          _miniSummaryRow('SUBTOTAL:', summary.subtotal),
+                          _miniSummaryRow('TAX:', summary.totalTax),
+                        ],
+                      ),
                     ),
                   ),
-                  Text(
-                    '\$${(totalToPay - state.loyaltyDiscount).toStringAsFixed(2)}',
-                    style: TextStyle(
-                      fontSize: 16.sp,
-                      fontWeight: FontWeight.w900,
-                      color: AppColors.primary,
+                  // Total Column
+                  Expanded(
+                    flex: 3,
+                    child: Container(
+                      padding: EdgeInsets.all(8.px),
+                      decoration: BoxDecoration(
+                        border: Border(
+                          right: BorderSide(color: AppColors.border),
+                        ),
+                      ),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'TOTAL',
+                            style: TextStyle(
+                              fontSize: 10.sp,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          Text(
+                            '\$${(totalToPay - state.loyaltyDiscount).toStringAsFixed(2)}',
+                            style: TextStyle(
+                              fontSize: 16.sp,
+                              fontWeight: FontWeight.w900,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                ],
-              ),
-              // Schedule Order Button (for non-Dine-In orders)
-              if (state.orderType != OrderType.dineIn && items.isNotEmpty) ...[
-                const SizedBox(height: 12),
-                OutlinedButton.icon(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => const ScheduleOrderDialog(),
-                    );
-                  },
-                  icon: Icon(
-                    Icons.schedule,
-                    size: 18,
-                    color: state.scheduledFor != null
-                        ? AppColors.primary
-                        : AppColors.textSecondary,
-                  ),
-                  label: Text(
-                    state.scheduledFor != null
-                        ? 'Scheduled: ${formatScheduledTime(state.scheduledFor!, state.scheduledOrderTime)}'
-                        : 'Schedule Order',
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: state.scheduledFor != null
-                          ? FontWeight.w600
-                          : FontWeight.normal,
-                      color: state.scheduledFor != null
-                          ? AppColors.primary
-                          : AppColors.textSecondary,
-                    ),
-                  ),
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 12,
-                    ),
-                    side: BorderSide(
-                      color: state.scheduledFor != null
-                          ? AppColors.primary
-                          : AppColors.border,
-                      width: state.scheduledFor != null ? 2 : 1,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                ),
-              ],
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  if (items.isNotEmpty)
-                    Expanded(
-                      child: SizedBox(
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            if (state.orderType == OrderType.dineIn &&
-                                state.tableNumber == null) {
+                  // Details Column (Buttons)
+                  Expanded(
+                    flex: 3,
+                    child: Column(
+                      children: [
+                        _summaryButton('SELECT TABLE', () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => const TableSelectionDialog(),
+                          );
+                        }),
+                        const Divider(height: 1, color: AppColors.border),
+                        _summaryButton(
+                          state.scheduledFor != null ? 'SCHEDULED' : 'SCHEDULE',
+                          () {
+                            if (state.orderType != OrderType.dineIn) {
                               showDialog(
                                 context: context,
                                 builder: (context) =>
-                                    const TableSelectionDialog(),
+                                    const ScheduleOrderDialog(),
                               );
-                              return;
                             }
-                            ref.read(posNotifierProvider.notifier).placeOrder();
                           },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor:
-                                (state.orderType == OrderType.dineIn &&
-                                    state.tableNumber == null)
-                                ? AppColors.grey400
-                                : AppColors.secondary,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: Text(
-                            (state.orderType == OrderType.dineIn &&
-                                    state.tableNumber == null)
-                                ? 'SELECT TABLE'
-                                : (ongoingOrder != null
-                                      ? 'ADD TO ORDER'
-                                      : 'PLACE ORDER'),
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
+                          color: state.scheduledFor != null
+                              ? AppColors.primary
+                              : null,
                         ),
-                      ),
+                      ],
                     ),
-                  if (items.isNotEmpty && ongoingOrder != null)
-                    const SizedBox(width: 12),
-                  if (ongoingOrder != null)
-                    Expanded(
-                      child: SizedBox(
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: () => _handleSettle(
-                            context,
-                            ref,
-                            ongoingOrder.id,
-                            totalToPay.toStringAsFixed(2),
-                          ),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            elevation: 0,
-                          ),
-                          child: const Text(
-                            'SETTLE',
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ),
-                    ),
+                  ),
                 ],
               ),
-            ],
-          ),
+            ),
+
+            // Bottom Action Bar (Clear/Send/Discount-Settle)
+            Container(
+              height: 48.px,
+              decoration: BoxDecoration(
+                color: AppColors.grey100,
+                border: Border(top: BorderSide(color: AppColors.border)),
+              ),
+              child: Row(
+                children: [
+                  _actionButton(
+                    Icons.close,
+                    'CLEAR',
+                    AppColors.error,
+                    () => ref.read(posNotifierProvider.notifier).clearCart(),
+                  ),
+                  const VerticalDivider(width: 1, color: AppColors.border),
+                  _actionButton(
+                    Icons.send,
+                    ongoingOrder != null ? 'ADD' : 'SEND',
+                    AppColors.secondary,
+                    () {
+                      if (state.orderType == OrderType.dineIn &&
+                          state.tableNumber == null) {
+                        showDialog(
+                          context: context,
+                          builder: (context) => const TableSelectionDialog(),
+                        );
+                        return;
+                      }
+
+                      // For dine-in, just place the order (add items to table)
+                      if (state.orderType == OrderType.dineIn) {
+                        ref.read(posNotifierProvider.notifier).placeOrder();
+                      } else {
+                        // For takeaway/delivery, show payment dialog
+                        _handlePaymentForOrder(context, ref, state);
+                      }
+                    },
+                  ),
+                  const VerticalDivider(width: 1, color: AppColors.border),
+                  _actionButton(
+                    Icons.payments,
+                    'SETTLE',
+                    AppColors.primary,
+                    () {
+                      if (ongoingOrder != null) {
+                        _handleSettle(
+                          context,
+                          ref,
+                          ongoingOrder.id,
+                          totalToPay.toStringAsFixed(2),
+                        );
+                      }
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ],
     );
   }
 
-  Widget _buildCustomerSection(
+  Widget _buildCustomerBar(
     BuildContext context,
     WidgetRef ref,
     PosState state,
   ) {
     final customer = state.loyaltyCustomer;
-
     return Container(
-      margin: const EdgeInsets.only(top: 16),
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.symmetric(horizontal: 12.px, vertical: 6.px),
       decoration: BoxDecoration(
-        color: customer != null
-            ? AppColors.primary.withOpacity(0.05)
-            : Colors.transparent,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: customer != null
-              ? AppColors.primary.withOpacity(0.2)
-              : AppColors.border.withOpacity(0.5),
-        ),
+        color: AppColors.white,
+        border: Border(top: BorderSide(color: AppColors.border)),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            children: [
-              Icon(
-                customer != null ? Icons.person : Icons.person_add_outlined,
-                size: 18,
-                color: customer != null ? AppColors.primary : AppColors.grey500,
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  customer != null ? customer.name : 'No Customer Selected',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontWeight: customer != null
-                        ? FontWeight.bold
-                        : FontWeight.w500,
-                    color: customer != null
-                        ? AppColors.textPrimary
-                        : AppColors.textSecondary,
-                  ),
+          Icon(Icons.person, size: 14.px, color: AppColors.textSecondary),
+          SizedBox(width: 4.px),
+          Text(
+            customer != null ? '1' : '0',
+            style: TextStyle(fontSize: 11.sp, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(width: 12.px),
+          Icon(Icons.search, size: 14.px, color: AppColors.textHint),
+          SizedBox(width: 4.px),
+          Expanded(
+            child: InkWell(
+              onTap: () => showDialog(
+                context: context,
+                builder: (context) => CustomerLookupDialog(
+                  onCustomerFound: (c) => ref
+                      .read(posNotifierProvider.notifier)
+                      .setLoyaltyCustomer(c),
                 ),
               ),
-              if (customer == null)
-                TextButton.icon(
-                  onPressed: () {
-                    showDialog(
-                      context: context,
-                      builder: (context) => CustomerLookupDialog(
-                        onCustomerFound: (c) {
-                          ref
-                              .read(posNotifierProvider.notifier)
-                              .setLoyaltyCustomer(c);
-                        },
-                      ),
-                    );
-                  },
-                  icon: const Icon(Icons.search, size: 14),
-                  label: const Text('Lookup', style: TextStyle(fontSize: 12)),
-                  style: TextButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    foregroundColor: AppColors.primary,
-                  ),
-                )
-              else
-                Row(
-                  children: [
-                    // if (state.cartItems.isNotEmpty)
-                      IconButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => RedeemPointsDialog(
-                              customer: customer,
-                              onPointsRedeemed: (discount, points) {
-                                ref
-                                    .read(posNotifierProvider.notifier)
-                                    .applyLoyaltyDiscount(discount, points);
-                              },
-                            ),
-                          );
-                        },
-                        icon: Icon(
-                          state.loyaltyDiscount > 0
-                              ? Icons.stars
-                              : Icons.stars_outlined,
-                          size: 20,
-                          color: state.loyaltyDiscount > 0
-                              ? AppColors.secondary
-                              : AppColors.primary,
-                        ),
-                        tooltip: 'Redeem Points',
-                        visualDensity: VisualDensity.compact,
-                      ),
-                    IconButton(
-                      onPressed: () {
-                        ref.read(posNotifierProvider.notifier).clearLoyalty();
-                        // Defer to next microtask to ensure widgets are disposed/unsubscribed
-                        // before the global loyalty state notifies.
-                        Future.microtask(() {
-                          ref
-                              .read(loyaltyNotifierProvider.notifier)
-                              .clearCustomer();
-                        });
-                      },
-                      icon: const Icon(Icons.close, size: 18),
-                      color: AppColors.error,
-                      visualDensity: VisualDensity.compact,
-                      tooltip: 'Clear Customer',
-                    ),
-                  ],
+              child: Text(
+                customer != null ? customer.name : 'Customer',
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  color: customer != null
+                      ? AppColors.textPrimary
+                      : AppColors.textHint,
                 ),
-            ],
+              ),
+            ),
           ),
           if (customer != null) ...[
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 2,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Row(
-                    children: [
-                      Text(
-                        customer.tierEmoji,
-                        style: const TextStyle(fontSize: 10),
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        customer.loyaltyTier.toUpperCase(),
-                        style: TextStyle(
-                          fontSize: 9,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ],
-                  ),
+            InkWell(
+              onTap: () => showDialog(
+                context: context,
+                builder: (context) => RedeemPointsDialog(
+                  customer: customer,
+                  onPointsRedeemed: (discount, points) {
+                    ref
+                        .read(posNotifierProvider.notifier)
+                        .applyLoyaltyDiscount(discount, points);
+                  },
                 ),
-                const SizedBox(width: 8),
-                Text(
-                  '${customer.loyaltyPoints.current} pts available',
-                  style: TextStyle(
-                    fontSize: 11,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const Spacer(),
-                if (state.loyaltyDiscount > 0)
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.success.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(4),
-                    ),
-                    child: Text(
-                      '-\$${state.loyaltyDiscount.toStringAsFixed(2)}',
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.success,
-                      ),
+              ),
+              child: Row(
+                children: [
+                  Text(
+                    '${customer.loyaltyPoints.current}',
+                    style: TextStyle(
+                      fontSize: 10.sp,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.secondary,
                     ),
                   ),
-              ],
+                  SizedBox(width: 2.px),
+                  Text(
+                    'PTS',
+                    style: TextStyle(
+                      fontSize: 8.sp,
+                      color: AppColors.secondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            IconButton(
+              icon: Icon(Icons.close, size: 14.px, color: AppColors.error),
+              padding: EdgeInsets.zero,
+              constraints: const BoxConstraints(),
+              onPressed: () {
+                ref.read(posNotifierProvider.notifier).clearLoyalty();
+                Future.microtask(() {
+                  ref.read(loyaltyNotifierProvider.notifier).clearCustomer();
+                });
+              },
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _miniSummaryRow(String label, double amount) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 2.px),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12.sp,
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          Text(
+            '\$${amount.abs().toStringAsFixed(2)}',
+            style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _summaryButton(String label, VoidCallback onTap, {Color? color}) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          width: double.infinity,
+          alignment: Alignment.center,
+          padding: EdgeInsets.symmetric(horizontal: 4.px),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 9.sp,
+              fontWeight: FontWeight.bold,
+              color: color ?? AppColors.textPrimary,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _actionButton(
+    IconData icon,
+    String label,
+    Color color,
+    VoidCallback onTap,
+  ) {
+    return Expanded(
+      child: InkWell(
+        onTap: onTap,
+        child: Container(
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 16.px, color: color),
+              SizedBox(width: 6.px),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 11.sp,
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -523,7 +460,6 @@ class OrderBuilder extends ConsumerWidget {
     String orderId,
     String amount,
   ) {
-    // Show payment dialog
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -537,8 +473,6 @@ class OrderBuilder extends ConsumerWidget {
           ElevatedButton(
             onPressed: () {
               final state = ref.read(posNotifierProvider);
-
-              // Prepare discount info if loyalty points used
               Discount? loyaltyDiscount;
               if (state.loyaltyDiscount > 0) {
                 loyaltyDiscount = Discount(
@@ -579,25 +513,29 @@ class OrderBuilder extends ConsumerWidget {
     );
   }
 
-  Widget _summaryRow(String label, double amount, {bool isDiscount = false}) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(
-            label,
-            style: TextStyle(color: AppColors.textSecondary, fontSize: 11.sp),
-          ),
-          Text(
-            '${amount < 0 ? "-" : ""}\$${amount.abs().toStringAsFixed(2)}',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: isDiscount ? AppColors.error : AppColors.textPrimary,
-              fontSize: 12.sp,
-            ),
-          ),
-        ],
+  void _handlePaymentForOrder(
+    BuildContext context,
+    WidgetRef ref,
+    PosState state,
+  ) {
+    final totalAmount = state.summary.total;
+    showDialog(
+      context: context,
+      builder: (context) => PaymentDialog(
+        totalAmount: totalAmount,
+        loyaltyDiscount: state.loyaltyDiscount,
+        onConfirmed: (payment, payNow) {
+          log(' payment: $payment, payNow: $payNow');
+          if (payNow && payment != null) {
+            // Pay Now: Use create-with-payment endpoint
+            ref
+                .read(posNotifierProvider.notifier)
+                .placeOrderWithPayment(payment);
+          } else {
+            // Pay Later: Create order without payment
+            ref.read(posNotifierProvider.notifier).placeOrder();
+          }
+        },
       ),
     );
   }
@@ -609,22 +547,22 @@ class OrderBuilder extends ConsumerWidget {
         children: [
           Icon(
             Icons.shopping_basket_outlined,
-            size: 64,
+            size: 48.px,
             color: AppColors.grey300,
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 12.px),
           Text(
             'Cart is empty',
             style: TextStyle(
-              fontSize: 14.sp,
+              fontSize: 13.sp,
               color: AppColors.textSecondary,
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
-          const Text(
+          SizedBox(height: 4.px),
+          Text(
             'Tap products to add items',
-            style: TextStyle(color: AppColors.textHint),
+            style: TextStyle(fontSize: 11.sp, color: AppColors.textHint),
           ),
         ],
       ),
@@ -634,109 +572,83 @@ class OrderBuilder extends ConsumerWidget {
 
 class _CartItemTile extends ConsumerWidget {
   final CartItemEntity item;
-
   const _CartItemTile({required this.item});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.symmetric(horizontal: 12.px, vertical: 8.px),
       decoration: BoxDecoration(
-        color: AppColors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border.withOpacity(0.5)),
+        color: AppColors.primary.withOpacity(0.03),
+        border: Border(
+          bottom: BorderSide(color: AppColors.border.withOpacity(0.3)),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.menuItemName,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    if (item.selectedCustomizations.isNotEmpty ||
-                        item.note != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (item.selectedCustomizations.isNotEmpty)
-                              Text(
-                                item.selectedCustomizations
-                                    .map((c) => c.name)
-                                    .join(', '),
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            if (item.note != null)
-                              Text(
-                                'Note: ${item.note}',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: AppColors.primary,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              Text(
-                '\$${(item.pricePerItem * item.quantity).toStringAsFixed(2)}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
+          _qtyButton(
+            icon: Icons.remove,
+            onTap: () => ref
+                .read(posNotifierProvider.notifier)
+                .decrementQuantity(item.id),
           ),
-          const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  _qtyButton(
-                    icon: Icons.remove,
-                    onTap: () => ref
-                        .read(posNotifierProvider.notifier)
-                        .decrementQuantity(item.id),
+          Container(
+            width: 32.px,
+            alignment: Alignment.center,
+            child: Text(
+              '${item.quantity}',
+              style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold),
+            ),
+          ),
+          _qtyButton(
+            icon: Icons.add,
+            onTap: () => ref
+                .read(posNotifierProvider.notifier)
+                .incrementQuantity(item.id),
+          ),
+          SizedBox(width: 12.px),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.menuItemName,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.sp,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      '${item.quantity}',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                ),
+                if (item.selectedCustomizations.isNotEmpty)
+                  Text(
+                    item.selectedCustomizations.map((c) => c.name).join(', '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      color: AppColors.textSecondary,
                     ),
                   ),
-                  _qtyButton(
-                    icon: Icons.add,
-                    onTap: () => ref
-                        .read(posNotifierProvider.notifier)
-                        .incrementQuantity(item.id),
-                  ),
-                ],
-              ),
-              IconButton(
-                onPressed: () =>
-                    ref.read(posNotifierProvider.notifier).removeItem(item.id),
-                icon: const Icon(
-                  Icons.delete_outline,
-                  color: AppColors.error,
-                  size: 20,
-                ),
-                visualDensity: VisualDensity.compact,
-              ),
-            ],
+              ],
+            ),
+          ),
+          SizedBox(width: 8.px),
+          Container(
+            padding: EdgeInsets.symmetric(horizontal: 8.px, vertical: 4.px),
+            decoration: BoxDecoration(
+              color: AppColors.white,
+              borderRadius: BorderRadius.circular(4.px),
+              border: Border.all(color: AppColors.border.withOpacity(0.5)),
+            ),
+            child: Text(
+              '\$${(item.pricePerItem * item.quantity).toStringAsFixed(2)}',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12.sp),
+            ),
+          ),
+          SizedBox(width: 8.px),
+          InkWell(
+            onTap: () =>
+                ref.read(posNotifierProvider.notifier).removeItem(item.id),
+            child: Icon(Icons.cancel, color: AppColors.error, size: 20.px),
           ),
         ],
       ),
@@ -747,12 +659,12 @@ class _CartItemTile extends ConsumerWidget {
     return InkWell(
       onTap: onTap,
       child: Container(
-        padding: const EdgeInsets.all(4),
+        padding: EdgeInsets.all(4.px),
         decoration: BoxDecoration(
-          color: AppColors.grey100,
-          borderRadius: BorderRadius.circular(6),
+          color: AppColors.grey200,
+          borderRadius: BorderRadius.circular(4.px),
         ),
-        child: Icon(icon, size: 16, color: AppColors.textPrimary),
+        child: Icon(icon, size: 14.px, color: AppColors.textPrimary),
       ),
     );
   }
@@ -760,141 +672,69 @@ class _CartItemTile extends ConsumerWidget {
 
 class _OngoingItemTile extends StatelessWidget {
   final DineInOrderItem item;
-
   const _OngoingItemTile({required this.item});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(12),
+      padding: EdgeInsets.symmetric(horizontal: 12.px, vertical: 8.px),
       decoration: BoxDecoration(
         color: AppColors.grey50,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border.withOpacity(0.3)),
+        border: Border(
+          bottom: BorderSide(color: AppColors.border.withOpacity(0.2)),
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
         children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: AppColors.success.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  '${item.quantity}x',
-                  style: TextStyle(
-                    color: AppColors.success,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      item.name,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary.withOpacity(0.8),
-                      ),
-                    ),
-                    if (item.modifiers.isNotEmpty ||
-                        item.specialInstructions != null)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (item.modifiers.isNotEmpty)
-                              Text(
-                                item.modifiers.map((m) => m.name).join(', '),
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            if (item.specialInstructions != null)
-                              Text(
-                                'Note: ${item.specialInstructions}',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: AppColors.primary,
-                                  fontStyle: FontStyle.italic,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              Text(
-                '\$${(item.price * item.quantity).toStringAsFixed(2)}',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary.withOpacity(0.7),
-                ),
-              ),
-            ],
-          ),
-          if (item.status != 'served')
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Row(
-                children: [
-                  Icon(
-                    _getStatusIcon(item.status),
-                    size: 14,
-                    color: _getStatusColor(item.status),
-                  ),
-                  const SizedBox(width: 4),
-                  Text(
-                    item.status.toUpperCase(),
-                    style: TextStyle(
-                      fontSize: 10,
-                      fontWeight: FontWeight.bold,
-                      color: _getStatusColor(item.status),
-                    ),
-                  ),
-                ],
-              ),
+          Container(
+            width: 32.px,
+            height: 24.px,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: AppColors.grey300,
+              borderRadius: BorderRadius.circular(4.px),
             ),
+            child: Text(
+              '${item.quantity}',
+              style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold),
+            ),
+          ),
+          SizedBox(width: 12.px),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  item.name,
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 13.sp,
+                  ),
+                ),
+                if (item.modifiers.isNotEmpty)
+                  Text(
+                    item.modifiers.map((c) => c.name).join(', '),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 11.sp,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          SizedBox(width: 8.px),
+          Text(
+            '\$${item.price.toStringAsFixed(2)}',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 12.sp,
+              color: AppColors.textSecondary,
+            ),
+          ),
         ],
       ),
     );
-  }
-
-  IconData _getStatusIcon(String status) {
-    switch (status.toLowerCase()) {
-      case 'preparing':
-        return Icons.timer_outlined;
-      case 'ready':
-        return Icons.check_circle_outline;
-      case 'new':
-        return Icons.fiber_new_outlined;
-      default:
-        return Icons.info_outline;
-    }
-  }
-
-  Color _getStatusColor(String status) {
-    switch (status.toLowerCase()) {
-      case 'preparing':
-        return Colors.orange;
-      case 'ready':
-        return AppColors.success;
-      case 'new':
-        return AppColors.primary;
-      default:
-        return AppColors.textSecondary;
-    }
   }
 }

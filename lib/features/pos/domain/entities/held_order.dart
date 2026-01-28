@@ -1,5 +1,6 @@
 import '../../../cart/domain/entities/cart_entity.dart';
 import '../../presentation/providers/pos_state.dart';
+import '../../../loyalty/domain/entities/customer_loyalty_entity.dart';
 
 /// Represents a held/parked order in the POS system
 class HeldOrder {
@@ -9,8 +10,11 @@ class HeldOrder {
   final String? customerName;
   final String? customerId;
   final String? tableNumber;
+  final CustomerLoyaltyEntity? loyaltyCustomer;
   final DateTime heldAt;
   final double totalAmount;
+  final double loyaltyDiscount;
+  final int redeemedPoints;
 
   const HeldOrder({
     required this.id,
@@ -19,8 +23,11 @@ class HeldOrder {
     this.customerName,
     this.customerId,
     this.tableNumber,
+    this.loyaltyCustomer,
     required this.heldAt,
     required this.totalAmount,
+    this.loyaltyDiscount = 0.0,
+    this.redeemedPoints = 0,
   });
 
   HeldOrder copyWith({
@@ -30,8 +37,11 @@ class HeldOrder {
     String? customerName,
     String? customerId,
     String? tableNumber,
+    CustomerLoyaltyEntity? loyaltyCustomer,
     DateTime? heldAt,
     double? totalAmount,
+    double? loyaltyDiscount,
+    int? redeemedPoints,
   }) {
     return HeldOrder(
       id: id ?? this.id,
@@ -40,8 +50,11 @@ class HeldOrder {
       customerName: customerName ?? this.customerName,
       customerId: customerId ?? this.customerId,
       tableNumber: tableNumber ?? this.tableNumber,
+      loyaltyCustomer: loyaltyCustomer ?? this.loyaltyCustomer,
       heldAt: heldAt ?? this.heldAt,
       totalAmount: totalAmount ?? this.totalAmount,
+      loyaltyDiscount: loyaltyDiscount ?? this.loyaltyDiscount,
+      redeemedPoints: redeemedPoints ?? this.redeemedPoints,
     );
   }
 

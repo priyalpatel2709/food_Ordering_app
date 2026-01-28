@@ -2,10 +2,14 @@ import '../../../../core/constants/api_constants.dart';
 import '../../../../core/network/dio_client.dart';
 import '../../domain/entities/order_entity.dart';
 import '../../domain/entities/order_type_entity.dart';
+import '../../domain/entities/create_order_with_payment_request.dart';
 
 /// Remote data source for orders
 abstract class OrderRemoteDataSource {
   Future<OrderEntity> createOrder(CreateOrderRequest request);
+  Future<OrderEntity> createOrderWithPayment(
+    CreateOrderWithPaymentRequest request,
+  );
   Future<OrderEntity> getOrder(String orderId);
   Future<List<OrderEntity>> getOrders();
   Future<List<OrderEntity>> getMyOrders();
@@ -31,6 +35,23 @@ class OrderRemoteDataSourceImpl implements OrderRemoteDataSource {
       return OrderEntity.fromJson(data['data'] as Map<String, dynamic>);
     } else {
       throw Exception(data['message'] ?? 'Failed to create order');
+    }
+  }
+
+  @override
+  Future<OrderEntity> createOrderWithPayment(
+    CreateOrderWithPaymentRequest request,
+  ) async {
+    final response = await _dioClient.post(
+      '${ApiConstants.v1}${ApiConstants.orders}/create-with-payment',
+      data: request.toJson(),
+    );
+
+    final data = response.data as Map<String, dynamic>;
+    if (data['status'] == 'success') {
+      return OrderEntity.fromJson(data['data'] as Map<String, dynamic>);
+    } else {
+      throw Exception(data['message'] ?? 'Failed to create order with payment');
     }
   }
 

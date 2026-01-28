@@ -5,6 +5,7 @@ import '../../../../shared/theme/app_colors.dart';
 import '../../../menu/domain/entities/menu_entity.dart';
 import '../providers/pos_provider.dart';
 import '../providers/pos_state.dart';
+import '../../../../features/settings/presentation/providers/settings_provider.dart';
 
 class CategorySelector extends ConsumerWidget {
   const CategorySelector({super.key});
@@ -39,7 +40,8 @@ class CategorySelector extends ConsumerWidget {
         itemBuilder: (context, index) {
           final isAll = index == 0;
           final category = isAll ? null : categories[index - 1];
-          final isSelected = isAll
+          final settings = ref.watch(settingsNotifierProvider);
+          final bool isSelected = isAll
               ? state.selectedCategory == null
               : state.selectedCategory?.id == category?.id;
 
@@ -54,8 +56,8 @@ class CategorySelector extends ConsumerWidget {
               borderRadius: BorderRadius.circular(12),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
-                padding: const EdgeInsets.symmetric(
-                  vertical: 20,
+                padding: EdgeInsets.symmetric(
+                  vertical: settings.showCategoryImages ? 20 : 16,
                   horizontal: 8,
                 ),
                 decoration: BoxDecoration(
@@ -71,13 +73,15 @@ class CategorySelector extends ConsumerWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Icon(
-                      isAll ? Icons.grid_view : Icons.category_outlined,
-                      color: isSelected
-                          ? Colors.white
-                          : AppColors.textSecondary,
-                    ),
-                    const SizedBox(height: 8),
+                    if (settings.showCategoryImages) ...[
+                      Icon(
+                        isAll ? Icons.grid_view : Icons.category_outlined,
+                        color: isSelected
+                            ? Colors.white
+                            : AppColors.textSecondary,
+                      ),
+                      const SizedBox(height: 8),
+                    ],
                     Text(
                       isAll ? 'All' : (category?.name ?? ''),
                       textAlign: TextAlign.center,
@@ -86,7 +90,7 @@ class CategorySelector extends ConsumerWidget {
                         color: isSelected
                             ? Colors.white
                             : AppColors.textPrimary,
-                        fontSize: 10.sp,
+                        fontSize: settings.showCategoryImages ? 10.sp : 11.sp,
                       ),
                     ),
                   ],

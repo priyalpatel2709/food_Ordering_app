@@ -7,6 +7,7 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 import 'core/di/providers.dart';
 import 'routes/app_router.dart';
 import 'shared/theme/app_theme.dart';
+import 'features/settings/presentation/providers/settings_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,11 +38,13 @@ void main() async {
   );
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends ConsumerWidget {
   const MainApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final settings = ref.watch(settingsNotifierProvider);
+
     return ResponsiveSizer(
       builder: (context, orientation, screenType) {
         return MaterialApp.router(
@@ -49,7 +52,7 @@ class MainApp extends StatelessWidget {
           debugShowCheckedModeBanner: false,
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
-          themeMode: ThemeMode.light,
+          themeMode: settings.themeMode,
           routerConfig: AppRouter.router,
         );
       },

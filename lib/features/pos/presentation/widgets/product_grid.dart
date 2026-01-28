@@ -5,7 +5,7 @@ import 'package:auto_size_text/auto_size_text.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../menu/domain/entities/menu_entity.dart';
 import '../providers/pos_provider.dart';
-
+import '../../../../features/settings/presentation/providers/settings_provider.dart';
 import './modifier_dialog.dart';
 
 class ProductGrid extends ConsumerWidget {
@@ -14,6 +14,7 @@ class ProductGrid extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(posNotifierProvider);
+    final settings = ref.watch(settingsNotifierProvider);
     final products = state.filteredProducts;
     final bool isDesktop = Device.width > 1000;
 
@@ -21,7 +22,10 @@ class ProductGrid extends ConsumerWidget {
       children: [
         // Search & Filter Bar
         Padding(
-          padding: EdgeInsets.all(isDesktop ? 1.w : 16),
+          padding: EdgeInsets.symmetric(
+            horizontal: isDesktop ? 1.w : 2.w,
+            vertical: settings.compactLayout ? 1.h : 2.h,
+          ),
           child: Row(
             children: [
               Expanded(
@@ -31,34 +35,35 @@ class ProductGrid extends ConsumerWidget {
                       .setSearchQuery(value),
                   decoration: InputDecoration(
                     hintText: 'Search menu items...',
-                    prefixIcon: const Icon(
+                    prefixIcon: Icon(
                       Icons.search,
                       color: AppColors.textSecondary,
+                      size: 20.px,
                     ),
                     filled: true,
                     fillColor: AppColors.white,
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+                    contentPadding: EdgeInsets.symmetric(horizontal: 4.w),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.px),
                       borderSide: BorderSide(color: AppColors.border),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(12.px),
                       borderSide: BorderSide(color: AppColors.border),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 2.w),
               Container(
                 decoration: BoxDecoration(
                   color: AppColors.white,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.px),
                   border: Border.all(color: AppColors.border),
                 ),
                 child: IconButton(
                   onPressed: () {},
-                  icon: const Icon(Icons.filter_list),
+                  icon: Icon(Icons.filter_list, size: 20.px),
                   color: AppColors.textSecondary,
                 ),
               ),
@@ -69,28 +74,46 @@ class ProductGrid extends ConsumerWidget {
         // Product Grid
         Expanded(
           child: state.isLoading
-              ? _buildSkeletonGrid()
+              ? _buildSkeletonGrid(settings.compactLayout)
               : products.isEmpty
               ? _buildEmptyState()
               : LayoutBuilder(
                   builder: (context, constraints) {
-                    final crossAxisCount = _getCrossAxisCount(
+                    int crossAxisCount = _getCrossAxisCount(
                       constraints.maxWidth,
                     );
-                    // Adjust aspect ratio based on item width to keep cards proportional
-                    final aspectRatio = isDesktop ? 0.8 : 0.75;
+
+                    if (settings.compactLayout) {
+                      crossAxisCount += (isDesktop ? 2 : 1);
+                    }
+
+                    // Adjust aspect ratio based on screen and settings
+                    double aspectRatio = isDesktop ? 0.82 : 0.78;
+
+                    if (settings.compactLayout) {
+                      // Make cards slightly taller in compact mode to fit text
+                      aspectRatio = isDesktop ? 0.75 : 0.72;
+                    }
+
+                    if (!settings.showItemImages) {
+                      aspectRatio = settings.compactLayout ? 1.6 : 1.4;
+                    }
 
                     return GridView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      // padding: EdgeInsets.symmetric(horizontal: 2.w),
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: crossAxisCount,
                         childAspectRatio: aspectRatio,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
+                        crossAxisSpacing: 8,
+                        mainAxisSpacing: 8,
                       ),
                       itemCount: products.length,
                       itemBuilder: (context, index) {
-                        return ProductCard(product: products[index]);
+                        return ProductCard(
+                          product: products[index],
+                          showImage: settings.showItemImages,
+                          isCompact: settings.compactLayout,
+                        );
                       },
                     );
                   },
@@ -108,23 +131,25 @@ class ProductGrid extends ConsumerWidget {
     return 1;
   }
 
-  Widget _buildSkeletonGrid() {
+  Widget _buildSkeletonGrid(bool isCompact) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final crossAxisCount = _getCrossAxisCount(constraints.maxWidth);
+        int crossAxisCount = _getCrossAxisCount(constraints.maxWidth);
+        if (isCompact) crossAxisCount += 2;
+
         return GridView.builder(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(2.w),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
             childAspectRatio: 0.8,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
+            crossAxisSpacing: isCompact ? 1.w : 2.w,
+            mainAxisSpacing: isCompact ? 1.h : 2.h,
           ),
           itemCount: 8,
           itemBuilder: (context, index) => Container(
             decoration: BoxDecoration(
               color: AppColors.grey100,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(16.px),
             ),
           ),
         );
@@ -137,8 +162,8 @@ class ProductGrid extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.restaurant_menu, size: 64, color: AppColors.grey300),
-          const SizedBox(height: 16),
+          Icon(Icons.restaurant_menu, size: 60.px, color: AppColors.grey300),
+          SizedBox(height: 2.h),
           Text(
             'No products found',
             style: TextStyle(
@@ -155,8 +180,15 @@ class ProductGrid extends ConsumerWidget {
 
 class ProductCard extends ConsumerWidget {
   final MenuItemEntity product;
+  final bool showImage;
+  final bool isCompact;
 
-  const ProductCard({super.key, required this.product});
+  const ProductCard({
+    super.key,
+    required this.product,
+    this.showImage = true,
+    this.isCompact = false,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -165,10 +197,11 @@ class ProductCard extends ConsumerWidget {
     return Opacity(
       opacity: isAvailable ? 1.0 : 0.6,
       child: Card(
+        margin: EdgeInsets.zero,
         elevation: 0,
         clipBehavior: Clip.antiAlias,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(12.px),
           side: BorderSide(color: AppColors.border.withOpacity(0.5)),
         ),
         child: Stack(
@@ -193,77 +226,83 @@ class ProductCard extends ConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   // Image Section
-                  Expanded(
-                    flex: 4,
-                    child: Stack(
-                      fit: StackFit.expand,
-                      children: [
-                        Image.network(
-                          product.image,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: AppColors.primaryContainer.withOpacity(0.3),
-                            child: Icon(
-                              Icons.restaurant,
-                              color: AppColors.primary,
-                              size: 32,
-                            ),
-                          ),
-                        ),
-                        if (product.customizationOptions.isNotEmpty)
-                          Positioned(
-                            top: 8,
-                            right: 8,
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                color: AppColors.white.withOpacity(0.9),
-                                shape: BoxShape.circle,
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.1),
-                                    blurRadius: 4,
-                                  ),
-                                ],
+                  if (showImage)
+                    Expanded(
+                      flex: isCompact ? 3 : 4,
+                      child: Stack(
+                        fit: StackFit.expand,
+                        children: [
+                          Image.network(
+                            product.image,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Container(
+                              color: AppColors.primaryContainer.withOpacity(
+                                0.3,
                               ),
                               child: Icon(
-                                Icons.tune,
-                                size: 14,
+                                Icons.restaurant,
                                 color: AppColors.primary,
+                                size: 24.px,
                               ),
                             ),
                           ),
-                        if (!isAvailable)
-                          Container(
-                            color: Colors.black45,
-                            alignment: Alignment.center,
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.error,
-                                borderRadius: BorderRadius.circular(4),
-                              ),
-                              child: const Text(
-                                'UNAVAILABLE',
-                                style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.bold,
+                          if (product.customizationOptions.isNotEmpty)
+                            Positioned(
+                              top: 4.px,
+                              right: 4.px,
+                              child: Container(
+                                padding: EdgeInsets.all(4.px),
+                                decoration: BoxDecoration(
+                                  color: AppColors.white.withOpacity(0.9),
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.1),
+                                      blurRadius: 4.px,
+                                    ),
+                                  ],
+                                ),
+                                child: Icon(
+                                  Icons.tune,
+                                  size: 10.px,
+                                  color: AppColors.primary,
                                 ),
                               ),
                             ),
-                          ),
-                      ],
+                          if (!isAvailable)
+                            Container(
+                              color: Colors.black45,
+                              alignment: Alignment.center,
+                              child: Container(
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 8.px,
+                                  vertical: 4.px,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.error,
+                                  borderRadius: BorderRadius.circular(4.px),
+                                ),
+                                child: Text(
+                                  'UNAVAILABLE',
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 10.sp,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
                     ),
-                  ),
                   // Info Section
                   Expanded(
                     flex: 3,
                     child: Padding(
-                      padding: const EdgeInsets.all(12),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 8.px,
+                        vertical: isCompact ? 4.px : 8.px,
+                      ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -271,7 +310,7 @@ class ProductCard extends ConsumerWidget {
                             child: AutoSizeText(
                               product.name,
                               maxLines: 2,
-                              minFontSize: 11,
+                              minFontSize: 8,
                               overflow: TextOverflow.ellipsis,
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
@@ -280,7 +319,7 @@ class ProductCard extends ConsumerWidget {
                               ),
                             ),
                           ),
-                          const SizedBox(height: 8),
+                          SizedBox(height: 4.px),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -296,9 +335,9 @@ class ProductCard extends ConsumerWidget {
                                   ),
                                 ),
                               ),
-                              const SizedBox(
-                                width: 40,
-                              ), // Spacer for the floating button
+                              // SizedBox(
+                              // width: isCompact ? 20.px : 32.px,
+                              // ),
                             ],
                           ),
                         ],
@@ -311,11 +350,11 @@ class ProductCard extends ConsumerWidget {
             // Direct Add Button (Quick Add)
             if (isAvailable)
               Positioned(
-                bottom: 12,
-                right: 12,
+                bottom: isCompact ? 4.px : 8.px,
+                right: isCompact ? 4.px : 8.px,
                 child: Material(
                   color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(12),
+                  borderRadius: BorderRadius.circular(12.px),
                   elevation: 4,
                   shadowColor: AppColors.primary.withOpacity(0.4),
                   child: InkWell(
@@ -328,16 +367,18 @@ class ProductCard extends ConsumerWidget {
                           duration: const Duration(milliseconds: 500),
                           backgroundColor: Colors.black87,
                           behavior: SnackBarBehavior.floating,
-                          width: 200,
+                          width: 40.w,
                         ),
                       );
                     },
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(
+                      isCompact ? 8.px : 12.px,
+                    ),
                     child: Container(
-                      padding: const EdgeInsets.all(10),
-                      child: const Icon(
+                      padding: EdgeInsets.all(isCompact ? 4.px : 8.px),
+                      child: Icon(
                         Icons.add,
-                        size: 20,
+                        size: isCompact ? 14.px : 18.px,
                         color: Colors.white,
                       ),
                     ),

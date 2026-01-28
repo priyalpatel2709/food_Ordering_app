@@ -39,7 +39,7 @@ class DineInRemoteDataSource {
     String tableNumber, {
     List<DineInOrderItem>? items,
     String? orderTypeId,
-    required String customerId,
+    String? customerId,
   }) async {
     final body = {
       'tableNumber': tableNumber,
@@ -193,7 +193,7 @@ class DineInRemoteDataSource {
     required int pointsToRedeem,
   }) async {
     final response = await _dioClient.post(
-      '${ApiConstants.v1}${ApiConstants.orders}${ApiConstants.dineIn}/$orderId/apply-loyalty-discount',
+      '${ApiConstants.v1}${ApiConstants.orders}/$orderId/apply-loyalty-discount',
       data: {
         'loyaltyCustomerId': loyaltyCustomerId,
         'pointsToRedeem': pointsToRedeem,

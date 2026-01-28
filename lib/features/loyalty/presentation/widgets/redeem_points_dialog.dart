@@ -57,22 +57,20 @@ class _RedeemPointsDialogState extends ConsumerState<RedeemPointsDialog> {
       return;
     }
 
-    final result = await ref
-        .read(loyaltyNotifierProvider.notifier)
-        .redeemPoints(_pointsToRedeem);
+    final result = {
+      'success': true,
+      'discountAmount': _discountAmount,
+      'pointsRedeemed': _pointsToRedeem,
+    };
 
-    if (result['success'] == true) {
-      if (widget.onPointsRedeemed != null) {
-        widget.onPointsRedeemed!(
-          result['discountAmount'] as double,
-          result['pointsRedeemed'] as int,
-        );
-      }
-      if (mounted) {
-        Navigator.pop(context, result);
-      }
-    } else {
-      _showError(result['error'] as String? ?? 'Failed to redeem points');
+    if (widget.onPointsRedeemed != null) {
+      widget.onPointsRedeemed!(
+        result['discountAmount'] as double,
+        result['pointsRedeemed'] as int,
+      );
+    }
+    if (mounted) {
+      Navigator.pop(context, result);
     }
   }
 

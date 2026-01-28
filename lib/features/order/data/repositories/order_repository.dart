@@ -1,6 +1,7 @@
 import '../../domain/entities/order_entity.dart';
 import '../../domain/entities/order_type_entity.dart';
 import '../datasources/order_remote_data_source.dart';
+import '../../domain/entities/create_order_with_payment_request.dart';
 
 /// Order Repository Implementation
 class OrderRepository {
@@ -10,6 +11,12 @@ class OrderRepository {
 
   Future<OrderEntity> createOrder(CreateOrderRequest request) async {
     return await _remoteDataSource.createOrder(request);
+  }
+
+  Future<OrderEntity> createOrderWithPayment(
+    CreateOrderWithPaymentRequest request,
+  ) async {
+    return await _remoteDataSource.createOrderWithPayment(request);
   }
 
   Future<OrderEntity> getOrder(String orderId) async {

@@ -6,6 +6,7 @@ import '../../data/datasources/order_remote_data_source.dart';
 import '../../data/repositories/order_repository.dart';
 import '../../domain/entities/order_entity.dart';
 import '../../domain/usecases/get_order_types_usecase.dart';
+import '../../domain/entities/create_order_with_payment_request.dart';
 
 /// Dio Client Provider
 final dioClientProvider = Provider<DioClient>((ref) {
@@ -76,6 +77,21 @@ class OrderNotifier extends StateNotifier<OrderState> {
       state = OrderSuccess(order);
     } catch (e, st) {
       log('order error: $e /n $st');
+      state = OrderError(e.toString());
+    }
+  }
+
+  /// Create order with payment
+  Future<void> createOrderWithPayment(
+    CreateOrderWithPaymentRequest request,
+  ) async {
+    state = OrderLoading();
+    try {
+      final order = await _repository.createOrderWithPayment(request);
+
+      state = OrderSuccess(order);
+    } catch (e, st) {
+      log('create order with payment error: $e /n $st');
       state = OrderError(e.toString());
     }
   }
