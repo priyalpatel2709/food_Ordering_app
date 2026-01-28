@@ -210,11 +210,27 @@ class CustomerPreferences {
 /// Favorite Item
 class FavoriteItem {
   final String itemId;
+  final String? itemName;
+  final String? itemImage;
   final int orderCount;
 
-  const FavoriteItem({required this.itemId, required this.orderCount});
+  const FavoriteItem({
+    required this.itemId,
+    this.itemName,
+    this.itemImage,
+    required this.orderCount,
+  });
 
   factory FavoriteItem.fromJson(Map<String, dynamic> json) {
+    if (json['itemId'] is Map<String, dynamic>) {
+      final itemData = json['itemId'] as Map<String, dynamic>;
+      return FavoriteItem(
+        itemId: itemData['_id'] as String,
+        itemName: itemData['name'] as String?,
+        itemImage: itemData['image'] as String?,
+        orderCount: json['orderCount'] as int? ?? 0,
+      );
+    }
     return FavoriteItem(
       itemId: json['itemId'] as String,
       orderCount: json['orderCount'] as int? ?? 0,
@@ -280,14 +296,21 @@ class ReferralInfo {
 class CustomerNote {
   final String note;
   final String? addedBy;
+  final String? addedUserName;
   final DateTime addedAt;
 
-  const CustomerNote({required this.note, this.addedBy, required this.addedAt});
+  const CustomerNote({
+    required this.note,
+    this.addedBy,
+    this.addedUserName,
+    required this.addedAt,
+  });
 
   factory CustomerNote.fromJson(Map<String, dynamic> json) {
     return CustomerNote(
       note: json['note'] as String,
       addedBy: json['addedBy'] as String?,
+      addedUserName: json['addedUserName'] as String?,
       addedAt: DateTime.parse(json['addedAt'] as String),
     );
   }

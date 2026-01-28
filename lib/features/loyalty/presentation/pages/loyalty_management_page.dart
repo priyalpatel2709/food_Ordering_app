@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../providers/loyalty_providers.dart';
 import '../widgets/create_customer_dialog.dart';
+import 'customer_detail_page.dart';
 
 class LoyaltyManagementPage extends ConsumerStatefulWidget {
   const LoyaltyManagementPage({super.key});
@@ -19,9 +20,10 @@ class _LoyaltyManagementPageState extends ConsumerState<LoyaltyManagementPage> {
   @override
   void initState() {
     super.initState();
-    Future.microtask(
-      () => ref.read(loyaltyNotifierProvider.notifier).fetchAllCustomers(),
-    );
+    Future.microtask(() {
+      ref.read(loyaltyNotifierProvider.notifier).fetchAllCustomers();
+      ref.read(loyaltyNotifierProvider.notifier).fetchUpcomingOccasions();
+    });
   }
 
   @override
@@ -61,8 +63,12 @@ class _LoyaltyManagementPageState extends ConsumerState<LoyaltyManagementPage> {
         title: const Text('Loyalty Management'),
         actions: [
           IconButton(
-            onPressed: () =>
-                ref.read(loyaltyNotifierProvider.notifier).fetchAllCustomers(),
+            onPressed: () {
+              ref.read(loyaltyNotifierProvider.notifier).fetchAllCustomers();
+              ref
+                  .read(loyaltyNotifierProvider.notifier)
+                  .fetchUpcomingOccasions();
+            },
             icon: const Icon(Icons.refresh),
           ),
           Padding(
@@ -90,74 +96,173 @@ class _LoyaltyManagementPageState extends ConsumerState<LoyaltyManagementPage> {
           ),
         ],
       ),
-      body: Column(
+      body: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Filter & Search Header
-          Container(
-            padding: const EdgeInsets.all(20),
-            color: Colors.white,
-            child: Row(
+          // Main Customers List
+          Expanded(
+            flex: 3,
+            child: Column(
               children: [
-                Expanded(
-                  flex: 3,
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: 'Search by name, email, or phone...',
-                      prefixIcon: const Icon(Icons.search),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
+                // Filter & Search Header
+                Container(
+                  padding: const EdgeInsets.all(20),
+                  color: Colors.white,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 3,
+                        child: TextField(
+                          controller: _searchController,
+                          decoration: InputDecoration(
+                            hintText: 'Search by name, email, or phone...',
+                            prefixIcon: const Icon(Icons.search),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                          ),
+                          onChanged: (v) => _onSearch(v),
+                        ),
                       ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                    ),
-                    onChanged: (v) => _onSearch(v),
-                  ),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  flex: 1,
-                  child: DropdownButtonFormField<String>(
-                    value: _selectedTier,
-                    decoration: InputDecoration(
-                      hintText: 'Filter by Tier',
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.grey[300]!),
-                      ),
-                    ),
-                    items: [
-                      const DropdownMenuItem(
-                        value: null,
-                        child: Text('All Tiers'),
-                      ),
-                      ...['bronze', 'silver', 'gold', 'platinum', 'vip'].map(
-                        (tier) => DropdownMenuItem(
-                          value: tier,
-                          child: Text(tier.toUpperCase()),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        flex: 1,
+                        child: DropdownButtonFormField<String>(
+                          value: _selectedTier,
+                          decoration: InputDecoration(
+                            hintText: 'Filter by Tier',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(color: Colors.grey[300]!),
+                            ),
+                          ),
+                          items: [
+                            const DropdownMenuItem(
+                              value: null,
+                              child: Text('All Tiers'),
+                            ),
+                            ...[
+                              'bronze',
+                              'silver',
+                              'gold',
+                              'platinum',
+                              'vip',
+                            ].map(
+                              (tier) => DropdownMenuItem(
+                                value: tier,
+                                child: Text(tier.toUpperCase()),
+                              ),
+                            ),
+                          ],
+                          onChanged: _onTierFilter,
                         ),
                       ),
                     ],
-                    onChanged: _onTierFilter,
                   ),
+                ),
+
+                // Main Content
+                Expanded(
+                  child: state.isLoading && state.allCustomers.isEmpty
+                      ? const Center(child: CircularProgressIndicator())
+                      : state.allCustomers.isEmpty
+                      ? _buildEmptyState()
+                      : _buildCustomerGrid(state.allCustomers),
                 ),
               ],
             ),
           ),
 
-          // Main Content
-          Expanded(
-            child: state.isLoading && state.allCustomers.isEmpty
-                ? const Center(child: CircularProgressIndicator())
-                : state.allCustomers.isEmpty
-                ? _buildEmptyState()
-                : _buildCustomerGrid(state.allCustomers),
+          // Sidebar for Upcoming Occasions
+          VerticalDivider(width: 1, color: Colors.grey[200]),
+          Container(
+            width: 320,
+            color: Colors.white,
+            child: _buildUpcomingSidebar(state),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildUpcomingSidebar(LoyaltyState state) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              const Icon(Icons.celebration, color: Colors.orange),
+              const SizedBox(width: 12),
+              const Text(
+                'Upcoming Events',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+        ),
+        Expanded(
+          child: state.isLoading && state.upcomingOccasions.isEmpty
+              ? const Center(child: CircularProgressIndicator())
+              : state.upcomingOccasions.isEmpty
+              ? Center(
+                  child: Text(
+                    'No upcoming events\nin the next 7 days ${state.upcomingOccasions.length}',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey),
+                  ),
+                )
+              : ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: state.upcomingOccasions.length,
+                  itemBuilder: (context, index) {
+                    final customer = state.upcomingOccasions[index];
+                    final isBirthday =
+                        customer.dateOfBirth != null; // Simple check
+
+                    return Card(
+                      elevation: 0,
+                      color: Colors.grey[50],
+                      margin: const EdgeInsets.only(bottom: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: BorderSide(color: Colors.grey[200]!),
+                      ),
+                      child: ListTile(
+                        onTap: () => _navigateToCustomerDetail(customer.id),
+                        leading: CircleAvatar(
+                          backgroundColor:
+                              (isBirthday ? Colors.pink : Colors.blue)
+                                  .withOpacity(0.1),
+                          child: Icon(
+                            isBirthday ? Icons.cake : Icons.favorite,
+                            size: 16,
+                            color: isBirthday ? Colors.pink : Colors.blue,
+                          ),
+                        ),
+                        title: Text(
+                          customer.name,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 14,
+                          ),
+                        ),
+                        subtitle: Text(
+                          isBirthday ? 'Birthday coming up!' : 'Anniversary!',
+                          style: const TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+        ),
+      ],
     );
   }
 
@@ -180,9 +285,7 @@ class _LoyaltyManagementPageState extends ConsumerState<LoyaltyManagementPage> {
             side: BorderSide(color: Colors.grey[200]!),
           ),
           child: InkWell(
-            onTap: () {
-              // TODO: Show full customer profile/edit
-            },
+            onTap: () => _navigateToCustomerDetail(customer.id),
             borderRadius: BorderRadius.circular(16),
             child: Padding(
               padding: const EdgeInsets.all(16),
@@ -257,6 +360,15 @@ class _LoyaltyManagementPageState extends ConsumerState<LoyaltyManagementPage> {
           ),
         );
       },
+    );
+  }
+
+  void _navigateToCustomerDetail(String customerId) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CustomerDetailPage(customerId: customerId),
+      ),
     );
   }
 

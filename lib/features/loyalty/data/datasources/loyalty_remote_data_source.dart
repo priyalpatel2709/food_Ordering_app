@@ -27,6 +27,8 @@ abstract class LoyaltyRemoteDataSource {
     String reason,
   );
   Future<void> recordVisit(String customerId, double orderAmount);
+  Future<List<CustomerLoyaltyEntity>> getUpcomingOccasions({int days = 7});
+  Future<List<CustomerNote>> addNote(String customerId, String note);
 }
 
 class LoyaltyRemoteDataSourceImpl implements LoyaltyRemoteDataSource {
@@ -193,6 +195,49 @@ class LoyaltyRemoteDataSourceImpl implements LoyaltyRemoteDataSource {
     final data = response.data as Map<String, dynamic>;
     if (data['status'] != 'success') {
       throw Exception(data['message'] ?? 'Failed to record visit');
+    }
+  }
+
+  @override
+  Future<List<CustomerLoyaltyEntity>> getUpcomingOccasions({
+    int days = 7,
+  }) async {
+    final response = await _dioClient.get(
+      '${ApiConstants.v1}/loyalty/customers/upcoming-occasions',
+      queryParameters: {'days': days},
+    );
+
+    final data = response.data as Map<String, dynamic>;
+
+    print('data from getUpcomingOccasions: $data');
+    if (data['status'] == 'success') {
+      final customers = (data['data'] as List)
+          .map(
+            (customer) => CustomerLoyaltyEntity.fromJson(
+              customer as Map<String, dynamic>,
+            ),
+          )
+          .toList();
+      return customers;
+    } else {
+      throw Exception(data['message'] ?? 'Failed to get upcoming occasions');
+    }
+  }
+
+  @override
+  Future<List<CustomerNote>> addNote(String customerId, String note) async {
+    final response = await _dioClient.post(
+      '${ApiConstants.v1}/loyalty/customers/$customerId/notes',
+      data: {'note': note},
+    );
+
+    final data = response.data as Map<String, dynamic>;
+    if (data['status'] == 'success') {
+      return (data['data'] as List)
+          .map((n) => CustomerNote.fromJson(n as Map<String, dynamic>))
+          .toList();
+    } else {
+      throw Exception(data['message'] ?? 'Failed to add note');
     }
   }
 }

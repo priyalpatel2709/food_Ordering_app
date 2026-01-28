@@ -26,6 +26,8 @@ abstract class LoyaltyRepository {
     String reason,
   );
   Future<void> recordVisit(String customerId, double orderAmount);
+  Future<List<CustomerLoyaltyEntity>> getUpcomingOccasions({int days});
+  Future<List<CustomerNote>> addNote(String customerId, String note);
 }
 
 class LoyaltyRepositoryImpl implements LoyaltyRepository {
@@ -97,5 +99,17 @@ class LoyaltyRepositoryImpl implements LoyaltyRepository {
   @override
   Future<void> recordVisit(String customerId, double orderAmount) async {
     return await _remoteDataSource.recordVisit(customerId, orderAmount);
+  }
+
+  @override
+  Future<List<CustomerLoyaltyEntity>> getUpcomingOccasions({
+    int days = 7,
+  }) async {
+    return await _remoteDataSource.getUpcomingOccasions(days: days);
+  }
+
+  @override
+  Future<List<CustomerNote>> addNote(String customerId, String note) async {
+    return await _remoteDataSource.addNote(customerId, note);
   }
 }
