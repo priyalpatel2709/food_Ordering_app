@@ -83,7 +83,11 @@ class _RedeemPointsDialogState extends ConsumerState<RedeemPointsDialog> {
   @override
   Widget build(BuildContext context) {
     final loyaltyState = ref.watch(loyaltyNotifierProvider);
-    final availablePoints = widget.customer.loyaltyPoints.current;
+    // Use the latest customer data from the provider if it matches the current customer
+    final customer = (loyaltyState.customer?.id == widget.customer.id)
+        ? loyaltyState.customer!
+        : widget.customer;
+    final availablePoints = customer.loyaltyPoints.current;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -112,7 +116,7 @@ class _RedeemPointsDialogState extends ConsumerState<RedeemPointsDialog> {
                         ),
                       ),
                       Text(
-                        widget.customer.name,
+                        customer.name,
                         style: TextStyle(
                           fontSize: 14,
                           color: AppColors.textSecondary,
@@ -181,7 +185,7 @@ class _RedeemPointsDialogState extends ConsumerState<RedeemPointsDialog> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '\$${widget.customer.availableDiscount}',
+                        '\$${customer.availableDiscount}',
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.bold,

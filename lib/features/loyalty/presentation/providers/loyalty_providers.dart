@@ -223,31 +223,10 @@ class LoyaltyNotifier extends StateNotifier<LoyaltyState> {
     state = state.copyWith(isLoading: true, clearError: true);
 
     try {
-      final updatedNotes = await _repository.addNote(customerId, note);
+      await _repository.addNote(customerId, note);
       if (state.customer?.id == customerId) {
-        state = state.copyWith(
-          customer: CustomerLoyaltyEntity(
-            id: state.customer!.id,
-            phone: state.customer!.phone,
-            name: state.customer!.name,
-            email: state.customer!.email,
-            loyaltyTier: state.customer!.loyaltyTier,
-            loyaltyPoints: state.customer!.loyaltyPoints,
-            memberSince: state.customer!.memberSince,
-            visitStats: state.customer!.visitStats,
-            status: state.customer!.status,
-            notes: updatedNotes,
-            preferences: state.customer!.preferences,
-            marketing: state.customer!.marketing,
-            tags: state.customer!.tags,
-            segments: state.customer!.segments,
-            referral: state.customer!.referral,
-            dateOfBirth: state.customer!.dateOfBirth,
-            anniversary: state.customer!.anniversary,
-            lastActivity: DateTime.now(),
-          ),
-          isLoading: false,
-        );
+        // Full refresh to get all updated fields and proper note objects from backend
+        await fetchCustomerDetails(customerId);
       } else {
         state = state.copyWith(isLoading: false);
       }

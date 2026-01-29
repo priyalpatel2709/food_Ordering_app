@@ -190,10 +190,13 @@ class OrderBuilder extends ConsumerWidget {
                     child: Column(
                       children: [
                         _summaryButton('SELECT TABLE', () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => const TableSelectionDialog(),
-                          );
+                          if (state.orderType == OrderType.dineIn) {
+                            showDialog(
+                              context: context,
+                              builder: (context) =>
+                                  const TableSelectionDialog(),
+                            );
+                          }
                         }),
                         const Divider(height: 1, color: AppColors.border),
                         _summaryButton(

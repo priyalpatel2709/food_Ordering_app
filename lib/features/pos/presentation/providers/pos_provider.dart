@@ -21,7 +21,6 @@ import '../../../dine_in/domain/usecases/get_order_details_usecase.dart';
 import '../../domain/entities/held_order.dart';
 import '../../../loyalty/domain/entities/customer_loyalty_entity.dart';
 import '../../../loyalty/presentation/providers/loyalty_providers.dart';
-import '../../../loyalty/domain/usecases/loyalty_usecases.dart';
 import 'pos_state.dart';
 
 final posNotifierProvider = StateNotifierProvider<PosNotifier, PosState>((ref) {
@@ -33,9 +32,8 @@ final posNotifierProvider = StateNotifierProvider<PosNotifier, PosState>((ref) {
   final getDineInOrderDetails = ref.watch(getDineInOrderDetailsUseCaseProvider);
   final completeDineInPayment = ref.watch(completeDineInPaymentUseCaseProvider);
   final getOrderTypes = ref.watch(getOrderTypesUseCaseProvider);
-  final redeemPoints = ref.watch(redeemPointsUseCaseProvider);
 
-  return PosNotifier(
+  final notifier = PosNotifier(
     ref: ref,
     getAllMenus: getAllMenus,
     getCurrentMenu: getCurrentMenu,
@@ -45,8 +43,20 @@ final posNotifierProvider = StateNotifierProvider<PosNotifier, PosState>((ref) {
     getDineInOrderDetails: getDineInOrderDetails,
     completeDineInPayment: completeDineInPayment,
     getOrderTypes: getOrderTypes,
-    redeemPoints: redeemPoints,
   );
+
+  // Sync loyalty customer updates from LoyaltyNotifier to PosNotifier
+  ref.listen(loyaltyNotifierProvider, (previous, next) {
+    final posCustomer = notifier.currentLoyaltyCustomer;
+    if (posCustomer != null &&
+        next.customer != null &&
+        next.customer!.id == posCustomer.id &&
+        next.customer != previous?.customer) {
+      notifier.setLoyaltyCustomer(next.customer);
+    }
+  });
+
+  return notifier;
 });
 
 class PosNotifier extends StateNotifier<PosState> {
@@ -59,7 +69,6 @@ class PosNotifier extends StateNotifier<PosState> {
   final GetDineInOrderDetailsUseCase _getDineInOrderDetails;
   final CompleteDineInPaymentUseCase _completeDineInPayment;
   final GetOrderTypesUseCase _getOrderTypes;
-  final RedeemPointsUseCase _redeemPoints;
 
   PosNotifier({
     required Ref ref,
@@ -71,7 +80,6 @@ class PosNotifier extends StateNotifier<PosState> {
     required GetDineInOrderDetailsUseCase getDineInOrderDetails,
     required CompleteDineInPaymentUseCase completeDineInPayment,
     required GetOrderTypesUseCase getOrderTypes,
-    required RedeemPointsUseCase redeemPoints,
   }) : _ref = ref,
        _getAllMenus = getAllMenus,
        _getCurrentMenu = getCurrentMenu,
@@ -81,10 +89,11 @@ class PosNotifier extends StateNotifier<PosState> {
        _getDineInOrderDetails = getDineInOrderDetails,
        _completeDineInPayment = completeDineInPayment,
        _getOrderTypes = getOrderTypes,
-       _redeemPoints = redeemPoints,
        super(const PosState(categories: [], products: [])) {
     _init();
   }
+
+  CustomerLoyaltyEntity? get currentLoyaltyCustomer => state.loyaltyCustomer;
 
   Future<void> _init() async {
     await fetchOrderTypes();
@@ -496,14 +505,20 @@ class PosNotifier extends StateNotifier<PosState> {
       await _orderNotifier.createOrder(request);
 
       // Handle point redemption if applicable for Takeaway/Delivery
-      if (state.loyaltyCustomer != null && state.redeemedPoints > 0) {
-        try {
-          await _redeemPoints.call(
-            state.loyaltyCustomer!.id,
-            state.redeemedPoints,
-          );
-        } catch (e) {
-          log('Warning: Loyalty points redemption failed: $e');
+      if (state.loyaltyCustomer != null) {
+        if (state.redeemedPoints > 0) {
+          try {
+            await _ref
+                .read(loyaltyNotifierProvider.notifier)
+                .redeemPoints(state.redeemedPoints);
+          } catch (e) {
+            log('Warning: Loyalty points redemption failed: $e');
+          }
+        } else {
+          // Refresh customer data to show earned points
+          await _ref
+              .read(loyaltyNotifierProvider.notifier)
+              .fetchCustomerDetails(state.loyaltyCustomer!.id);
         }
       }
 
@@ -587,7 +602,12 @@ class PosNotifier extends StateNotifier<PosState> {
 
       await _orderNotifier.createOrderWithPayment(request);
 
-      // No need to manually redeem points as the backend handles it via create-with-payment
+      // Refresh loyalty data after successful payment (backend awarded points or redeemed them)
+      if (state.loyaltyCustomer != null) {
+        _ref
+            .read(loyaltyNotifierProvider.notifier)
+            .fetchCustomerDetails(state.loyaltyCustomer!.id);
+      }
 
       // Invalidate staff orders list to refresh order history
       _ref.invalidate(staffOrdersListNotifierProvider);
@@ -631,15 +651,20 @@ class PosNotifier extends StateNotifier<PosState> {
       await _completeDineInPayment.call(orderId, paymentData);
 
       // Handle point redemption if applicable
-      if (state.loyaltyCustomer != null && state.redeemedPoints > 0) {
-        try {
-          await _redeemPoints.call(
-            state.loyaltyCustomer!.id,
-            state.redeemedPoints,
-          );
-        } catch (e) {
-          log('Warning: Loyalty points redemption failed: $e');
-          // We continue anyway as the payment succeeded
+      if (state.loyaltyCustomer != null) {
+        if (state.redeemedPoints > 0) {
+          try {
+            await _ref
+                .read(loyaltyNotifierProvider.notifier)
+                .redeemPoints(state.redeemedPoints);
+          } catch (e) {
+            log('Warning: Loyalty points redemption failed: $e');
+          }
+        } else {
+          // Earned points refresh
+          await _ref
+              .read(loyaltyNotifierProvider.notifier)
+              .fetchCustomerDetails(state.loyaltyCustomer!.id);
         }
       }
 

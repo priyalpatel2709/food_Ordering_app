@@ -93,7 +93,7 @@ class _CustomerLookupDialogState extends ConsumerState<CustomerLookupDialog> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Customer Lookup',
+                    'Customer Lookup ${loyaltyState.allCustomers.length}',
                     style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -151,8 +151,24 @@ class _CustomerLookupDialogState extends ConsumerState<CustomerLookupDialog> {
               ),
             ),
 
+            // if (loyaltyState.allCustomers.isEmpty) ...[
+            const SizedBox(height: 16),
+            ElevatedButton.icon(
+              onPressed: _showCreateCustomerDialog,
+              icon: const Icon(Icons.person_add, size: 18),
+              label: const Text('Register New Customer'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.secondary.withOpacity(0.1),
+                foregroundColor: AppColors.secondary,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+            ),
+            // ],
             // Error Message
-            // if (loyaltyState.error != null) ...[
+            if (loyaltyState.error != null) ...[
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -199,7 +215,7 @@ class _CustomerLookupDialogState extends ConsumerState<CustomerLookupDialog> {
                   ],
                 ),
               ),
-            // ],
+            ],
 
             // Multiple Results Found
             if (loyaltyState.customer == null &&
