@@ -1,7 +1,6 @@
-import 'package:equatable/equatable.dart';
 import 'cash_history.dart';
 
-class CashShiftSummaryEntity extends Equatable {
+class CashShiftSummaryEntity {
   final double expectedBalance;
   final double actualCash;
   final double difference;
@@ -13,7 +12,4 @@ class CashShiftSummaryEntity extends Equatable {
     required this.difference,
     required this.session,
   });
-
-  @override
-  List<Object?> get props => [expectedBalance, actualCash, difference, session];
 }

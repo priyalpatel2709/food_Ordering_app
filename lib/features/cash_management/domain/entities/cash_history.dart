@@ -1,6 +1,4 @@
-import 'package:equatable/equatable.dart';
-
-class CashHistoryEntity extends Equatable {
+class CashHistoryEntity {
   final String id;
   final String registerId;
   final OpenedByEntity openedBy;
@@ -42,41 +40,16 @@ class CashHistoryEntity extends Equatable {
   });
 
   bool get isOpen => status == 'open';
-
-  @override
-  List<Object?> get props => [
-    id,
-    registerId,
-    openedBy,
-    openingBalance,
-    openingNotes,
-    businessDate,
-    status,
-    totalSales,
-    totalRefunds,
-    totalPayIns,
-    totalPayOuts,
-    openedAt,
-    closedAt,
-    transactions,
-    actualCash,
-    expectedCash,
-    difference,
-    closingNotes,
-  ];
 }
 
-class OpenedByEntity extends Equatable {
+class OpenedByEntity {
   final String id;
   final String name;
 
   const OpenedByEntity({required this.id, required this.name});
-
-  @override
-  List<Object?> get props => [id, name];
 }
 
-class CashTransactionEntity extends Equatable {
+class CashTransactionEntity {
   final String id;
   final String type;
   final double amount;
@@ -94,15 +67,4 @@ class CashTransactionEntity extends Equatable {
     required this.timestamp,
     required this.performedBy,
   });
-
-  @override
-  List<Object?> get props => [
-    id,
-    type,
-    amount,
-    reason,
-    orderId,
-    timestamp,
-    performedBy,
-  ];
 }

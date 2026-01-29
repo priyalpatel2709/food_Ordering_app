@@ -43,18 +43,18 @@ class CashHistoryDto {
 
   factory CashHistoryDto.fromJson(Map<String, dynamic> json) {
     return CashHistoryDto(
-      id: json['_id'] as String,
-      registerId: json['registerId'] as String,
-      openedBy: OpenedByDto.fromJson(json['openedBy'] as Map<String, dynamic>),
+      id: json['_id'] as String? ?? json['id'] as String? ?? '',
+      registerId: json['registerId'] as String? ?? '',
+      openedBy: OpenedByDto.fromJson(json['openedBy']),
       openingBalance: (json['openingBalance'] as num?)?.toDouble() ?? 0.0,
       openingNotes: json['openingNotes'] as String?,
-      businessDate: json['businessDate'] as String,
-      status: json['status'] as String,
+      businessDate: json['businessDate'] as String? ?? '',
+      status: json['status'] as String? ?? 'unknown',
       totalSales: (json['totalSales'] as num?)?.toDouble() ?? 0.0,
       totalRefunds: (json['totalRefunds'] as num?)?.toDouble() ?? 0.0,
       totalPayIns: (json['totalPayIns'] as num?)?.toDouble() ?? 0.0,
       totalPayOuts: (json['totalPayOuts'] as num?)?.toDouble() ?? 0.0,
-      openedAt: json['openedAt'] as String,
+      openedAt: json['openedAt'] as String? ?? '',
       closedAt: json['closedAt'] as String?,
       transactions:
           (json['transactions'] as List<dynamic>?)
@@ -83,7 +83,7 @@ class CashHistoryDto {
       totalRefunds: totalRefunds,
       totalPayIns: totalPayIns,
       totalPayOuts: totalPayOuts,
-      openedAt: DateTime.parse(openedAt),
+      openedAt: openedAt.isNotEmpty ? DateTime.parse(openedAt) : DateTime.now(),
       closedAt: closedAt != null ? DateTime.parse(closedAt!) : null,
       transactions: transactions.map((e) => e.toEntity()).toList(),
       actualCash: actualCash,
@@ -100,11 +100,17 @@ class OpenedByDto {
 
   const OpenedByDto({required this.id, required this.name});
 
-  factory OpenedByDto.fromJson(Map<String, dynamic> json) {
-    return OpenedByDto(
-      id: json['_id'] as String,
-      name: json['name'] as String? ?? 'Unknown',
-    );
+  factory OpenedByDto.fromJson(dynamic json) {
+    if (json is String) {
+      return OpenedByDto(id: json, name: 'Staff');
+    }
+    if (json is Map<String, dynamic>) {
+      return OpenedByDto(
+        id: json['_id'] as String? ?? json['id'] as String? ?? '',
+        name: json['name'] as String? ?? 'Staff',
+      );
+    }
+    return const OpenedByDto(id: '', name: 'Staff');
   }
 
   OpenedByEntity toEntity() {
@@ -133,13 +139,13 @@ class CashTransactionDto {
 
   factory CashTransactionDto.fromJson(Map<String, dynamic> json) {
     return CashTransactionDto(
-      id: json['_id'] as String,
-      type: json['type'] as String,
+      id: json['_id'] as String? ?? json['id'] as String? ?? '',
+      type: json['type'] as String? ?? 'unknown',
       amount: (json['amount'] as num?)?.toDouble() ?? 0.0,
       reason: json['reason'] as String? ?? '',
       orderId: json['orderId'] as String?,
-      timestamp: json['timestamp'] as String,
-      performedBy: json['performedBy'] as String,
+      timestamp: json['timestamp'] as String? ?? '',
+      performedBy: json['performedBy'] as String? ?? '',
     );
   }
 
@@ -150,7 +156,9 @@ class CashTransactionDto {
       amount: amount,
       reason: reason,
       orderId: orderId,
-      timestamp: DateTime.parse(timestamp),
+      timestamp: timestamp.isNotEmpty
+          ? DateTime.parse(timestamp)
+          : DateTime.now(),
       performedBy: performedBy,
     );
   }
