@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../dine_in/domain/entities/payment_entity.dart';
+import '../../../cash_management/presentation/viewmodels/cash_register_view_model.dart';
 
 /// Payment dialog for collecting payment method and processing payment
 class PaymentDialog extends ConsumerStatefulWidget {
@@ -24,6 +25,7 @@ class PaymentDialog extends ConsumerStatefulWidget {
 
 class _PaymentDialogState extends ConsumerState<PaymentDialog> {
   String _selectedMethod = 'cash';
+  String? _selectedRegisterId;
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _referenceController = TextEditingController();
 
@@ -31,6 +33,10 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
   void initState() {
     super.initState();
     _amountController.text = widget.totalAmount.toStringAsFixed(2);
+    // Load registers on init
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(cashRegisterNotifierProvider.notifier).loadRegisters();
+    });
   }
 
   @override
@@ -141,24 +147,78 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
                 _paymentMethodButton('other', 'Other', Icons.more_horiz),
               ],
             ),
-            SizedBox(height: 24.px),
-
-            // Reference Number (for non-cash payments)
-            if (_selectedMethod != 'cash') ...[
-              TextField(
-                controller: _referenceController,
-                decoration: InputDecoration(
-                  labelText: 'Reference / Transaction ID',
-                  hintText: 'Enter transaction reference',
-                  prefixIcon: const Icon(Icons.tag),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.px),
-                  ),
+            // Cash Register Selection (Visible only for Cash payments)
+            if (_selectedMethod == 'cash') ...[
+              SizedBox(height: 24.px),
+              Text(
+                'Select Cash Register',
+                style: TextStyle(
+                  fontSize: 14.sp,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
                 ),
+              ),
+              SizedBox(height: 12.px),
+              Consumer(
+                builder: (context, ref, child) {
+                  final cashState = ref.watch(cashRegisterNotifierProvider);
+                  if (cashState is CashRegisterLoading) {
+                    return const LinearProgressIndicator();
+                  }
+                  if (cashState is CashRegisterLoaded) {
+                    final openRegisters = cashState.registers
+                        .where((r) => r.isOpen)
+                        .toList();
+                    if (openRegisters.isEmpty) {
+                      return Container(
+                        padding: EdgeInsets.all(12.px),
+                        decoration: BoxDecoration(
+                          color: AppColors.error.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8.px),
+                        ),
+                        child: Text(
+                          'No open cash registers found! Please open a register first.',
+                          style: TextStyle(
+                            color: AppColors.error,
+                            fontSize: 12.sp,
+                          ),
+                        ),
+                      );
+                    }
+                    return Container(
+                      padding: EdgeInsets.symmetric(horizontal: 12.px),
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12.px),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButton<String>(
+                          isExpanded: true,
+                          value: _selectedRegisterId,
+                          hint: const Text('Select an open register'),
+                          items: openRegisters.map((r) {
+                            return DropdownMenuItem<String>(
+                              value: r.id,
+                              child: Text(r.name),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            setState(() => _selectedRegisterId = val);
+                          },
+                        ),
+                      ),
+                    );
+                  }
+                  return Text(
+                    'Error loading registers',
+                    style: TextStyle(color: AppColors.error),
+                  );
+                },
               ),
               SizedBox(height: 16.px),
             ],
 
+            SizedBox(height: 16.px),
             // Payment Amount (editable for partial payments)
             TextField(
               controller: _amountController,
@@ -178,6 +238,7 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
                 FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
               ],
             ),
+
             SizedBox(height: 24.px),
 
             // Action Buttons
@@ -311,6 +372,16 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
       return;
     }
 
+    if (_selectedMethod == 'cash' && _selectedRegisterId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please select a cash register'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
     Discount? discount;
     if (widget.loyaltyDiscount > 0) {
       discount = Discount(
@@ -332,6 +403,7 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
             ? _referenceController.text
             : null,
         discount: discount,
+        cashRegisterId: _selectedRegisterId,
       ),
       customerPhone: null,
       customerEmail: null,

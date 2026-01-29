@@ -152,7 +152,7 @@ class _CustomerLookupDialogState extends ConsumerState<CustomerLookupDialog> {
             ),
 
             // Error Message
-            if (loyaltyState.error != null) ...[
+            // if (loyaltyState.error != null) ...[
               const SizedBox(height: 16),
               Container(
                 padding: const EdgeInsets.all(12),
@@ -199,7 +199,7 @@ class _CustomerLookupDialogState extends ConsumerState<CustomerLookupDialog> {
                   ],
                 ),
               ),
-            ],
+            // ],
 
             // Multiple Results Found
             if (loyaltyState.customer == null &&

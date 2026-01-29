@@ -32,6 +32,7 @@ import '../features/pos/presentation/screens/pos_screen.dart';
 import '../features/dine_in/presentation/pages/table_management_page.dart';
 import '../features/loyalty/presentation/pages/loyalty_management_page.dart';
 import '../features/cash_management/presentation/pages/cash_management_page.dart';
+import '../features/cash_management/presentation/pages/cash_register_history_page.dart';
 import '../features/settings/presentation/pages/settings_page.dart';
 
 class AppRouter {
@@ -269,6 +270,18 @@ class AppRouter {
         name: RouteConstants.cashManagementName,
         builder: (context, state) => const CashManagementPage(),
       ),
+      GoRoute(
+        path: RouteConstants.cashHistory,
+        name: RouteConstants.cashHistoryName,
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>;
+          return CashRegisterHistoryPage(
+            registerId: extra['registerId'],
+            registerName: extra['registerName'],
+          );
+        },
+      ),
+
       GoRoute(
         path: RouteConstants.settings,
         name: RouteConstants.settingsName,

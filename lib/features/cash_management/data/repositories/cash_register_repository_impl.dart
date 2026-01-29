@@ -2,6 +2,8 @@ import '../../../../core/error/exceptions.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/error/result.dart';
 import '../../domain/entities/cash_register.dart';
+import '../../domain/entities/cash_history.dart';
+import '../../domain/entities/cash_shift_summary.dart';
 import '../../domain/repositories/cash_register_repository.dart';
 import '../datasources/cash_register_remote_data_source.dart';
 
@@ -84,14 +86,30 @@ class CashRegisterRepositoryImpl implements CashRegisterRepository {
   }
 
   @override
-  Future<Result<Map<String, dynamic>>> closeShift(
+  Future<Result<CashShiftSummaryEntity>> closeShift(
     String id,
     double actualCash,
     String? notes,
   ) async {
     try {
-      final result = await _remoteDataSource.closeShift(id, actualCash, notes);
-      return Result.success(result);
+      final dto = await _remoteDataSource.closeShift(id, actualCash, notes);
+      return Result.success(dto.toEntity());
+    } on NetworkException catch (e) {
+      return Result.failure(Failure.network(e.message));
+    } on ServerException catch (e) {
+      return Result.failure(
+        Failure.server(e.message, statusCode: e.statusCode),
+      );
+    } catch (e) {
+      return Result.failure(Failure.unknown(e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<List<CashHistoryEntity>>> getHistory(String id) async {
+    try {
+      final dtos = await _remoteDataSource.getHistory(id);
+      return Result.success(dtos.map((dto) => dto.toEntity()).toList());
     } on NetworkException catch (e) {
       return Result.failure(Failure.network(e.message));
     } on ServerException catch (e) {

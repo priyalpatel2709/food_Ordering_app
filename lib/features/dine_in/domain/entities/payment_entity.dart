@@ -27,12 +27,14 @@ class Payment {
   final double amount;
   final String? notes;
   final Discount? discount;
+  final String? cashRegisterId;
 
   Payment({
     required this.method,
     required this.amount,
     this.notes,
     this.discount,
+    this.cashRegisterId,
   });
 
   Map<String, dynamic> toMap() {
@@ -41,6 +43,7 @@ class Payment {
       'amount': amount,
       'notes': notes,
       'discount': discount?.toMap(),
+      'cashRegisterId': cashRegisterId,
     };
   }
 

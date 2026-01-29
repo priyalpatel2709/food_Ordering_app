@@ -83,6 +83,7 @@ class PaymentData {
   final String? transactionId;
   final String? gateway;
   final String? notes;
+  final String? cashRegisterId;
 
   const PaymentData({
     required this.method,
@@ -90,6 +91,7 @@ class PaymentData {
     this.transactionId,
     this.gateway,
     this.notes,
+    this.cashRegisterId,
   });
 
   Map<String, dynamic> toJson() {
@@ -98,6 +100,7 @@ class PaymentData {
     if (transactionId != null) json['transactionId'] = transactionId!;
     if (gateway != null) json['gateway'] = gateway!;
     if (notes != null) json['notes'] = notes!;
+    if (cashRegisterId != null) json['cashRegisterId'] = cashRegisterId!;
 
     return json;
   }

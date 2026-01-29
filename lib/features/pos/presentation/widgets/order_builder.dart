@@ -6,7 +6,6 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 import '../../../cart/domain/entities/cart_entity.dart';
 import '../../../../shared/theme/app_colors.dart';
 import '../../../dine_in/domain/entities/dine_in_order_entity.dart';
-import '../../../dine_in/domain/entities/payment_entity.dart';
 import '../../../loyalty/presentation/providers/loyalty_providers.dart';
 import '../providers/pos_state.dart';
 import '../providers/pos_provider.dart';
@@ -460,55 +459,21 @@ class OrderBuilder extends ConsumerWidget {
     String orderId,
     String amount,
   ) {
+    final state = ref.read(posNotifierProvider);
+    final double totalAmount = double.tryParse(amount) ?? 0;
+
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Settle Order'),
-        content: const Text('Choose payment method and finalize order?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final state = ref.read(posNotifierProvider);
-              Discount? loyaltyDiscount;
-              if (state.loyaltyDiscount > 0) {
-                loyaltyDiscount = Discount(
-                  discounts: [
-                    DiscountDetails(
-                      discountAmount: state.loyaltyDiscount,
-                      discountType: 'loyalty_points',
-                      pointsRedeemed: state.redeemedPoints,
-                    ),
-                  ],
-                  totalDiscountAmount: state.loyaltyDiscount,
-                );
-              }
-
-              ref
-                  .read(posNotifierProvider.notifier)
-                  .settleOrder(
-                    orderId,
-                    PaymentEntity(
-                      payment: Payment(
-                        method: 'cash',
-                        amount:
-                            (double.tryParse(amount) ?? 0) -
-                            state.loyaltyDiscount,
-                        discount: loyaltyDiscount,
-                      ),
-                      customerPhone: state.customerPhone,
-                      customerEmail: state.loyaltyCustomer?.email,
-                      customerName: state.customerName,
-                    ),
-                  );
-              Navigator.pop(context);
-            },
-            child: const Text('Confirm Cash Payment'),
-          ),
-        ],
+      builder: (context) => PaymentDialog(
+        totalAmount: totalAmount,
+        loyaltyDiscount: state.loyaltyDiscount,
+        onConfirmed: (payment, payNow) {
+          if (payment != null) {
+            ref
+                .read(posNotifierProvider.notifier)
+                .settleOrder(orderId, payment);
+          }
+        },
       ),
     );
   }

@@ -17,6 +17,7 @@ import '../../../discount/domain/entities/discount_entity.dart';
 import '../../../discount/presentation/providers/discount_provider.dart';
 import '../../../loyalty/domain/entities/customer_loyalty_entity.dart';
 import '../../../loyalty/presentation/widgets/customer_lookup_dialog.dart';
+import '../../../cash_management/presentation/viewmodels/cash_register_view_model.dart';
 
 class TableDetailsPage extends ConsumerStatefulWidget {
   final TableEntity table;
@@ -556,6 +557,13 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
             DiscountEntity? selectedDiscount;
             CustomerLoyaltyEntity? loyaltyCustomer;
             int pointsToRedeem = 0;
+            String paymentMethod = 'cash';
+            String? selectedRegisterId;
+
+            // Load registers
+            Future.microtask(() {
+              ref.read(cashRegisterNotifierProvider.notifier).loadRegisters();
+            });
 
             return StatefulBuilder(
               builder: (context, setState) {
@@ -575,38 +583,38 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
                     style: TextStyle(fontSize: isDesktop ? 14.sp : 18.sp),
                   ),
                   content: SizedBox(
-                    width: isDesktop ? 30.w : double.maxFinite,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Subtotal:",
-                              style: TextStyle(
-                                fontSize: isDesktop ? 12.sp : 15.sp,
+                    width: isDesktop ? 35.w : double.maxFinite,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Subtotal:",
+                                style: TextStyle(
+                                  fontSize: isDesktop ? 12.sp : 15.sp,
+                                ),
                               ),
-                            ),
-                            Text(
-                              "\$${amount.toStringAsFixed(2)}",
-                              style: TextStyle(
-                                fontSize: isDesktop ? 12.sp : 15.sp,
+                              Text(
+                                "\$${amount.toStringAsFixed(2)}",
+                                style: TextStyle(
+                                  fontSize: isDesktop ? 12.sp : 15.sp,
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                        SizedBox(height: 1.5.h),
-                        Text(
-                          "Apply Discount:",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: isDesktop ? 12.sp : 15.sp,
+                            ],
                           ),
-                        ),
-                        SizedBox(height: 0.5.h),
-                        if (discountsAsync is DiscountLoaded) ...[
+                          SizedBox(height: 1.5.h),
+                          Text(
+                            "Payment Method:",
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: isDesktop ? 12.sp : 15.sp,
+                            ),
+                          ),
+                          SizedBox(height: 0.5.h),
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 12),
                             decoration: BoxDecoration(
@@ -614,191 +622,310 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
                               border: Border.all(color: Colors.grey.shade300),
                             ),
                             child: DropdownButtonHideUnderline(
-                              child: DropdownButton<DiscountEntity>(
+                              child: DropdownButton<String>(
                                 isExpanded: true,
-                                value: selectedDiscount,
-                                hint: Text(
-                                  "Select Discount",
-                                  style: TextStyle(
-                                    fontSize: isDesktop ? 11.sp : 14.sp,
+                                value: paymentMethod,
+                                items: const [
+                                  DropdownMenuItem(
+                                    value: 'cash',
+                                    child: Text("Cash"),
                                   ),
-                                ),
-                                icon: Icon(
-                                  Icons.keyboard_arrow_down,
-                                  size: isDesktop ? 1.5.w : 20,
-                                ),
-                                items: [
-                                  DropdownMenuItem<DiscountEntity>(
-                                    value: null,
-                                    child: Text(
-                                      "None",
-                                      style: TextStyle(
-                                        fontSize: isDesktop ? 11.sp : 14.sp,
-                                      ),
-                                    ),
+                                  DropdownMenuItem(
+                                    value: 'card',
+                                    child: Text("Card"),
                                   ),
-                                  ...discountsAsync.discounts.map((d) {
-                                    return DropdownMenuItem(
-                                      value: d,
-                                      child: Text(
-                                        "${d.discountCode} (${d.type == 'percentage' ? '${d.value}%' : '\$${d.value}'})",
-                                        style: TextStyle(
-                                          fontSize: isDesktop ? 11.sp : 14.sp,
-                                        ),
-                                      ),
-                                    );
-                                  }),
+                                  DropdownMenuItem(
+                                    value: 'upi',
+                                    child: Text("UPI"),
+                                  ),
                                 ],
                                 onChanged: (val) {
-                                  setState(() {
-                                    selectedDiscount = val;
-                                  });
+                                  if (val != null) {
+                                    setState(() {
+                                      paymentMethod = val;
+                                    });
+                                  }
                                 },
                               ),
                             ),
                           ),
-                        ] else if (discountsAsync is DiscountLoading) ...[
-                          const LinearProgressIndicator(),
-                        ],
-                        if (selectedDiscount != null) ...[
-                          SizedBox(height: 1.h),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Discount Savings:",
-                                style: TextStyle(
-                                  color: AppColors.success,
-                                  fontSize: isDesktop ? 11.sp : 14.sp,
-                                ),
-                              ),
-                              Text(
-                                "- \$${selectedDiscount!.calculateDiscountAmount(amount).toStringAsFixed(2)}",
-                                style: TextStyle(
-                                  color: AppColors.success,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: isDesktop ? 11.sp : 14.sp,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-
-                        // Loyalty Points Section
-                        SizedBox(height: 2.h),
-                        const Divider(),
-                        SizedBox(height: 1.h),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
+                          if (paymentMethod == 'cash') ...[
+                            SizedBox(height: 1.5.h),
                             Text(
-                              "Loyalty Customer:",
+                              "Select Cash Register:",
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: isDesktop ? 12.sp : 15.sp,
                               ),
                             ),
-                            if (loyaltyCustomer == null)
-                              TextButton.icon(
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    builder: (context) => CustomerLookupDialog(
-                                      onCustomerFound: (customer) {
-                                        setState(() {
-                                          loyaltyCustomer = customer;
-                                        });
-                                      },
+                            SizedBox(height: 0.5.h),
+                            Consumer(
+                              builder: (context, ref, child) {
+                                final cashState = ref.watch(
+                                  cashRegisterNotifierProvider,
+                                );
+                                if (cashState is CashRegisterLoading) {
+                                  return const LinearProgressIndicator();
+                                }
+                                if (cashState is CashRegisterLoaded) {
+                                  final openRegisters = cashState.registers
+                                      .where((r) => r.isOpen)
+                                      .toList();
+                                  if (openRegisters.isEmpty) {
+                                    return Text(
+                                      "No open registers found!",
+                                      style: TextStyle(
+                                        color: AppColors.error,
+                                        fontSize: 11.sp,
+                                      ),
+                                    );
+                                  }
+                                  return Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(8),
+                                      border: Border.all(
+                                        color: Colors.grey.shade300,
+                                      ),
+                                    ),
+                                    child: DropdownButtonHideUnderline(
+                                      child: DropdownButton<String>(
+                                        isExpanded: true,
+                                        value: selectedRegisterId,
+                                        hint: const Text("Select Register"),
+                                        items: openRegisters.map((r) {
+                                          return DropdownMenuItem(
+                                            value: r.id,
+                                            child: Text(r.name),
+                                          );
+                                        }).toList(),
+                                        onChanged: (val) {
+                                          setState(() {
+                                            selectedRegisterId = val;
+                                          });
+                                        },
+                                      ),
                                     ),
                                   );
-                                },
-                                icon: const Icon(Icons.person_search, size: 18),
-                                label: const Text("Select"),
-                              )
-                            else
-                              IconButton(
-                                icon: const Icon(Icons.close, size: 18),
-                                onPressed: () =>
-                                    setState(() => loyaltyCustomer = null),
-                              ),
+                                }
+                                return Text(
+                                  "Error loading registers",
+                                  style: TextStyle(color: AppColors.error),
+                                );
+                              },
+                            ),
                           ],
-                        ),
-                        if (loyaltyCustomer != null) ...[
+                          SizedBox(height: 2.h),
                           Text(
-                            "${loyaltyCustomer!.name} (${loyaltyCustomer!.loyaltyPoints.current} pts)",
+                            "Apply Discount:",
                             style: TextStyle(
-                              fontSize: isDesktop ? 11.sp : 14.sp,
-                              color: AppColors.primary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: isDesktop ? 12.sp : 15.sp,
                             ),
                           ),
-                          SizedBox(height: 1.h),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  decoration: const InputDecoration(
-                                    labelText: "Points to Redeem",
-                                    isDense: true,
+                          SizedBox(height: 0.5.h),
+                          if (discountsAsync is DiscountLoaded) ...[
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                              ),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: Colors.grey.shade300),
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<DiscountEntity>(
+                                  isExpanded: true,
+                                  value: selectedDiscount,
+                                  hint: Text(
+                                    "Select Discount",
+                                    style: TextStyle(
+                                      fontSize: isDesktop ? 11.sp : 14.sp,
+                                    ),
                                   ),
-                                  keyboardType: TextInputType.number,
+                                  icon: Icon(
+                                    Icons.keyboard_arrow_down,
+                                    size: isDesktop ? 1.5.w : 20,
+                                  ),
+                                  items: [
+                                    DropdownMenuItem<DiscountEntity>(
+                                      value: null,
+                                      child: Text(
+                                        "None",
+                                        style: TextStyle(
+                                          fontSize: isDesktop ? 11.sp : 14.sp,
+                                        ),
+                                      ),
+                                    ),
+                                    ...discountsAsync.discounts.map((d) {
+                                      return DropdownMenuItem(
+                                        value: d,
+                                        child: Text(
+                                          "${d.discountCode} (${d.type == 'percentage' ? '${d.value}%' : '\$${d.value}'})",
+                                          style: TextStyle(
+                                            fontSize: isDesktop ? 11.sp : 14.sp,
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                  ],
                                   onChanged: (val) {
                                     setState(() {
-                                      pointsToRedeem = int.tryParse(val) ?? 0;
+                                      selectedDiscount = val;
                                     });
                                   },
                                 ),
                               ),
-                              SizedBox(width: 2.w),
-                              ElevatedButton(
-                                onPressed:
-                                    pointsToRedeem > 0 &&
-                                        pointsToRedeem <=
-                                            loyaltyCustomer!
-                                                .loyaltyPoints
-                                                .current
-                                    ? () async {
-                                        await applyLoyaltyDiscountToOrder(
-                                          orderId: orderId,
-                                          loyaltyCustomerId:
-                                              loyaltyCustomer!.id,
-                                          pointsToRedeem: pointsToRedeem,
-                                        );
-                                        // Close dialog and detail page will refresh
-                                        if (context.mounted) {
-                                          Navigator.pop(context);
+                            ),
+                          ] else if (discountsAsync is DiscountLoading) ...[
+                            const LinearProgressIndicator(),
+                          ],
+                          if (selectedDiscount != null) ...[
+                            SizedBox(height: 1.h),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  "Discount Savings:",
+                                  style: TextStyle(
+                                    color: AppColors.success,
+                                    fontSize: isDesktop ? 11.sp : 14.sp,
+                                  ),
+                                ),
+                                Text(
+                                  "- \$${selectedDiscount!.calculateDiscountAmount(amount).toStringAsFixed(2)}",
+                                  style: TextStyle(
+                                    color: AppColors.success,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: isDesktop ? 11.sp : 14.sp,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+
+                          // Loyalty Points Section
+                          SizedBox(height: 2.h),
+                          const Divider(),
+                          SizedBox(height: 1.h),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Loyalty Customer:",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: isDesktop ? 12.sp : 15.sp,
+                                ),
+                              ),
+                              if (loyaltyCustomer == null)
+                                TextButton.icon(
+                                  onPressed: () {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) =>
+                                          CustomerLookupDialog(
+                                            onCustomerFound: (customer) {
+                                              setState(() {
+                                                loyaltyCustomer = customer;
+                                              });
+                                            },
+                                          ),
+                                    );
+                                  },
+                                  icon: const Icon(
+                                    Icons.person_search,
+                                    size: 18,
+                                  ),
+                                  label: const Text("Select"),
+                                )
+                              else
+                                IconButton(
+                                  icon: const Icon(Icons.close, size: 18),
+                                  onPressed: () =>
+                                      setState(() => loyaltyCustomer = null),
+                                ),
+                            ],
+                          ),
+                          if (loyaltyCustomer != null) ...[
+                            Text(
+                              "${loyaltyCustomer!.name} (${loyaltyCustomer!.loyaltyPoints.current} pts)",
+                              style: TextStyle(
+                                fontSize: isDesktop ? 11.sp : 14.sp,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            SizedBox(height: 1.h),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: TextField(
+                                    decoration: const InputDecoration(
+                                      labelText: "Points to Redeem",
+                                      isDense: true,
+                                    ),
+                                    keyboardType: TextInputType.number,
+                                    onChanged: (val) {
+                                      setState(() {
+                                        pointsToRedeem = int.tryParse(val) ?? 0;
+                                      });
+                                    },
+                                  ),
+                                ),
+                                SizedBox(width: 2.w),
+                                ElevatedButton(
+                                  onPressed:
+                                      pointsToRedeem > 0 &&
+                                          pointsToRedeem <=
+                                              loyaltyCustomer!
+                                                  .loyaltyPoints
+                                                  .current
+                                      ? () async {
+                                          await applyLoyaltyDiscountToOrder(
+                                            orderId: orderId,
+                                            loyaltyCustomerId:
+                                                loyaltyCustomer!.id,
+                                            pointsToRedeem: pointsToRedeem,
+                                          );
+                                          // Close dialog and detail page will refresh
+                                          if (context.mounted) {
+                                            Navigator.pop(context);
+                                          }
                                         }
-                                      }
-                                    : null,
-                                child: const Text("Apply"),
+                                      : null,
+                                  child: const Text("Apply"),
+                                ),
+                              ],
+                            ),
+                          ],
+                          Padding(
+                            padding: EdgeInsets.symmetric(vertical: 1.5.h),
+                            child: const Divider(),
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Total To Pay:",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: isDesktop ? 13.sp : 16.sp,
+                                ),
+                              ),
+                              Text(
+                                "\$${finalAmount.toStringAsFixed(2)}",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: isDesktop ? 16.sp : 20.sp,
+                                  color: AppColors.primary,
+                                ),
                               ),
                             ],
                           ),
                         ],
-                        Padding(
-                          padding: EdgeInsets.symmetric(vertical: 1.5.h),
-                          child: const Divider(),
-                        ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Total To Pay:",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: isDesktop ? 13.sp : 16.sp,
-                              ),
-                            ),
-                            Text(
-                              "\$${finalAmount.toStringAsFixed(2)}",
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: isDesktop ? 16.sp : 20.sp,
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                   actions: [
@@ -834,30 +961,35 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
                             );
                           }
 
+                          if (paymentMethod == 'cash' &&
+                              selectedRegisterId == null) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Please select a cash register'),
+                              ),
+                            );
+                            return;
+                          }
+
                           await ref
                               .read(completeDineInPaymentUseCaseProvider)
                               .call(
                                 orderId,
                                 PaymentEntity(
                                   payment: Payment(
-                                    method: 'cash',
+                                    method: paymentMethod,
                                     amount: finalAmount,
                                     notes: 'Paid via App',
                                     discount: discount,
+                                    cashRegisterId: selectedRegisterId,
                                   ),
                                 ),
-
-                                // {
-                                //   "method": "cash",
-                                //   "amount": finalAmount,
-                                //   "notes": "Paid via App",
-                                //   "discount": discountData,
-                                // }
                               );
+
                           if (context.mounted) {
                             ref.invalidate(tablesProvider);
                             Navigator.pop(context); // Close dialog
-                            context.pop(); // Close detail page
+                            context.pop(); // Go back to tables list
                           }
                         } catch (e) {
                           if (context.mounted) {
@@ -870,13 +1002,13 @@ class _TableDetailsPageState extends ConsumerState<TableDetailsPage> {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
                       ),
                       child: Text(
                         "Confirm Payment",
-                        style: TextStyle(fontSize: isDesktop ? 11.sp : 14.sp),
+                        style: TextStyle(
+                          fontSize: isDesktop ? 11.sp : 14.sp,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
                   ],

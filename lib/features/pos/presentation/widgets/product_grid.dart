@@ -360,16 +360,16 @@ class ProductCard extends ConsumerWidget {
                   child: InkWell(
                     onTap: () {
                       ref.read(posNotifierProvider.notifier).addToCart(product);
-                      ScaffoldMessenger.of(context).clearSnackBars();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('${product.name} added to cart'),
-                          duration: const Duration(milliseconds: 500),
-                          backgroundColor: Colors.black87,
-                          behavior: SnackBarBehavior.floating,
-                          width: 40.w,
-                        ),
-                      );
+                      // ScaffoldMessenger.of(context).clearSnackBars();
+                      // ScaffoldMessenger.of(context).showSnackBar(
+                      //   SnackBar(
+                      //     content: Text('${product.name} added to cart'),
+                      //     duration: const Duration(milliseconds: 500),
+                      //     backgroundColor: Colors.black87,
+                      //     behavior: SnackBarBehavior.floating,
+                      //     width: 40.w,
+                      //   ),
+                      // );
                     },
                     borderRadius: BorderRadius.circular(
                       isCompact ? 8.px : 12.px,

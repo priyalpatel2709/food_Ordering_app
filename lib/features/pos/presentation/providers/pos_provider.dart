@@ -559,6 +559,7 @@ class PosNotifier extends StateNotifier<PosState> {
         method: paymentData.payment.method,
         amount: paymentData.payment.amount,
         notes: paymentData.payment.notes,
+        cashRegisterId: paymentData.payment.cashRegisterId,
         // transactionId: paymentData.payment.transactionId, // If you have it
       );
 

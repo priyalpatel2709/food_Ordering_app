@@ -54,6 +54,7 @@ import '../../features/cash_management/domain/usecases/create_register_usecase.d
 import '../../features/cash_management/domain/usecases/open_shift_usecase.dart';
 import '../../features/cash_management/domain/usecases/add_transaction_usecase.dart';
 import '../../features/cash_management/domain/usecases/close_shift_usecase.dart';
+import '../../features/cash_management/domain/usecases/get_history_usecase.dart';
 
 /// Manual Provider Definitions
 /// TODO: When build_runner is fixed, restore @riverpod code generation
@@ -373,4 +374,8 @@ final addTransactionUseCaseProvider = Provider<AddTransactionUseCase>((ref) {
 
 final closeShiftUseCaseProvider = Provider<CloseShiftUseCase>((ref) {
   return CloseShiftUseCase(ref.watch(cashRegisterRepositoryProvider));
+});
+
+final getHistoryUseCaseProvider = Provider<GetHistoryUseCase>((ref) {
+  return GetHistoryUseCase(ref.watch(cashRegisterRepositoryProvider));
 });

@@ -1,4 +1,5 @@
 import '../../../../core/error/result.dart';
+import '../entities/cash_shift_summary.dart';
 import '../repositories/cash_register_repository.dart';
 
 class CloseShiftUseCase {
@@ -6,7 +7,7 @@ class CloseShiftUseCase {
 
   CloseShiftUseCase(this._repository);
 
-  Future<Result<Map<String, dynamic>>> execute(
+  Future<Result<CashShiftSummaryEntity>> execute(
     String id,
     double actualCash,
     String? notes,

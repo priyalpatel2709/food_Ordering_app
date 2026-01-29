@@ -33,6 +33,7 @@ class ApiConstants {
   static const String openShiftEndpoint = '/open';
   static const String transactionEndpoint = '/transaction';
   static const String closeShiftEndpoint = '/close';
+  static const String historyEndpoint = '/history';
 
   // orders
   static const String orders = 'orders';

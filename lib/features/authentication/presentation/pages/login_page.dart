@@ -266,9 +266,9 @@ class _LoginPageState extends State<LoginPage> with TickerProviderStateMixin {
           if (value == null || value.isEmpty) {
             return 'Please enter your email';
           }
-          if (!value.contains('@')) {
-            return 'Please enter a valid email';
-          }
+          // if (!value.contains('@')) {
+          //   return 'Please enter a valid email';
+          // }
           return null;
         },
       ),

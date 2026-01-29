@@ -1,5 +1,7 @@
 import '../../../../core/error/result.dart';
 import '../entities/cash_register.dart';
+import '../entities/cash_history.dart';
+import '../entities/cash_shift_summary.dart';
 
 abstract class CashRegisterRepository {
   Future<Result<List<CashRegisterEntity>>> getRegisters();
@@ -19,9 +21,11 @@ abstract class CashRegisterRepository {
     String reason,
   );
 
-  Future<Result<Map<String, dynamic>>> closeShift(
+  Future<Result<CashShiftSummaryEntity>> closeShift(
     String id,
     double actualCash,
     String? notes,
   );
+
+  Future<Result<List<CashHistoryEntity>>> getHistory(String id);
 }

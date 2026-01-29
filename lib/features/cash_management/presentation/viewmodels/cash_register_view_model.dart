@@ -1,6 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/providers.dart';
 import '../../domain/entities/cash_register.dart';
+import '../../domain/entities/cash_history.dart';
+import '../../domain/entities/cash_shift_summary.dart';
 
 sealed class CashRegisterState {
   const CashRegisterState();
@@ -84,7 +86,7 @@ class CashRegisterNotifier extends StateNotifier<CashRegisterState> {
     );
   }
 
-  Future<Map<String, dynamic>?> closeShift(
+  Future<CashShiftSummaryEntity?> closeShift(
     String id,
     double actualCash, {
     String? notes,
@@ -101,6 +103,11 @@ class CashRegisterNotifier extends StateNotifier<CashRegisterState> {
         return null;
       },
     );
+  }
+
+  Future<List<CashHistoryEntity>?> getHistory(String id) async {
+    final result = await ref.read(getHistoryUseCaseProvider).execute(id);
+    return result.when(success: (history) => history, failure: (_) => null);
   }
 }
 
