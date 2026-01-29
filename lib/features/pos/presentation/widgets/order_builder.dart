@@ -189,30 +189,38 @@ class OrderBuilder extends ConsumerWidget {
                     flex: 3,
                     child: Column(
                       children: [
-                        _summaryButton('SELECT TABLE', () {
-                          if (state.orderType == OrderType.dineIn) {
-                            showDialog(
-                              context: context,
-                              builder: (context) =>
-                                  const TableSelectionDialog(),
-                            );
-                          }                                      
-                        }),
-                        const Divider(height: 1, color: AppColors.border),
-                        _summaryButton(
-                          state.scheduledFor != null ? 'SCHEDULED' : 'SCHEDULE',
-                          () {
-                            if (state.orderType != OrderType.dineIn) {
+                        Visibility(
+                          visible: state.orderType == OrderType.dineIn,
+                          child: _summaryButton('SELECT TABLE', () {
+                            if (state.orderType == OrderType.dineIn) {
                               showDialog(
                                 context: context,
                                 builder: (context) =>
-                                    const ScheduleOrderDialog(),
+                                    const TableSelectionDialog(),
                               );
                             }
-                          },
-                          color: state.scheduledFor != null
-                              ? AppColors.primary
-                              : null,
+                          }),
+                        ),
+                        const Divider(height: 1, color: AppColors.border),
+                        Visibility(
+                          visible: state.orderType != OrderType.dineIn,
+                          child: _summaryButton(
+                            state.scheduledFor != null
+                                ? 'SCHEDULED'
+                                : 'SCHEDULE',
+                            () {
+                              if (state.orderType != OrderType.dineIn) {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) =>
+                                      const ScheduleOrderDialog(),
+                                );
+                              }
+                            },
+                            color: state.scheduledFor != null
+                                ? AppColors.primary
+                                : null,
+                          ),
                         ),
                       ],
                     ),
@@ -233,15 +241,23 @@ class OrderBuilder extends ConsumerWidget {
                   _actionButton(
                     Icons.close,
                     'CLEAR',
-                    AppColors.error,
-                    () => ref.read(posNotifierProvider.notifier).clearCart(),
+                    (items.isEmpty && ongoingOrder == null)
+                        ? AppColors.borderDark
+                        : AppColors.error,
+                    () {
+                      if (items.isEmpty && ongoingOrder == null) return;
+                      ref.read(posNotifierProvider.notifier).clearCart();
+                    },
                   ),
                   const VerticalDivider(width: 1, color: AppColors.border),
                   _actionButton(
                     Icons.send,
                     ongoingOrder != null ? 'ADD' : 'SEND',
-                    AppColors.secondary,
+                    (items.isEmpty && ongoingOrder == null)
+                        ? AppColors.borderDark
+                        : AppColors.secondary,
                     () {
+                      if (items.isEmpty && ongoingOrder == null) return;
                       if (state.orderType == OrderType.dineIn &&
                           state.tableNumber == null) {
                         showDialog(
@@ -264,7 +280,9 @@ class OrderBuilder extends ConsumerWidget {
                   _actionButton(
                     Icons.payments,
                     'SETTLE',
-                    AppColors.primary,
+                    ongoingOrder == null
+                        ? AppColors.borderDark
+                        : AppColors.primary,
                     () {
                       if (ongoingOrder != null) {
                         _handleSettle(

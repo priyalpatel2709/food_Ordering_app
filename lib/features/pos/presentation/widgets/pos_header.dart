@@ -124,7 +124,7 @@ class _PosHeaderState extends ConsumerState<PosHeader> {
           SizedBox(width: 2.w),
 
           // Table Selector (Only for Dine-In)
-          _buildTableSelector(context, ref),
+          // _buildTableSelector(context, ref),
 
           const Spacer(),
 
