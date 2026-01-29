@@ -196,7 +196,7 @@ class OrderBuilder extends ConsumerWidget {
                               builder: (context) =>
                                   const TableSelectionDialog(),
                             );
-                          }
+                          }                                      
                         }),
                         const Divider(height: 1, color: AppColors.border),
                         _summaryButton(

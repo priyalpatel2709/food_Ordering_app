@@ -28,6 +28,7 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
   String? _selectedRegisterId;
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _referenceController = TextEditingController();
+  double _manualDiscount = 0.0;
 
   @override
   void initState() {
@@ -46,7 +47,110 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
     super.dispose();
   }
 
-  double get _finalAmount => widget.totalAmount - widget.loyaltyDiscount;
+  double get _finalAmount {
+    final amount =
+        widget.totalAmount - widget.loyaltyDiscount - _manualDiscount;
+    return amount > 0 ? amount : 0.0;
+  }
+
+  void _showDiscountDialog() {
+    final controller = TextEditingController();
+    bool isPercentage = false;
+
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return AlertDialog(
+            title: const Text('Add Discount'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Text('Fixed Amount'),
+                        selected: !isPercentage,
+                        onSelected: (v) => setState(() => isPercentage = false),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ChoiceChip(
+                        label: const Text('Percentage'),
+                        selected: isPercentage,
+                        onSelected: (v) => setState(() => isPercentage = true),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    labelText: isPercentage ? 'Percentage (%)' : 'Amount (\$)',
+                    hintText: 'Enter value',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(
+                      RegExp(r'^\d*\.?\d{0,2}'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  final value = double.tryParse(controller.text) ?? 0.0;
+                  double discount = 0.0;
+
+                  if (isPercentage) {
+                    discount = (widget.totalAmount * value) / 100;
+                  } else {
+                    discount = value;
+                  }
+
+                  if (discount >
+                      (widget.totalAmount - widget.loyaltyDiscount)) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: const Text(
+                          'Discount cannot exceed remaining amount',
+                        ),
+                        backgroundColor: AppColors.error,
+                      ),
+                    );
+                    return;
+                  }
+
+                  Navigator.pop(context, discount);
+                },
+                child: const Text('Apply'),
+              ),
+            ],
+          );
+        },
+      ),
+    ).then((value) {
+      if (value != null && value is double) {
+        setState(() {
+          _manualDiscount = value;
+          // Reset amount field to the new final amount
+          _amountController.text = _finalAmount.toStringAsFixed(2);
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -114,6 +218,56 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
                       '-\$${widget.loyaltyDiscount.toStringAsFixed(2)}',
                       false,
                       color: AppColors.success,
+                    ),
+                    Divider(height: 16.px),
+                  ],
+                  if (_manualDiscount > 0) ...[
+                    // Conditionally show Subtotal only if not already shown by loyalty discount logic,
+                    // or just accept duplicate subtotal if acceptable.
+                    // Better logic: ensure Subtotal is distinct.
+                    // Since loyalty block already shows Subtotal if > 0, we check.
+                    if (widget.loyaltyDiscount == 0)
+                      _summaryRow(
+                        'Subtotal',
+                        '\$${widget.totalAmount.toStringAsFixed(2)}',
+                        false,
+                      ),
+                    SizedBox(height: 8.px),
+                    _summaryRow(
+                      'Manual Discount',
+                      '-\$${_manualDiscount.toStringAsFixed(2)}',
+                      false,
+                      color: AppColors.success,
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton(
+                        onPressed: () {
+                          setState(() {
+                            _manualDiscount = 0.0;
+                            _amountController.text = _finalAmount
+                                .toStringAsFixed(2);
+                          });
+                        },
+                        child: const Text(
+                          'Remove',
+                          style: TextStyle(color: Colors.red, fontSize: 12),
+                        ),
+                      ),
+                    ),
+                    Divider(height: 16.px),
+                  ],
+                  if (_manualDiscount == 0) ...[
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: TextButton.icon(
+                        onPressed: _showDiscountDialog,
+                        icon: const Icon(Icons.add, size: 16),
+                        label: const Text('Add Discount'),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.primary,
+                        ),
+                      ),
                     ),
                     Divider(height: 16.px),
                   ],
@@ -382,16 +536,44 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
       return;
     }
 
-    Discount? discount;
+    if (_selectedMethod == 'cash' && _selectedRegisterId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Please select a cash register'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      return;
+    }
+
+    final discountDetails = <DiscountDetails>[];
+    double totalDiscount = 0.0;
+
     if (widget.loyaltyDiscount > 0) {
+      discountDetails.add(
+        DiscountDetails(
+          discountAmount: widget.loyaltyDiscount,
+          discountType: 'loyalty_points',
+        ),
+      );
+      totalDiscount += widget.loyaltyDiscount;
+    }
+
+    if (_manualDiscount > 0) {
+      discountDetails.add(
+        DiscountDetails(
+          discountAmount: _manualDiscount,
+          discountType: 'manual',
+        ),
+      );
+      totalDiscount += _manualDiscount;
+    }
+
+    Discount? discount;
+    if (discountDetails.isNotEmpty) {
       discount = Discount(
-        discounts: [
-          DiscountDetails(
-            discountAmount: widget.loyaltyDiscount,
-            discountType: 'loyalty_points',
-          ),
-        ],
-        totalDiscountAmount: widget.loyaltyDiscount,
+        discounts: discountDetails,
+        totalDiscountAmount: totalDiscount,
       );
     }
 
