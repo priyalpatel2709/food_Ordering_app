@@ -43,8 +43,9 @@ class UserDto {
           (data['roles'] as List<dynamic>?)
               ?.map((e) {
                 if (e is Map<String, dynamic>) return RoleDto.fromJson(e);
-                if (e is Map)
+                if (e is Map) {
                   return RoleDto.fromJson(Map<String, dynamic>.from(e));
+                }
                 return null;
               })
               .whereType<RoleDto>()

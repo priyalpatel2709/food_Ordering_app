@@ -6,7 +6,6 @@ import '../../../../features/rbac/presentation/widgets/permission_guard.dart';
 import '../../../../core/constants/permission_constants.dart';
 import '../../../tax/presentation/providers/tax_provider.dart';
 import '../../../tax/domain/entities/tax_entity.dart';
-import '../../../authentication/presentation/providers/auth_provider.dart';
 
 class TaxesManagementPage extends ConsumerStatefulWidget {
   const TaxesManagementPage({super.key});

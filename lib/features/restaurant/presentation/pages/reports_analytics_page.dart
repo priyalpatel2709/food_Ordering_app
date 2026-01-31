@@ -316,11 +316,12 @@ class _ReportsAnalyticsPageState extends ConsumerState<ReportsAnalyticsPage> {
   }
 
   Widget _buildPeakHoursChart(List<dynamic> peakHours) {
-    if (peakHours.isEmpty)
+    if (peakHours.isEmpty) {
       return const SizedBox(
         height: 100,
         child: Center(child: Text('No peak hours data')),
       );
+    }
 
     final sortedHours = List<Map<String, dynamic>>.from(peakHours);
     sortedHours.sort((a, b) => (a['_id'] as num).compareTo(b['_id'] as num));

@@ -611,7 +611,7 @@ class _RestaurantSettingsPageState
                           ),
                         ),
                       );
-                    }).toList(),
+                    }),
                 ],
               ),
             ),

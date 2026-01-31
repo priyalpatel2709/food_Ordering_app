@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:food_order_app/core/network/dio_client.dart';
 

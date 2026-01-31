@@ -133,7 +133,7 @@ class _LoyaltyManagementPageState extends ConsumerState<LoyaltyManagementPage> {
                       Expanded(
                         flex: 1,
                         child: DropdownButtonFormField<String>(
-                          value: _selectedTier,
+                          initialValue: _selectedTier,
                           decoration: InputDecoration(
                             hintText: 'Filter by Tier',
                             border: OutlineInputBorder(

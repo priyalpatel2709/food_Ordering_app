@@ -60,11 +60,13 @@ class CreateOrderWithPaymentRequest {
     if (contactEmail != null) json['contactEmail'] = contactEmail!;
     if (contactName != null) json['contactName'] = contactName!;
     if (customerId != null) json['customerId'] = customerId!;
-    if (loyaltyCustomerId != null)
+    if (loyaltyCustomerId != null) {
       json['loyaltyCustomerId'] = loyaltyCustomerId!;
+    }
     if (pointsToRedeem != null) json['pointsToRedeem'] = pointsToRedeem!;
-    if (deliveryAddress != null)
+    if (deliveryAddress != null) {
       json['deliveryAddress'] = deliveryAddress!.toJson();
+    }
     if (isScheduledOrder != null) json['isScheduledOrder'] = isScheduledOrder!;
     if (scheduledDeliveryTime != null) {
       json['scheduledDeliveryTime'] = scheduledDeliveryTime!.toIso8601String();

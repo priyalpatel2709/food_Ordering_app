@@ -10,7 +10,6 @@ import '../../../menu/domain/entities/menu_entity.dart';
 import '../../../menu/presentation/viewmodels/categories_view_model.dart';
 import '../../../menu/presentation/viewmodels/items_view_model.dart';
 
-import 'package:responsive_sizer/responsive_sizer.dart';
 
 class ItemsManagementPage extends ConsumerStatefulWidget {
   const ItemsManagementPage({super.key});

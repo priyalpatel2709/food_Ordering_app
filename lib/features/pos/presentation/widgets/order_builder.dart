@@ -133,7 +133,7 @@ class OrderBuilder extends ConsumerWidget {
                 children: [
                   // Subtotal/Tax/Discount Column
                   Expanded(
-                    flex: 4,
+                    flex: 5,
                     child: Container(
                       padding: EdgeInsets.all(8.px),
                       decoration: BoxDecoration(

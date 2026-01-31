@@ -341,7 +341,7 @@ class _AddEditTableDialogState extends ConsumerState<_AddEditTableDialog> {
             if (isEditing) ...[
               SizedBox(height: 2.h),
               DropdownButtonFormField<TableStatus>(
-                value: _status,
+                initialValue: _status,
                 decoration: const InputDecoration(labelText: 'Status'),
                 items: TableStatus.values.map((status) {
                   return DropdownMenuItem(

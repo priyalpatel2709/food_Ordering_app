@@ -249,8 +249,9 @@ class _AddMenuPageState extends ConsumerState<AddMenuPage> {
   Widget _buildCategorySelector() {
     final categoriesState = ref.watch(categoriesNotifierProvider);
 
-    if (categoriesState is! CategoriesLoaded)
+    if (categoriesState is! CategoriesLoaded) {
       return const LinearProgressIndicator();
+    }
 
     return _MultiSelectDialogField(
       title: 'Categories',
@@ -374,7 +375,7 @@ class _AddMenuPageState extends ConsumerState<AddMenuPage> {
           mainAxisSize: MainAxisSize.min,
           children: [
             DropdownButtonFormField<String>(
-              value: selectedDay,
+              initialValue: selectedDay,
               items: [
                 'Monday',
                 'Tuesday',
@@ -589,10 +590,11 @@ class _MultiSelectDialogField<T> extends StatelessWidget {
                       value: isSelected,
                       onChanged: (val) {
                         setState(() {
-                          if (val == true)
+                          if (val == true) {
                             selected.add(id);
-                          else
+                          } else {
                             selected.remove(id);
+                          }
                         });
                       },
                     );

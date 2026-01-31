@@ -70,6 +70,7 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
     }
   }
 
+  @override
   void dispose() {
     _nameController.dispose();
     _descriptionController.dispose();
@@ -256,7 +257,7 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
             ),
             const SizedBox(height: 8),
             DropdownButtonFormField<String>(
-              value: _selectedCategoryId,
+              initialValue: _selectedCategoryId,
               decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 hintText: 'Choose category',
@@ -395,7 +396,7 @@ class _AddItemPageState extends ConsumerState<AddItemPage> {
             const SizedBox(height: 8),
             if (taxState is TaxLoaded)
               DropdownButtonFormField<String>(
-                value: _selectedTaxId,
+                initialValue: _selectedTaxId,
                 decoration: const InputDecoration(
                   labelText: 'Tax Rate',
                   border: OutlineInputBorder(),

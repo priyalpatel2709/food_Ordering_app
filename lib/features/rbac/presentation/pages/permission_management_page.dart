@@ -120,7 +120,7 @@ class _CreatePermissionDialogState
         mainAxisSize: MainAxisSize.min,
         children: [
           DropdownButtonFormField<String>(
-            value: _selectedPermission,
+            initialValue: _selectedPermission,
             decoration: const InputDecoration(
               labelText: 'Select Permission',
               border: OutlineInputBorder(),

@@ -8,7 +8,6 @@ import '../../../menu/domain/entities/menu_entity.dart';
 import '../../../menu/presentation/viewmodels/categories_view_model.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
-import 'package:responsive_sizer/responsive_sizer.dart';
 
 class CategoriesManagementPage extends ConsumerStatefulWidget {
   const CategoriesManagementPage({super.key});

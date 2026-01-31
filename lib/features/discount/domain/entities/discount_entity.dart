@@ -31,7 +31,7 @@ class DiscountEntity {
       throw ArgumentError('DiscountEntity.fromJson received null json');
     }
 
-    DateTime? _parseDate(dynamic value) {
+    DateTime? parseDate(dynamic value) {
       if (value == null) return null;
       if (value is String && value.isNotEmpty) {
         return DateTime.tryParse(value);
@@ -46,13 +46,13 @@ class DiscountEntity {
       discountCode: json['discountCode']?.toString(),
       value: (json['value'] as num?)?.toDouble() ?? 0.0,
       isActive: json['isActive'] as bool? ?? false,
-      validFrom: _parseDate(json['validFrom']),
-      validTo: _parseDate(json['validTo']),
+      validFrom: parseDate(json['validFrom']),
+      validTo: parseDate(json['validTo']),
       metaData: json['metaData'] is List
           ? json['metaData'] as List<dynamic>
           : [],
-      createdAt: _parseDate(json['createdAt']) ?? DateTime.now(),
-      updatedAt: _parseDate(json['updatedAt']) ?? DateTime.now(),
+      createdAt: parseDate(json['createdAt']) ?? DateTime.now(),
+      updatedAt: parseDate(json['updatedAt']) ?? DateTime.now(),
     );
   }
 

@@ -32,7 +32,7 @@ class PosScreen extends ConsumerWidget {
     };
 
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(textScaleFactor: scaleFactor),
+      data: MediaQuery.of(context).copyWith(textScaler: TextScaler.linear(scaleFactor)),
       child: Scaffold(
         backgroundColor: AppColors.background,
         body: SafeArea(
