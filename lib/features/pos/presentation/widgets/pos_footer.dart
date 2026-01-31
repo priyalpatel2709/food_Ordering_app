@@ -120,7 +120,7 @@ class PosFooter extends ConsumerWidget {
           const Spacer(),
 
           // Current Cashier Info (Desktop only)
-          if (isDesktop)
+          if (false)
             Row(
               children: [
                 CircleAvatar(

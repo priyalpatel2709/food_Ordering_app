@@ -154,296 +154,362 @@ class _PaymentDialogState extends ConsumerState<PaymentDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isMobile = Device.screenType == ScreenType.mobile;
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bool isDesktop = screenWidth > 900;
+
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.px)),
-      child: Container(
-        constraints: BoxConstraints(maxWidth: 500.px),
-        padding: EdgeInsets.all(24.px),
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 12.px : (isDesktop ? 60.px : 40.px),
+        vertical: 24.px,
+      ),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: isMobile ? screenWidth : (isDesktop ? 900.px : 600.px),
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Header
-            Row(
-              children: [
-                Icon(Icons.payment, color: AppColors.primary, size: 28.px),
-                SizedBox(width: 12.px),
-                Expanded(
-                  child: Text(
-                    'Payment',
-                    style: TextStyle(
-                      fontSize: 20.sp,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+            // Fixed Header
+            Padding(
+              padding: EdgeInsets.fromLTRB(24.px, 20.px, 24.px, 0),
+              child: Row(
+                children: [
+                  Icon(Icons.payment, color: AppColors.primary, size: 28.px),
+                  SizedBox(width: 12.px),
+                  Expanded(
+                    child: Text(
+                      'Payment',
+                      style: TextStyle(
+                        fontSize: isMobile ? 18.sp : 20.sp,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
-                ),
-                IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: const Icon(Icons.close),
-                  color: AppColors.textSecondary,
-                ),
-              ],
-            ),
-            SizedBox(height: 24.px),
-
-            // Amount Summary
-            Container(
-              padding: EdgeInsets.all(16.px),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.primary.withValues(alpha: 0.1),
-                    AppColors.secondary.withValues(alpha: 0.05),
-                  ],
-                ),
-                borderRadius: BorderRadius.circular(12.px),
-                border: Border.all(
-                  color: AppColors.primary.withValues(alpha: 0.3),
-                ),
-              ),
-              child: Column(
-                children: [
-                  if (widget.loyaltyDiscount > 0) ...[
-                    _summaryRow(
-                      'Subtotal',
-                      '\$${widget.totalAmount.toStringAsFixed(2)}',
-                      false,
-                    ),
-                    SizedBox(height: 8.px),
-                    _summaryRow(
-                      'Loyalty Discount',
-                      '-\$${widget.loyaltyDiscount.toStringAsFixed(2)}',
-                      false,
-                      color: AppColors.success,
-                    ),
-                    Divider(height: 16.px),
-                  ],
-                  if (_manualDiscount > 0) ...[
-                    // Conditionally show Subtotal only if not already shown by loyalty discount logic,
-                    // or just accept duplicate subtotal if acceptable.
-                    // Better logic: ensure Subtotal is distinct.
-                    // Since loyalty block already shows Subtotal if > 0, we check.
-                    if (widget.loyaltyDiscount == 0)
-                      _summaryRow(
-                        'Subtotal',
-                        '\$${widget.totalAmount.toStringAsFixed(2)}',
-                        false,
-                      ),
-                    SizedBox(height: 8.px),
-                    _summaryRow(
-                      'Manual Discount',
-                      '-\$${_manualDiscount.toStringAsFixed(2)}',
-                      false,
-                      color: AppColors.success,
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _manualDiscount = 0.0;
-                            _amountController.text = _finalAmount
-                                .toStringAsFixed(2);
-                          });
-                        },
-                        child: const Text(
-                          'Remove',
-                          style: TextStyle(color: Colors.red, fontSize: 12),
-                        ),
-                      ),
-                    ),
-                    Divider(height: 16.px),
-                  ],
-                  if (_manualDiscount == 0) ...[
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton.icon(
-                        onPressed: _showDiscountDialog,
-                        icon: const Icon(Icons.add, size: 16),
-                        label: const Text('Add Discount'),
-                        style: TextButton.styleFrom(
-                          foregroundColor: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                    Divider(height: 16.px),
-                  ],
-                  _summaryRow(
-                    'Total Due',
-                    '\$${_finalAmount.toStringAsFixed(2)}',
-                    true,
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                    color: AppColors.textSecondary,
                   ),
                 ],
               ),
             ),
-            SizedBox(height: 24.px),
 
-            // Payment Method Selection
-            Text(
-              'Payment Method',
-              style: TextStyle(
-                fontSize: 14.sp,
-                fontWeight: FontWeight.w600,
-                color: AppColors.textPrimary,
-              ),
-            ),
-            SizedBox(height: 12.px),
-            Wrap(
-              spacing: 12.px,
-              runSpacing: 12.px,
-              children: [
-                _paymentMethodButton('cash', 'Cash', Icons.money),
-                _paymentMethodButton('card', 'Card', Icons.credit_card),
-                _paymentMethodButton('upi', 'UPI', Icons.qr_code_scanner),
-                _paymentMethodButton('other', 'Other', Icons.more_horiz),
-              ],
-            ),
-            // Cash Register Selection (Visible only for Cash payments)
-            if (_selectedMethod == 'cash') ...[
-              SizedBox(height: 24.px),
-              Text(
-                'Select Cash Register',
-                style: TextStyle(
-                  fontSize: 14.sp,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              SizedBox(height: 12.px),
-              Consumer(
-                builder: (context, ref, child) {
-                  final cashState = ref.watch(cashRegisterNotifierProvider);
-                  if (cashState is CashRegisterLoading) {
-                    return const LinearProgressIndicator();
-                  }
-                  if (cashState is CashRegisterLoaded) {
-                    final openRegisters = cashState.registers
-                        .where((r) => r.isOpen)
-                        .toList();
-                    if (openRegisters.isEmpty) {
-                      return Container(
-                        padding: EdgeInsets.all(12.px),
-                        decoration: BoxDecoration(
-                          color: AppColors.error.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8.px),
-                        ),
-                        child: Text(
-                          'No open cash registers found! Please open a register first.',
-                          style: TextStyle(
-                            color: AppColors.error,
-                            fontSize: 12.sp,
+            // Content
+            Flexible(
+              child: SingleChildScrollView(
+                physics: isDesktop
+                    ? const ClampingScrollPhysics()
+                    : const BouncingScrollPhysics(),
+                padding: EdgeInsets.all(24.px),
+                child: isDesktop
+                    ? Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Left Column: Summary & Methods
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _sectionTitle('Order Summary'),
+                                _amountSummary(),
+                                SizedBox(height: 24.px),
+                                _sectionTitle('Payment Method'),
+                                _paymentMethods(),
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    }
-                    return Container(
-                      padding: EdgeInsets.symmetric(horizontal: 12.px),
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12.px),
-                        border: Border.all(color: AppColors.border),
+                          SizedBox(width: 32.px),
+                          // Right Column: Inputs & Actions
+                          Expanded(
+                            flex: 1,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                if (_selectedMethod == 'cash') ...[
+                                  _sectionTitle('Cash Register'),
+                                  _cashRegisterSelection(),
+                                  SizedBox(height: 24.px),
+                                ],
+                                _sectionTitle('Payment Amount'),
+                                _amountInput(),
+                                SizedBox(height: 32.px),
+                                Row(
+                                  children: [
+                                    Expanded(child: _payLaterButton()),
+                                    SizedBox(width: 12.px),
+                                    Expanded(child: _payNowButton()),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      )
+                    : Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          _amountSummary(),
+                          SizedBox(height: 24.px),
+                          _sectionTitle('Payment Method'),
+                          _paymentMethods(),
+                          if (_selectedMethod == 'cash') ...[
+                            SizedBox(height: 24.px),
+                            _sectionTitle('Select Cash Register'),
+                            _cashRegisterSelection(),
+                          ],
+                          SizedBox(height: 24.px),
+                          _amountInput(),
+                          SizedBox(height: 24.px),
+                          if (isMobile)
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                _payLaterButton(),
+                                SizedBox(height: 12.px),
+                                _payNowButton(),
+                              ],
+                            )
+                          else
+                            Row(
+                              children: [
+                                Expanded(child: _payLaterButton()),
+                                SizedBox(width: 12.px),
+                                Expanded(child: _payNowButton()),
+                              ],
+                            ),
+                        ],
                       ),
-                      child: DropdownButtonHideUnderline(
-                        child: DropdownButton<String>(
-                          isExpanded: true,
-                          value: _selectedRegisterId,
-                          hint: const Text('Select an open register'),
-                          items: openRegisters.map((r) {
-                            return DropdownMenuItem<String>(
-                              value: r.id,
-                              child: Text(r.name),
-                            );
-                          }).toList(),
-                          onChanged: (val) {
-                            setState(() => _selectedRegisterId = val);
-                          },
-                        ),
-                      ),
-                    );
-                  }
-                  return Text(
-                    'Error loading registers',
-                    style: TextStyle(color: AppColors.error),
-                  );
-                },
               ),
-              SizedBox(height: 16.px),
-            ],
-
-            SizedBox(height: 16.px),
-            // Payment Amount (editable for partial payments)
-            TextField(
-              controller: _amountController,
-              decoration: InputDecoration(
-                labelText: 'Amount Received',
-                hintText: 'Enter amount',
-                prefixIcon: const Icon(Icons.attach_money),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12.px),
-                ),
-                helperText: 'Default: Total Due',
-              ),
-              keyboardType: const TextInputType.numberWithOptions(
-                decimal: true,
-              ),
-              inputFormatters: [
-                FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-              ],
-            ),
-
-            SizedBox(height: 24.px),
-
-            // Action Buttons
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: () => _handlePayLater(),
-                    icon: const Icon(Icons.schedule),
-                    label: Text(
-                      'Pay Later',
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.textSecondary,
-                      side: BorderSide(color: AppColors.border, width: 2),
-                      padding: EdgeInsets.symmetric(vertical: 16.px),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.px),
-                      ),
-                    ),
-                  ),
-                ),
-                SizedBox(width: 12.px),
-                Expanded(
-                  child: ElevatedButton.icon(
-                    onPressed: _handlePayNow,
-                    icon: const Icon(Icons.check_circle),
-                    label: Text(
-                      'Pay Now',
-                      style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 16.px),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.px),
-                      ),
-                    ),
-                  ),
-                ),
-              ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _sectionTitle(String title) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 12.px),
+      child: Text(
+        title,
+        style: TextStyle(
+          fontSize: 15.sp,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+        ),
+      ),
+    );
+  }
+
+  Widget _amountSummary() {
+    return Container(
+      padding: EdgeInsets.all(16.px),
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            AppColors.primary.withValues(alpha: 0.1),
+            AppColors.secondary.withValues(alpha: 0.05),
+          ],
+        ),
+        borderRadius: BorderRadius.circular(12.px),
+        border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+      ),
+      child: Column(
+        children: [
+          if (widget.loyaltyDiscount > 0) ...[
+            _summaryRow(
+              'Subtotal',
+              '\$${widget.totalAmount.toStringAsFixed(2)}',
+              false,
+            ),
+            SizedBox(height: 8.px),
+            _summaryRow(
+              'Loyalty Discount',
+              '-\$${widget.loyaltyDiscount.toStringAsFixed(2)}',
+              false,
+              color: AppColors.success,
+            ),
+            Divider(height: 16.px),
+          ],
+          if (_manualDiscount > 0) ...[
+            if (widget.loyaltyDiscount == 0)
+              _summaryRow(
+                'Subtotal',
+                '\$${widget.totalAmount.toStringAsFixed(2)}',
+                false,
+              ),
+            SizedBox(height: 8.px),
+            _summaryRow(
+              'Manual Discount',
+              '-\$${_manualDiscount.toStringAsFixed(2)}',
+              false,
+              color: AppColors.success,
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () {
+                  setState(() {
+                    _manualDiscount = 0.0;
+                    _amountController.text = _finalAmount.toStringAsFixed(2);
+                  });
+                },
+                child: const Text(
+                  'Remove',
+                  style: TextStyle(color: Colors.red, fontSize: 12),
+                ),
+              ),
+            ),
+            Divider(height: 16.px),
+          ],
+          if (_manualDiscount == 0) ...[
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton.icon(
+                onPressed: _showDiscountDialog,
+                icon: const Icon(Icons.add, size: 16),
+                label: const Text('Add Discount'),
+                style: TextButton.styleFrom(foregroundColor: AppColors.primary),
+              ),
+            ),
+            Divider(height: 16.px),
+          ],
+          _summaryRow(
+            'Total Due',
+            '\$${_finalAmount.toStringAsFixed(2)}',
+            true,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _paymentMethods() {
+    return Wrap(
+      spacing: 12.px,
+      runSpacing: 12.px,
+      children: [
+        _paymentMethodButton('cash', 'Cash', Icons.money),
+        _paymentMethodButton('card', 'Card', Icons.credit_card),
+        _paymentMethodButton('upi', 'UPI', Icons.qr_code_scanner),
+        _paymentMethodButton('other', 'Other', Icons.more_horiz),
+      ],
+    );
+  }
+
+  Widget _cashRegisterSelection() {
+    return Consumer(
+      builder: (context, ref, child) {
+        final cashState = ref.watch(cashRegisterNotifierProvider);
+        if (cashState is CashRegisterLoading) {
+          return const LinearProgressIndicator();
+        }
+        if (cashState is CashRegisterLoaded) {
+          final openRegisters = cashState.registers
+              .where((r) => r.isOpen)
+              .toList();
+          if (openRegisters.isEmpty) {
+            return Container(
+              padding: EdgeInsets.all(12.px),
+              decoration: BoxDecoration(
+                color: AppColors.error.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8.px),
+              ),
+              child: Text(
+                'No open cash registers! Please open a register.',
+                style: TextStyle(color: AppColors.error, fontSize: 12.sp),
+              ),
+            );
+          }
+          return Container(
+            padding: EdgeInsets.symmetric(horizontal: 12.px),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12.px),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: DropdownButtonHideUnderline(
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: _selectedRegisterId,
+                hint: const Text('Select an open register'),
+                items: openRegisters.map((r) {
+                  return DropdownMenuItem<String>(
+                    value: r.id,
+                    child: Text(r.name),
+                  );
+                }).toList(),
+                onChanged: (val) => setState(() => _selectedRegisterId = val),
+              ),
+            ),
+          );
+        }
+        return Text(
+          'Error loading registers',
+          style: TextStyle(color: AppColors.error),
+        );
+      },
+    );
+  }
+
+  Widget _amountInput() {
+    return TextField(
+      controller: _amountController,
+      decoration: InputDecoration(
+        labelText: 'Amount Received',
+        hintText: 'Enter amount',
+        prefixIcon: const Icon(Icons.attach_money),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12.px)),
+        helperText: 'Default: Total Due',
+      ),
+      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+      inputFormatters: [
+        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+      ],
+    );
+  }
+
+  Widget _payNowButton() {
+    return ElevatedButton.icon(
+      onPressed: _handlePayNow,
+      icon: const Icon(Icons.check_circle),
+      label: Text(
+        'Pay Now',
+        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+      ),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        padding: EdgeInsets.symmetric(vertical: 16.px),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.px),
+        ),
+      ),
+    );
+  }
+
+  Widget _payLaterButton() {
+    return OutlinedButton.icon(
+      onPressed: () => _handlePayLater(),
+      icon: const Icon(Icons.schedule),
+      label: Text(
+        'Pay Later',
+        style: TextStyle(fontSize: 14.sp, fontWeight: FontWeight.bold),
+      ),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.textSecondary,
+        side: BorderSide(color: AppColors.border, width: 2),
+        padding: EdgeInsets.symmetric(vertical: 16.px),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.px),
         ),
       ),
     );

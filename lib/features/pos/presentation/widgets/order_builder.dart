@@ -18,6 +18,9 @@ import '../../../loyalty/presentation/widgets/redeem_points_dialog.dart';
 class OrderBuilder extends ConsumerWidget {
   const OrderBuilder({super.key});
 
+  // ONLY the build() method and bottom layout changed.
+  // Rest of your file stays exactly the same.
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(posNotifierProvider);
@@ -27,9 +30,14 @@ class OrderBuilder extends ConsumerWidget {
 
     final double totalToPay = summary.total + (ongoingOrder?.totalAmount ?? 0);
 
+    // fixed footer height
+    final double footerHeight = 40.px + 80.px + 48.px;
+
     return Column(
       children: [
-        // Top Order Info Bar (Simplified)
+        // =========================
+        // Top Order Info Bar
+        // =========================
         Container(
           padding: EdgeInsets.symmetric(horizontal: 16.px, vertical: 12.px),
           decoration: BoxDecoration(
@@ -82,12 +90,14 @@ class OrderBuilder extends ConsumerWidget {
           ),
         ),
 
-        // Items List
+        // =========================
+        // Scrollable Items List
+        // =========================
         Expanded(
           child: (items.isEmpty && ongoingOrder == null)
               ? _buildEmptyState()
               : ListView(
-                  padding: EdgeInsets.zero,
+                  padding: EdgeInsets.only(bottom: footerHeight),
                   children: [
                     if (items.isNotEmpty)
                       ...items.map((item) => _CartItemTile(item: item)),
@@ -116,188 +126,187 @@ class OrderBuilder extends ConsumerWidget {
                 ),
         ),
 
-        // Bottom Info & Action Section
-        Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Customer Info Row
-            _buildCustomerBar(context, ref, state),
+        // =========================
+        // Fixed Footer
+        // =========================
+        SafeArea(
+          top: false,
+          child: SizedBox(
+            height: footerHeight,
+            child: Column(
+              children: [
+                _buildCustomerBar(context, ref, state),
 
-            // Grid-style Summary
-            Container(
-              height: 80.px,
-              decoration: BoxDecoration(
-                border: Border(top: BorderSide(color: AppColors.border)),
-              ),
-              child: Row(
-                children: [
-                  // Subtotal/Tax/Discount Column
-                  Expanded(
-                    flex: 5,
-                    child: Container(
-                      padding: EdgeInsets.all(8.px),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          right: BorderSide(color: AppColors.border),
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          _miniSummaryRow('DISCOUNT:', state.loyaltyDiscount),
-                          _miniSummaryRow('SUBTOTAL:', summary.subtotal),
-                          _miniSummaryRow('TAX:', summary.totalTax),
-                        ],
-                      ),
-                    ),
+                // Summary
+                Container(
+                  height: 85.px,
+                  decoration: BoxDecoration(
+                    border: Border(top: BorderSide(color: AppColors.border)),
                   ),
-                  // Total Column
-                  Expanded(
-                    flex: 3,
-                    child: Container(
-                      padding: EdgeInsets.all(8.px),
-                      decoration: BoxDecoration(
-                        border: Border(
-                          right: BorderSide(color: AppColors.border),
-                        ),
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'TOTAL',
-                            style: TextStyle(
-                              fontSize: 10.sp,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textSecondary,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        flex: 5,
+                        child: Container(
+                          padding: EdgeInsets.all(8.px),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              right: BorderSide(color: AppColors.border),
                             ),
                           ),
-                          Text(
-                            '\$${(totalToPay - state.loyaltyDiscount).toStringAsFixed(2)}',
-                            style: TextStyle(
-                              fontSize: 16.sp,
-                              fontWeight: FontWeight.w900,
-                              color: AppColors.primary,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              _miniSummaryRow(
+                                'DISCOUNT:',
+                                state.loyaltyDiscount,
+                              ),
+                              _miniSummaryRow('SUBTOTAL:', summary.subtotal),
+                              _miniSummaryRow('TAX:', summary.totalTax),
+                            ],
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Container(
+                          padding: EdgeInsets.all(8.px),
+                          decoration: BoxDecoration(
+                            border: Border(
+                              right: BorderSide(color: AppColors.border),
                             ),
                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // Details Column (Buttons)
-                  Expanded(
-                    flex: 3,
-                    child: Column(
-                      children: [
-                        Visibility(
-                          visible: state.orderType == OrderType.dineIn,
-                          child: _summaryButton('SELECT TABLE', () {
-                            if (state.orderType == OrderType.dineIn) {
-                              showDialog(
-                                context: context,
-                                builder: (context) =>
-                                    const TableSelectionDialog(),
-                              );
-                            }
-                          }),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'TOTAL',
+                                style: TextStyle(
+                                  fontSize: 10.sp,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              Text(
+                                '\$${(totalToPay - state.loyaltyDiscount).toStringAsFixed(2)}',
+                                style: TextStyle(
+                                  fontSize: 16.sp,
+                                  fontWeight: FontWeight.w900,
+                                  color: AppColors.primary,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                        const Divider(height: 1, color: AppColors.border),
-                        Visibility(
-                          visible: state.orderType != OrderType.dineIn,
-                          child: _summaryButton(
-                            state.scheduledFor != null
-                                ? 'SCHEDULED'
-                                : 'SCHEDULE',
-                            () {
-                              if (state.orderType != OrderType.dineIn) {
+                      ),
+                      Expanded(
+                        flex: 3,
+                        child: Column(
+                          children: [
+                            Visibility(
+                              visible: state.orderType == OrderType.dineIn,
+                              child: _summaryButton('SELECT TABLE', () {
                                 showDialog(
                                   context: context,
-                                  builder: (context) =>
-                                      const ScheduleOrderDialog(),
+                                  builder: (_) => const TableSelectionDialog(),
                                 );
-                              }
-                            },
-                            color: state.scheduledFor != null
-                                ? AppColors.primary
-                                : null,
-                          ),
+                              }),
+                            ),
+                            const Divider(height: 1),
+                            Visibility(
+                              visible: state.orderType != OrderType.dineIn,
+                              child: _summaryButton(
+                                state.scheduledFor != null
+                                    ? 'SCHEDULED'
+                                    : 'SCHEDULE',
+                                () {
+                                  showDialog(
+                                    context: context,
+                                    builder: (_) => const ScheduleOrderDialog(),
+                                  );
+                                },
+                                color: state.scheduledFor != null
+                                    ? AppColors.primary
+                                    : null,
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
-            ),
+                ),
 
-            // Bottom Action Bar (Clear/Send/Discount-Settle)
-            Container(
-              height: 48.px,
-              decoration: BoxDecoration(
-                color: AppColors.grey100,
-                border: Border(top: BorderSide(color: AppColors.border)),
-              ),
-              child: Row(
-                children: [
-                  _actionButton(
-                    Icons.close,
-                    'CLEAR',
-                    (items.isEmpty && ongoingOrder == null)
-                        ? AppColors.borderDark
-                        : AppColors.error,
-                    () {
-                      if (items.isEmpty && ongoingOrder == null) return;
-                      ref.read(posNotifierProvider.notifier).clearCart();
-                    },
+                // Action bar
+                Container(
+                  height: 48.px,
+                  decoration: BoxDecoration(
+                    color: AppColors.grey100,
+                    border: Border(top: BorderSide(color: AppColors.border)),
                   ),
-                  const VerticalDivider(width: 1, color: AppColors.border),
-                  _actionButton(
-                    Icons.send,
-                    ongoingOrder != null ? 'ADD' : 'SEND',
-                    (items.isEmpty && ongoingOrder == null)
-                        ? AppColors.borderDark
-                        : AppColors.secondary,
-                    () {
-                      if (items.isEmpty && ongoingOrder == null) return;
-                      if (state.orderType == OrderType.dineIn &&
-                          state.tableNumber == null) {
-                        showDialog(
-                          context: context,
-                          builder: (context) => const TableSelectionDialog(),
-                        );
-                        return;
-                      }
+                  child: Row(
+                    children: [
+                      _actionButton(
+                        Icons.close,
+                        'CLEAR',
+                        items.isEmpty && ongoingOrder == null
+                            ? AppColors.borderDark
+                            : AppColors.error,
+                        () {
+                          if (items.isEmpty && ongoingOrder == null) return;
+                          ref.read(posNotifierProvider.notifier).clearCart();
+                        },
+                      ),
+                      const VerticalDivider(width: 1),
+                      _actionButton(
+                        Icons.send,
+                        ongoingOrder != null ? 'ADD' : 'SEND',
+                        items.isEmpty && ongoingOrder == null
+                            ? AppColors.borderDark
+                            : AppColors.secondary,
+                        () {
+                          if (items.isEmpty && ongoingOrder == null) return;
 
-                      // For dine-in, just place the order (add items to table)
-                      if (state.orderType == OrderType.dineIn) {
-                        ref.read(posNotifierProvider.notifier).placeOrder();
-                      } else {
-                        // For takeaway/delivery, show payment dialog
-                        _handlePaymentForOrder(context, ref, state);
-                      }
-                    },
+                          if (state.orderType == OrderType.dineIn &&
+                              state.tableNumber == null) {
+                            showDialog(
+                              context: context,
+                              builder: (_) => const TableSelectionDialog(),
+                            );
+                            return;
+                          }
+
+                          if (state.orderType == OrderType.dineIn) {
+                            ref.read(posNotifierProvider.notifier).placeOrder();
+                          } else {
+                            _handlePaymentForOrder(context, ref, state);
+                          }
+                        },
+                      ),
+                      const VerticalDivider(width: 1),
+                      _actionButton(
+                        Icons.payments,
+                        'SETTLE',
+                        ongoingOrder == null
+                            ? AppColors.borderDark
+                            : AppColors.primary,
+                        () {
+                          if (ongoingOrder != null) {
+                            _handleSettle(
+                              context,
+                              ref,
+                              ongoingOrder.id,
+                              totalToPay.toStringAsFixed(2),
+                            );
+                          }
+                        },
+                      ),
+                    ],
                   ),
-                  const VerticalDivider(width: 1, color: AppColors.border),
-                  _actionButton(
-                    Icons.payments,
-                    'SETTLE',
-                    ongoingOrder == null
-                        ? AppColors.borderDark
-                        : AppColors.primary,
-                    () {
-                      if (ongoingOrder != null) {
-                        _handleSettle(
-                          context,
-                          ref,
-                          ongoingOrder.id,
-                          totalToPay.toStringAsFixed(2),
-                        );
-                      }
-                    },
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
+          ),
         ),
       ],
     );
@@ -407,14 +416,14 @@ class OrderBuilder extends ConsumerWidget {
           Text(
             label,
             style: TextStyle(
-              fontSize: 12.sp,
+              fontSize: 10.sp,
               color: AppColors.textSecondary,
               fontWeight: FontWeight.bold,
             ),
           ),
           Text(
             '\$${amount.abs().toStringAsFixed(2)}',
-            style: TextStyle(fontSize: 12.sp, fontWeight: FontWeight.bold),
+            style: TextStyle(fontSize: 10.sp, fontWeight: FontWeight.bold),
           ),
         ],
       ),

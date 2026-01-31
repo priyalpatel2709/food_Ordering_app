@@ -105,156 +105,219 @@ class _OrderPaymentDialogState extends ConsumerState<OrderPaymentDialog> {
 
   @override
   Widget build(BuildContext context) {
-    // Responsive sizing logic
+    // Check if responsive_sizer is available via context or use MediaQuery
+    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isMobile = screenWidth < 600;
+    final bool isDesktop = screenWidth > 900;
 
     return Dialog(
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        constraints: BoxConstraints(maxWidth: 500),
-        padding: const EdgeInsets.all(24),
+      insetPadding: EdgeInsets.symmetric(
+        horizontal: isMobile ? 12 : (isDesktop ? 60 : 40),
+        vertical: 24,
+      ),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: isMobile ? screenWidth : (isDesktop ? 900 : 500),
+          maxHeight: MediaQuery.of(context).size.height * 0.9,
+        ),
         child: Form(
           key: _formKey,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // Header
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Take Payment',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Order Summary Info
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey[100],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Column(
+              // Fixed Header
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 20, 24, 0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _summaryRow('Order ID', '#${widget.order.orderId}'),
-                    const Divider(),
-                    _summaryRow(
-                      'Total Amount',
-                      '\$${widget.order.orderFinalCharge.toStringAsFixed(2)}',
+                    Text(
+                      'Take Payment',
+                      style: TextStyle(
+                        fontSize: isMobile ? 18 : 20,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                    _summaryRow(
-                      'Paid So Far',
-                      '\$${widget.order.payment.totalPaid.toStringAsFixed(2)}',
-                    ),
-                    const Divider(),
-                    _summaryRow(
-                      'Remaining Due',
-                      '\$${(widget.order.orderFinalCharge - widget.order.payment.totalPaid).toStringAsFixed(2)}',
-                      isBold: true,
-                      color: AppColors.primary,
+                    IconButton(
+                      onPressed: () => Navigator.pop(context),
+                      icon: const Icon(Icons.close),
                     ),
                   ],
                 ),
               ),
-              const SizedBox(height: 24),
 
-              Text(
-                'Payment Method',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-              ),
-              const SizedBox(height: 12),
-
-              // Payment Methods
-              Wrap(
-                spacing: 12,
-                runSpacing: 12,
-                children: [
-                  _paymentMethodChip('cash', 'Cash', Icons.money),
-                  _paymentMethodChip('card', 'Card', Icons.credit_card),
-                  _paymentMethodChip('upi', 'UPI', Icons.qr_code),
-                  _paymentMethodChip('other', 'Other', Icons.more_horiz),
-                ],
-              ),
-              const SizedBox(height: 24),
-
-              // Amount Input
-              TextFormField(
-                controller: _amountController,
-                decoration: const InputDecoration(
-                  labelText: 'Amount to Pay',
-                  prefixText: '\$',
-                  border: OutlineInputBorder(),
+              // Content
+              Flexible(
+                child: SingleChildScrollView(
+                  physics: isDesktop
+                      ? const ClampingScrollPhysics()
+                      : const BouncingScrollPhysics(),
+                  padding: const EdgeInsets.all(24),
+                  child: isDesktop
+                      ? Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // Left Column: Summary
+                            Expanded(
+                              flex: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  _sectionHeader('Order Summary'),
+                                  _orderSummaryInfo(),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 32),
+                            // Right Column: Payment Details
+                            Expanded(
+                              flex: 1,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  _sectionHeader('Payment Details'),
+                                  _paymentMethodSelection(),
+                                  const SizedBox(height: 24),
+                                  _paymentInputs(),
+                                  const SizedBox(height: 32),
+                                  _confirmButton(),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      : Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            _orderSummaryInfo(),
+                            const SizedBox(height: 24),
+                            _sectionHeader('Payment Method'),
+                            _paymentMethodSelection(),
+                            const SizedBox(height: 24),
+                            _paymentInputs(),
+                            const SizedBox(height: 32),
+                            _confirmButton(),
+                          ],
+                        ),
                 ),
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                inputFormatters: [
-                  FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
-                ],
-                validator: (value) {
-                  if (value == null || value.isEmpty) return 'Required';
-                  final v = double.tryParse(value);
-                  if (v == null || v <= 0) return 'Invalid amount';
-                  if (v >
-                      (widget.order.orderFinalCharge -
-                          widget.order.payment.totalPaid +
-                          0.01)) {
-                    // Allow small float margin if needed
-                    // Optional: Prevent overpayment
-                    // return 'Amount exceeds total due';
-                  }
-                  return null;
-                },
-              ),
-              const SizedBox(height: 16),
-
-              // Reference Input
-              // Reference Input for transaction ID (Online/Card/UPI)
-              if (_selectedMethod != 'cash') ...[
-                TextFormField(
-                  controller: _referenceController,
-                  decoration: const InputDecoration(
-                    labelText: 'Transaction Reference',
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-              ],
-
-              // Notes Input
-              TextFormField(
-                controller: _notesController,
-                decoration: const InputDecoration(
-                  labelText: 'Notes (Optional)',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              ElevatedButton(
-                onPressed: _processPayment,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.primary,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text('Confirm Payment'),
               ),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _sectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Text(
+        title,
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+
+  Widget _orderSummaryInfo() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.grey[100],
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Column(
+        children: [
+          _summaryRow('Order ID', '#${widget.order.orderId}'),
+          const Divider(),
+          _summaryRow(
+            'Total Amount',
+            '\$${widget.order.orderFinalCharge.toStringAsFixed(2)}',
+          ),
+          _summaryRow(
+            'Paid So Far',
+            '\$${widget.order.payment.totalPaid.toStringAsFixed(2)}',
+          ),
+          const Divider(),
+          _summaryRow(
+            'Remaining Due',
+            '\$${(widget.order.orderFinalCharge - widget.order.payment.totalPaid).toStringAsFixed(2)}',
+            isBold: true,
+            color: AppColors.primary,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _paymentMethodSelection() {
+    return Wrap(
+      spacing: 12,
+      runSpacing: 12,
+      children: [
+        _paymentMethodChip('cash', 'Cash', Icons.money),
+        _paymentMethodChip('card', 'Card', Icons.credit_card),
+        _paymentMethodChip('upi', 'UPI', Icons.qr_code),
+        _paymentMethodChip('other', 'Other', Icons.more_horiz),
+      ],
+    );
+  }
+
+  Widget _paymentInputs() {
+    return Column(
+      children: [
+        TextFormField(
+          controller: _amountController,
+          decoration: const InputDecoration(
+            labelText: 'Amount to Pay',
+            prefixText: '\$',
+            border: OutlineInputBorder(),
+          ),
+          keyboardType: const TextInputType.numberWithOptions(decimal: true),
+          inputFormatters: [
+            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d{0,2}')),
+          ],
+          validator: (value) {
+            if (value == null || value.isEmpty) return 'Required';
+            final v = double.tryParse(value);
+            if (v == null || v <= 0) return 'Invalid amount';
+            return null;
+          },
+        ),
+        const SizedBox(height: 16),
+        if (_selectedMethod != 'cash') ...[
+          TextFormField(
+            controller: _referenceController,
+            decoration: const InputDecoration(
+              labelText: 'Transaction Reference',
+              border: OutlineInputBorder(),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+        TextFormField(
+          controller: _notesController,
+          decoration: const InputDecoration(
+            labelText: 'Notes (Optional)',
+            border: OutlineInputBorder(),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _confirmButton() {
+    return ElevatedButton(
+      onPressed: _processPayment,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        foregroundColor: Colors.white,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+      child: const Text('Confirm Payment'),
     );
   }
 
